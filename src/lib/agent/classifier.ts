@@ -11,65 +11,92 @@ export interface ClassificationResult {
 }
 
 export async function classifyInputAndExtractClaims(rawInput: string): Promise<ClassificationResult> {
-  const systemPrompt = `Anda adalah "Input & Intent Interpreter" untuk Telaah 360, asisten riset pasar modal Indonesia (IDX).
-Tugas Anda:
-1. Identifikasi 1 kode saham IDX (4 huruf alfabet kapital, misal BBCA, BBRI, GOTO, TLKM, ASII, BREN, ADRO, AMMN).
-   - Jika pengguna menyebut nama perusahaan (contoh: "Bank Central Asia", "Telkom"), konversikan ke simbol resminya.
-   - Jika ada lebih dari 1 simbol, tentukan satu primary issuer yang paling dibahas. Jika sama sekali tidak ada ticker atau nama emiten yang jelas, set isAmbiguous: true.
-2. Klasifikasikan intensitas/tipe input menjadi salah satu dari:
-   - "claim_check": teks berisi rumor/klaim ("broker CC akumulasi", "laba naik 300%", "asing buang barang")
-   - "news_event": teks berupa kutipan berita, pengumuman aksi korporasi, rights issue, dividen, tender offer
-   - "company_overview": pertanyaan mendasar ("bagaimana fundamental BBCA?", "gimana bisnis GOTO?")
-   - "thesis_review": hipotesis/tesis investasi jangka panjang ("saya rasa saham ini turnaround")
-   - "market_technical": pertanyaan spesifik teknikal harga/volume ("apakah RSI oversold?", "breakout?")
-3. Pisahkan klaim-klaim spesifik menjadi klaim atomik (AtomicClaim) maksimal 10 klaim:
-   - Setiap klaim harus tunggal (jangan menggabungkan dua fakta dalam satu klaim).
-   - Klasifikasikan tipenya: "financial", "flow", "price_technical", "event", "valuation", atau "general".
-   - Tentukan targetMetric dan statedPeriod jika ada.
+  const systemPrompt = `Anda adalah Input & Intent Interpreter untuk Telaah 360, asisten riset saham Bursa Efek Indonesia (IDX).
+Tugas:
+1. Ambil 1 kode saham IDX 4 huruf kapital (misal: BBCA, BBRI, GOTO, TLKM, ASII, BMRI).
+   Jika pengguna menyebut nama perusahaan ("Bank BCA"), ubah ke simbolnya (BBCA).
+2. Tentukan intensitas/tipe input: "claim_check" | "news_event" | "company_overview" | "thesis_review" | "market_technical".
+3. Ekstrak klaim-klaim spesifik yang ingin diuji sebagai array string (maksimal 5 klaim).
 
-Jawab HANYA dalam format JSON valid dengan struktur:
+Jawab HANYA format JSON valid:
 {
   "symbol": "BBCA",
   "companyNameCandidate": "PT Bank Central Asia Tbk",
   "intent": "claim_check",
   "isAmbiguous": false,
-  "claims": [
-    {
-      "id": "claim_1",
-      "originalText": "Broker asing borong saham BBCA",
-      "claimType": "flow",
-      "targetMetric": "foreign_flow",
-      "statedPeriod": "terkini"
-    }
-  ],
-  "explanation": "Deteksi klaim arus dana asing pada emiten BBCA"
+  "claims": ["Laba naik gila-gilaan", "Asing borong saham"],
+  "explanation": "Ringkasan deteksi"
 }`;
 
-  const userPrompt = `Input pengguna:\n"""\n${rawInput.slice(0, 6000)}\n"""`;
+  const userPrompt = `Input pengguna:\n"""\n${rawInput.slice(0, 4000)}\n"""`;
 
   try {
-    const result = await callOpenRouter<ClassificationResult>({
+    const result = await callOpenRouter<any>({
       systemPrompt,
       userPrompt,
       temperature: 0.1,
     });
 
     // Sanitasi simbol
-    let sym = (result.symbol || "").toUpperCase().replace(".JK", "").trim();
-    if (!/^[A-Z]{4}$/.test(sym)) {
-      result.isAmbiguous = true;
+    let sym = String(result.symbol || "").toUpperCase().replace(".JK", "").trim();
+    const isAmbiguous = !/^[A-Z]{4}$/.test(sym);
+    if (isAmbiguous) {
+      // Coba ekstrak regex 4 huruf jika model mengembalikan teks campur
+      const match = sym.match(/\b([A-Z]{4})\b/);
+      if (match) {
+        sym = match[1];
+      }
+    }
+
+    // Sanitasi intent
+    const rawIntent = String(result.intent || "").toLowerCase();
+    let validIntent: IntentType = "claim_check";
+    if (rawIntent.includes("tech") || rawIntent.includes("chart") || rawIntent.includes("rsi")) {
+      validIntent = "market_technical";
+    } else if (rawIntent.includes("news") || rawIntent.includes("event") || rawIntent.includes("dividen") || rawIntent.includes("rights")) {
+      validIntent = "news_event";
+    } else if (rawIntent.includes("thesis") || rawIntent.includes("turnaround")) {
+      validIntent = "thesis_review";
+    } else if (rawIntent.includes("overview") || rawIntent.includes("fundamental") || rawIntent.includes("bisnis")) {
+      validIntent = "company_overview";
     } else {
-      result.symbol = sym;
+      validIntent = "claim_check";
     }
 
-    if (!Array.isArray(result.claims)) {
-      result.claims = [];
-    }
+    // Normalisasi klaim ke AtomicClaim[]
+    const rawClaims = Array.isArray(result.claims) ? result.claims : [];
+    const normalizedClaims: AtomicClaim[] = rawClaims.map((c: any, i: number) => {
+      if (typeof c === "string") {
+        const text = c.trim();
+        const isFlow = /asing|foreign|broker|bandar|akumulasi|distribusi|borong/i.test(text);
+        const isTech = /rsi|macd|sma|chart|breakout|support|resistance|volume/i.test(text);
+        const isEvent = /dividen|rights|rups|split|akuisisi|merger/i.test(text);
+        return {
+          id: `claim_${i + 1}`,
+          originalText: text,
+          claimType: isFlow ? "flow" : isTech ? "price_technical" : isEvent ? "event" : "financial",
+        };
+      }
+      return {
+        id: c.id || `claim_${i + 1}`,
+        originalText: c.originalText || c.text || c.claim || String(c),
+        claimType: c.claimType || "general",
+        targetMetric: c.targetMetric,
+        statedPeriod: c.statedPeriod,
+      };
+    });
 
-    return result;
+    return {
+      symbol: sym,
+      companyNameCandidate: result.companyNameCandidate || undefined,
+      intent: validIntent,
+      isAmbiguous: !/^[A-Z]{4}$/.test(sym),
+      claims: normalizedClaims,
+      explanation: result.explanation || "Deteksi otomatis",
+    };
   } catch (error) {
     console.error("Error in classifyInputAndExtractClaims:", error);
-    // Fallback regex detection
+    // Fallback regex detection jika LLM gagal
     const match = rawInput.match(/\b([A-Z]{4})\b/);
     return {
       symbol: match ? match[1] : "",
@@ -77,7 +104,7 @@ Jawab HANYA dalam format JSON valid dengan struktur:
       intent: "company_overview",
       isAmbiguous: !match,
       claims: [],
-      explanation: "Fallback classification",
+      explanation: "Fallback regex classifier",
     };
   }
 }

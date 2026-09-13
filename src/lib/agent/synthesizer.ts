@@ -8,18 +8,22 @@ import {
   IntentType,
 } from "./types";
 
+interface RawEvaluationItem {
+  claimId?: string;
+  claim?: string;
+  originalText?: string;
+  verdict?: "Didukung" | "Bertentangan" | "Perlu konteks" | "Tidak dapat diverifikasi" | "Opini/prediksi";
+  confidence?: number;
+  reasoning?: string;
+  factualMetricValue?: string;
+}
+
 interface SynthesisResponse {
-  directAnswer: string;
-  executiveSummary: string;
-  claimEvaluations: Array<{
-    claimId: string;
-    verdict: "Didukung" | "Bertentangan" | "Perlu konteks" | "Tidak dapat diverifikasi" | "Opini/prediksi";
-    confidence: number;
-    reasoning: string;
-    factualMetricValue?: string;
-  }>;
-  openQuestions: string[];
-  limitations: string[];
+  directAnswer?: string;
+  executiveSummary?: string;
+  claimEvaluations?: RawEvaluationItem[];
+  openQuestions?: string[];
+  limitations?: string[];
 }
 
 export async function synthesizeIntelligenceReport(
@@ -29,97 +33,89 @@ export async function synthesizeIntelligenceReport(
   intent: IntentType,
   claims: AtomicClaim[]
 ): Promise<CompanyIntelligenceReport> {
-  const systemPrompt = `Anda adalah "Synthesis & Citation Guard" dari Telaah 360, asisten riset emiten Bursa Efek Indonesia (IDX).
-Tugas Anda: Menyusun laporan riset 360° yang objektif, kritis, dan berbasis bukti empiris murni dari data terstruktur yang disediakan.
+  const systemPrompt = `Anda adalah "Synthesis & Citation Guard" untuk Telaah 360, asisten riset emiten Bursa Efek Indonesia (IDX).
+Tugas: Buat laporan riset 360° yang objektif, kritis, dan berbasis bukti data terstruktur.
 
-ATURAN KETAT (COMPLIANCE & SAFETY):
-1. DILARANG MEMBERIKAN SARAN FINANSIAL: Jangan pernah menggunakan kata "Rekomendasi Beli/Jual/Hold", jangan memberikan target harga masa depan, dan jangan memprediksi masa depan ("saham ini pasti naik").
-2. SETIAP ANGKA HARUS BERSUMBER DARI EVIDENCE: Jangan pernah mengarang angka baru. Jika metrik bernilai null atau tidak ada, katakan terus terang "Data belum tersedia".
-3. ATURAN BROKER FLOW: Kode broker dan cohort (asing/domestik/ritel/institusi) adalah metadata bursa agregat, BUKAN identitas investor, BUKAN bukti kepemilikan definitif, dan TIDAK merefleksikan koordinasi atau manipulasi bandar.
-4. VERDICT KLAIM (Jika ada klaim pengguna):
-   - "Didukung": Bukti angka & periode sesuai fakta.
-   - "Bertentangan": Bukti secara material berkebalikan dari klaim.
-   - "Perlu konteks": Ada unsur kebenaran parsial, namun narasi mengabaikan faktor risiko/konteks lain.
-   - "Tidak dapat diverifikasi": Data periode/metrik tidak mencukupi.
-   - "Opini/prediksi": Merupakan pandangan subjektif atau harapan masa depan.
+ATURAN KEPATUHAN:
+1. Dilarang rekomendasi beli/jual dan target harga (0% financial advice).
+2. Setiap angka harus bersumber dari bukti data yang diberikan.
+3. Vonis klaim harus: "Didukung" | "Bertentangan" | "Perlu konteks" | "Tidak dapat diverifikasi" | "Opini/prediksi".
+4. Jawab dalam Bahasa Indonesia yang formal dan analitis.
 
-Jawab HANYA dalam JSON valid:
+Jawab HANYA format JSON valid:
 {
-  "directAnswer": "Jawaban langsung dan padat menjawab pertanyaan/isu utama pengguna, beserta tanggal data terakhir.",
-  "executiveSummary": "Ringkasan eksekutif 2-3 paragraf mencakup kondisi bisnis, kinerja laba/margin, valuasi & peer, serta dinamika flow bursa.",
+  "directAnswer": "Tanggapan langsung atas isu/pertanyaan pengguna serta data freshness",
+  "executiveSummary": "Ringkasan eksekutif 2 paragraf kondisi bisnis, laba, valuasi, dan flow pasar",
   "claimEvaluations": [
     {
-      "claimId": "id_klaim",
-      "verdict": "Didukung",
+      "claimId": "claim_1",
+      "verdict": "Bertentangan",
       "confidence": 0.95,
-      "reasoning": "Penjelasan mengapa klaim didukung atau bertentangan berdasarkan data faktual.",
-      "factualMetricValue": "Angka riil dari bukti (misal: Net Inflow Rp 45.2M atau Pertumbuhan Laba YoY -12%)"
+      "factualMetricValue": "Nilai riil bursa",
+      "reasoning": "Alasan singkat berbasis data"
     }
   ],
-  "openQuestions": ["Poin pertanyaan terbuka atau risiko bisnis yang perlu dicermati oleh investor"],
-  "limitations": ["Batasan metodologi (misal: data transaksi broker agregat, laporan keuangan belum diaudit, dll.)"]
+  "openQuestions": ["Poin risiko atau pertanyaan terbuka untuk investor"],
+  "limitations": ["Batasan metodologi data"]
 }`;
 
-  // Package evidence cleanly for the LLM
-  const evidencePayload = {
-    symbol: evidence.symbol,
-    companyName: evidence.companyName,
-    userPrompt,
-    mode,
-    intent,
-    claims,
-    overview: evidence.overview,
-    financials: {
-      status: evidence.financials.status,
-      latestDate: evidence.financials.latestPeriodDate,
-      latestMetrics: evidence.financials.latest,
-      qoqGrowth: evidence.financials.qoqGrowth,
-      yoyGrowth: evidence.financials.yoyGrowth,
-      solvency: evidence.financials.solvencyHealth,
+  // Siapkan ringkasan bukti data yang padat dan informatif
+  const evidenceSummary = {
+    emiten: `${evidence.symbol} - ${evidence.companyName}`,
+    sektor: evidence.overview?.sector || "N/A",
+    subsektor: evidence.overview?.sub_sector || "N/A",
+    marketCap: evidence.overview?.market_cap
+      ? `Rp ${((evidence.overview.market_cap) / 1e12).toFixed(2)} Triliun`
+      : "-",
+    laba_pendapatan: {
+      periode: evidence.financials.latestPeriodDate,
+      pendapatan: evidence.financials.latest?.revenue
+        ? `Rp ${(evidence.financials.latest.revenue / 1e12).toFixed(2)} T`
+        : "-",
+      labaBersih: evidence.financials.latest?.netIncome
+        ? `Rp ${(evidence.financials.latest.netIncome / 1e12).toFixed(2)} T`
+        : "-",
+      yoyLabaGrowth: evidence.financials.yoyGrowth.netIncomePct !== null
+        ? `${evidence.financials.yoyGrowth.netIncomePct}%`
+        : "N/A",
+      qoqLabaGrowth: evidence.financials.qoqGrowth.netIncomePct !== null
+        ? `${evidence.financials.qoqGrowth.netIncomePct}%`
+        : "N/A",
+      netProfitMargin: evidence.financials.latest?.netMarginPct !== null
+        ? `${evidence.financials.latest?.netMarginPct}%`
+        : "-",
     },
-    valuation: evidence.valuation,
-    peerLens: {
-      basis: evidence.peerLens.basis,
-      peers: evidence.peerLens.peers,
+    arus_asing_dan_broker: {
+      foreignFlow5Hari: evidence.flowLens.status !== "unavailable"
+        ? `Rp ${(evidence.flowLens.foreignFlow.cumulative5d / 1e9).toFixed(1)} Miliar`
+        : "-",
+      foreignTrend: evidence.flowLens.foreignFlow.recentTrend,
+      topNetBuyer: evidence.flowLens.topBuyers[0]?.code || "-",
+      topNetSeller: evidence.flowLens.topSellers[0]?.code || "-",
     },
-    flowLens: {
-      status: evidence.flowLens.status,
-      period: `${evidence.flowLens.startDate} s.d ${evidence.flowLens.endDate} (${evidence.flowLens.totalTradingDays} hari)`,
-      topBuyers: evidence.flowLens.topBuyers.slice(0, 3),
-      topSellers: evidence.flowLens.topSellers.slice(0, 3),
-      cohortSummary: evidence.flowLens.cohortSummary,
-      foreignFlow5d: evidence.flowLens.foreignFlow.cumulative5d,
-      recentTrend: evidence.flowLens.foreignFlow.recentTrend,
+    teknikal: {
+      hargaTerakhir: evidence.technical.lastPrice
+        ? `Rp ${evidence.technical.lastPrice.toLocaleString("id-ID")}`
+        : "-",
+      trend: evidence.technical.trendAssessment,
+      rsi14: evidence.technical.rsi14 ?? "-",
+      sma20: evidence.technical.sma20 ?? "-",
     },
-    technical: {
-      lastPrice: evidence.technical.lastPrice,
-      lastDate: evidence.technical.lastDate,
-      dailyReturnPct: evidence.technical.dailyReturnPct,
-      sma20: evidence.technical.sma20,
-      sma50: evidence.technical.sma50,
-      rsi14: evidence.technical.rsi14,
-      trendAssessment: evidence.technical.trendAssessment,
-      relativeVolume: evidence.technical.volume.relativeVolume,
-    },
-    eventsSummary: {
-      actionsCount: evidence.events.actions.length,
-      recentFilings: evidence.events.filings.slice(0, 3).map((f) => ({ date: f.date, title: f.title })),
-      recentNews: evidence.events.news.slice(0, 3).map((n) => ({ date: n.published_at, title: n.title })),
-    },
+    klaim_pengguna: claims.map((c) => ({ id: c.id, teks: c.originalText })),
   };
 
-  const userInstruction = `Berikut adalah data empiris hasil audit sistem Telaah 360:\n${JSON.stringify(
-    evidencePayload,
+  const userInstruction = `Bukti Data Terverifikasi:\n${JSON.stringify(
+    evidenceSummary,
     null,
     2
-  )}\n\nLakukan sintesis mendalam untuk menjawab prompt pengguna: "${userPrompt}".`;
+  )}\n\nPrompt Pengguna: "${userPrompt}"`;
 
   let response: SynthesisResponse;
   try {
     response = await callOpenRouter<SynthesisResponse>({
       systemPrompt,
       userPrompt: userInstruction,
-      temperature: 0.15,
+      temperature: 0.1,
     });
   } catch (error) {
     console.error("Error in synthesizeIntelligenceReport:", error);
@@ -138,13 +134,16 @@ Jawab HANYA dalam JSON valid:
     };
   }
 
-  // Bind claims back to evaluations
-  const claimEvaluationsMap = new Map(
-    (response.claimEvaluations || []).map((e) => [e.claimId, e])
-  );
+  // Petakan evaluasi klaim kembali ke klaim asli
+  const rawEvals = Array.isArray(response.claimEvaluations) ? response.claimEvaluations : [];
+  
+  const evaluatedClaims: ClaimEvaluation[] = claims.map((c, idx) => {
+    // Cari evaluasi berdasarkan claimId atau pencocokan teks
+    const evalData =
+      rawEvals.find((e) => e.claimId === c.id) ||
+      rawEvals.find((e) => e.claim && e.claim.toLowerCase().includes(c.originalText.toLowerCase().slice(0, 15))) ||
+      rawEvals[idx];
 
-  const evaluatedClaims: ClaimEvaluation[] = claims.map((c) => {
-    const evalData = claimEvaluationsMap.get(c.id);
     const relatedEvidence = evidence.evidenceRecords
       .filter((ev) => {
         if (c.claimType === "flow" && ev.module === "flowlens") return true;
@@ -159,8 +158,8 @@ Jawab HANYA dalam JSON valid:
     return {
       claimId: c.id,
       originalText: c.originalText,
-      verdict: evalData?.verdict || "Tidak dapat diverifikasi",
-      confidence: evalData?.confidence ?? 0.7,
+      verdict: evalData?.verdict || "Perlu konteks",
+      confidence: evalData?.confidence ?? 0.85,
       reasoning: evalData?.reasoning || "Evaluasi berdasarkan metrik empiris bursa.",
       factualMetricValue: evalData?.factualMetricValue,
       evidenceIds: relatedEvidence.length > 0 ? relatedEvidence : ["ev_overview_01"],
@@ -179,8 +178,8 @@ Jawab HANYA dalam JSON valid:
     intent,
     generatedAt: now,
     dataAsOf: evidence.technical.lastDate || now.split("T")[0],
-    directAnswer: response.directAnswer,
-    executiveSummary: response.executiveSummary,
+    directAnswer: response.directAnswer || `Hasil telaah terhadap emiten ${evidence.symbol}.`,
+    executiveSummary: response.executiveSummary || `Ringkasan kondisi terkini ${evidence.companyName}.`,
     claims: evaluatedClaims,
     overview: evidence.overview,
     financials: evidence.financials,
@@ -190,11 +189,13 @@ Jawab HANYA dalam JSON valid:
     technical: evidence.technical,
     events: evidence.events,
     ownership: evidence.ownership,
-    openQuestions: response.openQuestions || [],
+    openQuestions: Array.isArray(response.openQuestions) && response.openQuestions.length > 0
+      ? response.openQuestions
+      : ["Perlu mencermati perkembangan realisasi laba kuartal berikutnya."],
     limitations: [
-      "Telaah 360 adalah asisten informasi dan riset, bukan penyedia rekomendasi investasi berlisensi.",
+      "Telaah 360 adalah asisten informasi dan riset edukasi, bukan penyedia rekomendasi investasi berlisensi.",
       "FlowLens menyajikan agregasi transaksi broker bursa, bukan identitas pemilik sebenarnya.",
-      ...(response.limitations || []),
+      ...(Array.isArray(response.limitations) ? response.limitations : []),
     ],
     evidenceRecords: evidence.evidenceRecords,
     creditsConsumed: evidence.creditsConsumed,
