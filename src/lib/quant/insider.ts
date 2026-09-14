@@ -89,56 +89,49 @@ export function analyzeInsiderCluster(
   }
 
   // 2. Parse setiap filing untuk mendeteksi transaksi insider
-  filings.forEach((f, idx) => {
+  filings.forEach((f: any, idx) => {
     const title = f.title || "";
     const body = f.body || "";
     const combined = `${title} ${body}`.toLowerCase();
 
-    // Deteksi apakah filing ini relevan dengan insider/kepemilikan saham
-    const isInsiderFiling =
-      combined.includes("kepemilikan saham") ||
-      combined.includes("insider") ||
-      combined.includes("direksi") ||
-      combined.includes("komisaris") ||
-      combined.includes("pembelian") ||
-      combined.includes("penjualan") ||
-      combined.includes("perubahan kepemilikan") ||
-      combined.includes("pengalihan saham") ||
-      f.category?.toLowerCase()?.includes("insider");
-
-    if (!isInsiderFiling && !matchExecutiveName(combined, knownExecutives)) {
-      return;
+    // Deteksi aksi: BUY, SELL, TRANSFER (utamakan data terstruktur dari Sectors API)
+    let action: "BUY" | "SELL" | "TRANSFER" | "NEUTRAL" = "NEUTRAL";
+    if (f.transaction_type) {
+      const tt = String(f.transaction_type).toLowerCase();
+      if (tt === "buy" || tt.includes("beli")) action = "BUY";
+      else if (tt === "sell" || tt.includes("jual")) action = "SELL";
+      else if (tt.includes("transfer") || tt.includes("hibah")) action = "TRANSFER";
     }
 
-    // Deteksi aksi: BUY, SELL, TRANSFER
-    let action: "BUY" | "SELL" | "TRANSFER" | "NEUTRAL" = "NEUTRAL";
-    if (
-      combined.includes("membeli") ||
-      combined.includes("pembelian") ||
-      combined.includes("tambah") ||
-      combined.includes("penambahan") ||
-      combined.includes("akumulasi") ||
-      combined.includes("perolehan") ||
-      combined.includes("buy")
-    ) {
-      action = "BUY";
-    } else if (
-      combined.includes("menjual") ||
-      combined.includes("penjualan") ||
-      combined.includes("pelepasan") ||
-      combined.includes("pengurangan") ||
-      combined.includes("sell") ||
-      combined.includes("divestasi")
-    ) {
-      action = "SELL";
-    } else if (combined.includes("pengalihan") || combined.includes("hibah") || combined.includes("waris")) {
-      action = "TRANSFER";
+    if (action === "NEUTRAL") {
+      if (
+        combined.includes("membeli") ||
+        combined.includes("pembelian") ||
+        combined.includes("tambah") ||
+        combined.includes("penambahan") ||
+        combined.includes("akumulasi") ||
+        combined.includes("perolehan") ||
+        combined.includes("buy")
+      ) {
+        action = "BUY";
+      } else if (
+        combined.includes("menjual") ||
+        combined.includes("penjualan") ||
+        combined.includes("pelepasan") ||
+        combined.includes("pengurangan") ||
+        combined.includes("sell") ||
+        combined.includes("divestasi")
+      ) {
+        action = "SELL";
+      } else if (combined.includes("pengalihan") || combined.includes("hibah") || combined.includes("waris")) {
+        action = "TRANSFER";
+      }
     }
 
     // Cari nama orang / institusi yang melakukan aksi
     let matchedExec = matchExecutiveName(combined, knownExecutives);
-    let actorName = matchedExec?.name;
-    let actorTitle = matchedExec?.title || "Direksi / Manajemen";
+    let actorName = f.holder_name || matchedExec?.name;
+    let actorTitle = matchedExec?.title || (f.holder_type === "insider" ? "Direksi / Manajemen Kunci" : "Manajemen / Pemegang Saham");
 
     if (!actorName) {
       // Coba ekstrak nama setelah "oleh" atau "milik" atau "saham"
@@ -152,21 +145,26 @@ export function analyzeInsiderCluster(
     }
 
     // Cari volume lembar saham
-    let shares = extractSharesFromText(combined) || 0;
+    let shares = Number(f.amount_transaction) || extractSharesFromText(combined) || 0;
 
     // Hitung estimasi nilai rupiah
-    const estimatedPrice = lastPrice > 0 ? lastPrice : 5000;
-    const estimatedValue = shares * estimatedPrice;
+    const txPrice = Number(f.price) || (lastPrice > 0 ? lastPrice : 5000);
+    const estimatedValue = Number(f.transaction_value) || (shares * txPrice);
+
+    // Tanggal transaksi
+    const txDate = f.date || (f.timestamp ? String(f.timestamp).split("T")[0] : new Date().toISOString().split("T")[0]);
 
     transactions.push({
       id: `insider_${f.id || idx}_${Date.now()}`,
-      date: f.date || new Date().toISOString().split("T")[0],
+      date: txDate,
       insiderName: actorName,
       position: actorTitle,
       action,
       shares,
-      price: lastPrice > 0 ? lastPrice : undefined,
+      price: txPrice,
       value: estimatedValue,
+      percentageBefore: f.share_percentage_before !== undefined ? Number(f.share_percentage_before) : undefined,
+      percentageAfter: f.share_percentage_after !== undefined ? Number(f.share_percentage_after) : undefined,
       filingTitle: title,
       filingId: f.id,
     });
