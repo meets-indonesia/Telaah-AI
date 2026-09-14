@@ -101,6 +101,19 @@ Jawab HANYA format JSON valid:
       rsi14: evidence.technical.rsi14 ?? "-",
       sma20: evidence.technical.sma20 ?? "-",
     },
+    radar_insider_direksi: {
+      signal: evidence.insiderRadar?.signal,
+      summary: evidence.insiderRadar?.summary,
+      clusterBuyTerdeteksi: evidence.insiderRadar?.clusterBuyDetected,
+      clusterSellTerdeteksi: evidence.insiderRadar?.clusterSellDetected,
+      totalLembarBeli: evidence.insiderRadar?.totalBuyShares,
+    },
+    lensa_komoditas: evidence.commodityLens?.isCommodityIssuer
+      ? {
+          komoditasUtama: evidence.commodityLens.primaryCommodity,
+          estimasiSensitivitas: evidence.commodityLens.sensitivityEstimate.narrative,
+        }
+      : undefined,
     klaim_pengguna: claims.map((c) => ({ id: c.id, teks: c.originalText })),
   };
 
@@ -189,6 +202,8 @@ Jawab HANYA format JSON valid:
     technical: evidence.technical,
     events: evidence.events,
     ownership: evidence.ownership,
+    insiderRadar: evidence.insiderRadar,
+    commodityLens: evidence.commodityLens,
     openQuestions: Array.isArray(response.openQuestions) && response.openQuestions.length > 0
       ? response.openQuestions
       : ["Perlu mencermati perkembangan realisasi laba kuartal berikutnya."],

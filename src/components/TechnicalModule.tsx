@@ -1,14 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { TechnicalAnalysisResult } from "@/lib/quant/indicators";
-import { Activity, Gauge, TrendingUp, TrendingDown, BarChart2 } from "lucide-react";
+import { CandlestickChart } from "./CandlestickChart";
+import {
+  Activity,
+  Gauge,
+  TrendingUp,
+  TrendingDown,
+  BarChart2,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
 
 interface TechnicalModuleProps {
   technical: TechnicalAnalysisResult;
+  symbol?: string;
+  companyName?: string;
 }
 
-export const TechnicalModule: React.FC<TechnicalModuleProps> = ({ technical }) => {
+export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
+  technical,
+  symbol = "IDX",
+  companyName = "Emiten",
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (technical.trendAssessment === "Data Terbatas") {
     return (
       <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-6">
@@ -81,7 +98,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({ technical }) =
         <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
           <span className="text-[10px] text-slate-400 block mb-1">Moving Averages</span>
           <div className="font-mono text-xs space-y-0.5 text-slate-200">
-            <div>SMA20: <strong className="text-blue-400">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong></div>
+            <div>SMA20: <strong className="text-amber-400">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong></div>
             <div>SMA50: <strong className="text-indigo-400">Rp {technical.sma50?.toLocaleString("id-ID") ?? "-"}</strong></div>
           </div>
         </div>
@@ -105,96 +122,14 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({ technical }) =
         </div>
       </div>
 
-      {/* Mini Trend Sparkline Table / Visualization */}
+      {/* Interactive Candlestick Chart Terminal (Upgrade dari SVG Line Biasa) */}
       {technical.chartSeries.length > 0 && (
-        <div className="bg-slate-950/50 rounded-xl border border-slate-800/80 p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-            <span className="font-semibold flex items-center gap-1">
-              <Activity className="w-3.5 h-3.5 text-blue-400" /> Pergerakan Harga Terkini ({technical.chartSeries.length} Hari Terakhir)
-            </span>
-            <div className="flex items-center gap-3 text-[10px]">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400" /> Close</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> SMA20</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-400" /> SMA50</span>
-            </div>
-          </div>
-
-          {/* Clean SVG Line chart */}
-          <div className="w-full h-36 relative mt-2">
-            {(() => {
-              const pts = technical.chartSeries;
-              if (pts.length < 2) return null;
-              const closes = pts.map((p) => p.close);
-              const min = Math.min(...closes) * 0.98;
-              const max = Math.max(...closes) * 1.02;
-              const range = max - min || 1;
-
-              const width = 800;
-              const height = 130;
-
-              const getX = (idx: number) => (idx / (pts.length - 1)) * width;
-              const getY = (val: number) => height - ((val - min) / range) * height;
-
-              const pathData = pts
-                .map((p, i) => `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(p.close)}`)
-                .join(" ");
-
-              const sma20Pts = pts.filter((p) => p.sma20 !== undefined);
-              const sma20Path = sma20Pts
-                .map((p, i) => {
-                  const originalIdx = pts.indexOf(p);
-                  return `${i === 0 ? "M" : "L"} ${getX(originalIdx)} ${getY(p.sma20!)}`;
-                })
-                .join(" ");
-
-              return (
-                <svg
-                  viewBox={`0 0 ${width} ${height}`}
-                  className="w-full h-full overflow-visible"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Area fill */}
-                  <path
-                    d={`${pathData} L ${width} ${height} L 0 ${height} Z`}
-                    fill="url(#priceGrad)"
-                  />
-
-                  {/* Close price line */}
-                  <path
-                    d={pathData}
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* SMA20 line */}
-                  {sma20Path && (
-                    <path
-                      d={sma20Path}
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="1.5"
-                      strokeDasharray="4 4"
-                    />
-                  )}
-                </svg>
-              );
-            })()}
-          </div>
-          <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-2">
-            <span>{technical.chartSeries[0]?.date}</span>
-            <span>{technical.chartSeries[Math.floor(technical.chartSeries.length / 2)]?.date}</span>
-            <span>{technical.chartSeries[technical.chartSeries.length - 1]?.date}</span>
-          </div>
+        <div className="pt-2">
+          <CandlestickChart
+            series={technical.chartSeries}
+            symbol={symbol}
+            companyName={companyName}
+          />
         </div>
       )}
     </div>

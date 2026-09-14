@@ -20,7 +20,13 @@ import {
   IntentType,
   PeerLensData,
 } from "./types";
-import { CorporateActionItem } from "../sectors/types";
+import {
+  CorporateActionItem,
+  InsiderClusterAnalysis,
+  CommodityLensData,
+} from "../sectors/types";
+import { analyzeInsiderCluster } from "../quant/insider";
+import { analyzeCommodityLens } from "../quant/commodity";
 
 function normalizeCorporateActions(raw: any): CorporateActionItem[] {
   if (!raw) return [];
@@ -110,6 +116,8 @@ export interface EvidenceCollectionResult {
   technical: TechnicalAnalysisResult;
   events: EventsTimelineData;
   ownership?: any;
+  insiderRadar: InsiderClusterAnalysis;
+  commodityLens: CommodityLensData;
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
   toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
@@ -148,7 +156,7 @@ export async function executeEvidencePlan(
   const needEvents =
     mode === "full" ||
     intent === "news_event" ||
-    claims.some((c) => c.claimType === "event");
+    claims.some((c) => c.claimType === "event" || c.claimType === "flow");
 
   // Plan sections for company report
   const reportSections: Array<"overview" | "valuation" | "financials" | "peers" | "ownership" | "management"> = [
@@ -408,6 +416,53 @@ export async function executeEvidencePlan(
     });
   }
 
+  // 7. Process Whale & Insider Cluster Watch Engine
+  const insiderRadar = analyzeInsiderCluster(
+    events.filings,
+    companyReport?.management,
+    companyReport?.ownership,
+    clean,
+    technical.lastPrice
+  );
+
+  if (insiderRadar.status !== "unavailable") {
+    evidenceRecords.push({
+      id: "ev_insider_01",
+      module: "insider",
+      sourceEndpoint: `/v2/filings/?symbol=${clean} & /v2/company/report/${clean}/?sections=management,ownership`,
+      asOfDate: retrievedAt.split("T")[0],
+      retrievedAt,
+      summary: `Insider & Whale Radar: ${insiderRadar.summary}`,
+      rawData: {
+        signal: insiderRadar.signal,
+        score: insiderRadar.score,
+        clusterBuy: insiderRadar.clusterBuyDetected,
+        clusterSell: insiderRadar.clusterSellDetected,
+        totalBuyShares: insiderRadar.totalBuyShares,
+        actors: insiderRadar.insiderActors,
+      },
+    });
+  }
+
+  // 8. Process Mining & Commodity Lens Engine
+  const commodityLens = analyzeCommodityLens(clean, companyReport?.overview);
+  if (commodityLens.isCommodityIssuer) {
+    evidenceRecords.push({
+      id: "ev_commodity_01",
+      module: "commodity",
+      sourceEndpoint: `/v2/mining/* & Acuan Komoditas Global (${commodityLens.primaryCommodity})`,
+      asOfDate: retrievedAt.split("T")[0],
+      retrievedAt,
+      summary: `Commodity Lens: Emiten komoditas dengan eksposur utama ${commodityLens.primaryCommodity}. ${commodityLens.sensitivityEstimate.narrative}`,
+      rawData: {
+        primaryCommodity: commodityLens.primaryCommodity,
+        benchmarks: commodityLens.benchmarks,
+        operations: commodityLens.operations,
+        sensitivity: commodityLens.sensitivityEstimate,
+      },
+    });
+  }
+
   return {
     symbol: clean,
     companyName,
@@ -419,6 +474,8 @@ export async function executeEvidencePlan(
     technical,
     events,
     ownership: companyReport?.ownership,
+    insiderRadar,
+    commodityLens,
     evidenceRecords,
     creditsConsumed: client.getCreditsUsed(),
     toolCallTrace: client.getCallLog(),
