@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { InputStation } from "@/components/InputStation";
 import { ReportHeader } from "@/components/ReportHeader";
@@ -12,6 +13,7 @@ import { PeerLensModule } from "@/components/PeerLensModule";
 import { EventsModule } from "@/components/EventsModule";
 import { InsiderWhaleRadar } from "@/components/InsiderWhaleRadar";
 import { CommodityLensModule } from "@/components/CommodityLensModule";
+import { HarmonicPRZModule } from "@/components/HarmonicPRZModule";
 import { HistoryWatchlistBar } from "@/components/HistoryWatchlistBar";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
 import { ReportQADrawer } from "@/components/ReportQADrawer";
@@ -32,9 +34,10 @@ import {
   Sparkles,
   Flame,
   Globe2,
+  Compass,
 } from "lucide-react";
 
-type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
+type DashboardTab = "overview" | "harmonic" | "technical" | "insider" | "commodity" | "all";
 
 export default function Home() {
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
@@ -44,6 +47,10 @@ export default function Home() {
 
   // Dashboard Active Tab
   const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+
+  // Sidebar state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [watchlistItems, setWatchlistItems] = useState<Array<{ symbol: string; companyName: string; lastPrice?: number }>>([]);
 
   // Ambiguity confirmation state
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
@@ -89,10 +96,13 @@ export default function Home() {
   // Initial load: restore latest viewed report if available
   useEffect(() => {
     const history = getHistory();
-    if (history.length > 0 && !report) {
-      const latest = getReportFromCache(history[0].symbol);
-      if (latest) {
-        setReport(latest);
+    if (history.length > 0) {
+      setWatchlistItems(history.map(h => ({ symbol: h.symbol, companyName: h.companyName, lastPrice: h.lastPrice })));
+      if (!report) {
+        const latest = getReportFromCache(history[0].symbol);
+        if (latest) {
+          setReport(latest);
+        }
       }
     }
   }, []);
@@ -205,8 +215,34 @@ export default function Home() {
 
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
+  const handleNewAnalysis = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    const textarea = document.querySelector("textarea");
+    if (textarea) textarea.focus();
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100">
+    <div className={`min-h-screen flex flex-col bg-[#090d16] text-slate-100 transition-all duration-300 ${isSidebarCollapsed ? "md:pl-16" : "md:pl-64"}`}>
+      {/* Terminal Sidebar */}
+      <Sidebar
+        report={report}
+        activeTab={activeTab}
+        onTabChange={(t) => setActiveTab(t)}
+        onNewAnalysis={handleNewAnalysis}
+        onOpenEvidence={() => {
+          setSelectedEvidenceId(null);
+          setIsEvidenceOpen(true);
+        }}
+        onOpenQA={() => setIsQAOpen(true)}
+        onShare={() => setIsShareOpen(true)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        watchlist={watchlistItems}
+        onSelectWatchlist={(sym) =>
+          executeAnalysis(`Telaah komprehensif saham ${sym}`, "full", sym)
+        }
+      />
+
       {/* Top Navbar */}
       <Header onSelectExample={handleSelectExample} />
 
@@ -395,6 +431,21 @@ export default function Home() {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab("harmonic")}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                    activeTab === "harmonic"
+                      ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
+                      : "text-purple-400 hover:text-purple-300 hover:bg-purple-950/40"
+                  }`}
+                >
+                  <Compass className="w-4 h-4" />
+                  <span>Harmonic PRZ Engine</span>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    NEW
+                  </span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab("technical")}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
                     activeTab === "technical"
@@ -469,6 +520,15 @@ export default function Home() {
                   />
                 )}
 
+                {/* Harmonic Pattern & PRZ Projection Widget */}
+                {report.harmonic && report.harmonic.hasPattern && (
+                  <HarmonicPRZModule
+                    harmonic={report.harmonic}
+                    symbol={report.symbol}
+                    currentPrice={report.technical.lastPrice}
+                  />
+                )}
+
                 {/* Mining & Commodity Lens Widget (if applicable) */}
                 {isCommodity && report.commodityLens && (
                   <CommodityLensModule
@@ -510,7 +570,18 @@ export default function Home() {
               </div>
             )}
 
-            {/* TAB CONTENT 2: TECHNICAL CANDLESTICK TERMINAL */}
+            {/* TAB CONTENT 2: HARMONIC PRZ ENGINE */}
+            {activeTab === "harmonic" && report.harmonic && (
+              <div className="space-y-6">
+                <HarmonicPRZModule
+                  harmonic={report.harmonic}
+                  symbol={report.symbol}
+                  currentPrice={report.technical.lastPrice}
+                />
+              </div>
+            )}
+
+            {/* TAB CONTENT 3: TECHNICAL CANDLESTICK TERMINAL */}
             {activeTab === "technical" && (
               <div className="space-y-6">
                 <TechnicalModule

@@ -136,6 +136,16 @@ Jawab HANYA format JSON valid:
           estimasiSensitivitas: evidence.commodityLens.sensitivityEstimate.narrative,
         }
       : undefined,
+    harmonic_prz: evidence.harmonic?.hasPattern
+      ? {
+          pola: evidence.harmonic.patternName,
+          tipe: evidence.harmonic.type,
+          area_PRZ: `Rp ${evidence.harmonic.prz.lower} - Rp ${evidence.harmonic.prz.upper}`,
+          target1: `Rp ${evidence.harmonic.targets.tp1.price}`,
+          target2: `Rp ${evidence.harmonic.targets.tp2.price}`,
+          status: evidence.harmonic.status,
+        }
+      : undefined,
     klaim_pengguna: claims.map((c) => ({ id: c.id, teks: c.originalText })),
   };
 
@@ -226,6 +236,7 @@ Jawab HANYA format JSON valid:
     ownership: evidence.ownership,
     insiderRadar: evidence.insiderRadar,
     commodityLens: evidence.commodityLens,
+    harmonic: evidence.harmonic,
     segments: evidence.segments,
     openQuestions: Array.isArray(response.openQuestions) && response.openQuestions.length > 0
       ? response.openQuestions
