@@ -210,31 +210,47 @@ export default function Home() {
       {/* Top Navbar */}
       <Header onSelectExample={handleSelectExample} />
 
-      {/* Global Market Ribbon (Live Sectors API Data) */}
-      <div className="border-b border-slate-800/60 bg-[#070a12] px-4 py-1.5 overflow-x-auto text-[11px] font-mono select-none">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 whitespace-nowrap">
-          <div className="flex items-center gap-2 text-slate-400 font-sans font-semibold">
-            <Globe2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>Market Acuan ({marketAsOfDate}):</span>
+      {/* Global Market Ribbon (Live Animated Financial Ticker Tape) */}
+      <div className="border-b border-slate-800/60 bg-[#070a12] px-3 sm:px-4 py-1.5 overflow-hidden text-[11px] font-mono select-none relative">
+        <div className="max-w-7xl mx-auto flex items-center relative">
+          {/* Static Left Label with Live Pulse */}
+          <div className="shrink-0 z-20 flex items-center gap-2 bg-[#070a12] pr-3 sm:pr-4 border-r border-slate-800/80 text-slate-300 font-sans font-semibold">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-xs text-white tracking-tight flex items-center gap-1.5">
+              <Globe2 className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden sm:inline">Market Acuan</span>
+              <span className="text-[10px] text-slate-400 font-mono">({marketAsOfDate})</span>
+            </span>
           </div>
 
-          <div className="flex items-center gap-6 text-slate-300">
-            {marketIndices.map((item) => (
-              <div key={item.code} className="flex items-center gap-1.5">
-                <span className="text-slate-500">{item.name}</span>
-                <span className="font-semibold text-white">
-                  {item.price}
-                  {item.unit && <span className="text-[9px] text-slate-500 font-normal ml-0.5">{item.unit}</span>}
-                </span>
-                <span
-                  className={`text-[10px] font-medium ${
-                    item.isPositive ? "text-emerald-400" : "text-rose-400"
-                  }`}
-                >
-                  {item.change}
-                </span>
-              </div>
-            ))}
+          {/* Fade Gradients for smooth tape entry/exit */}
+          <div className="pointer-events-none absolute left-[125px] sm:left-[215px] top-0 bottom-0 w-8 bg-gradient-to-r from-[#070a12] to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#070a12] to-transparent z-10" />
+
+          {/* Continuous Moving Tape Track */}
+          <div className="overflow-hidden relative w-full ml-3 flex items-center">
+            <div className="animate-ticker flex items-center gap-8 py-0.5" title="Arahkan kursor untuk menjeda pita pasar">
+              {[...marketIndices, ...marketIndices].map((item, idx) => (
+                <div key={`${item.code}-${idx}`} className="flex items-center gap-1.5 shrink-0 hover:bg-slate-800/60 px-2 py-0.5 rounded transition cursor-pointer">
+                  <span className="text-slate-400 font-sans">{item.name}</span>
+                  <span className="font-semibold text-white">
+                    {item.price}
+                    {item.unit && <span className="text-[9px] text-slate-500 font-normal ml-0.5">{item.unit}</span>}
+                  </span>
+                  <span
+                    className={`text-[10px] font-bold ${
+                      item.isPositive ? "text-emerald-400" : "text-rose-400"
+                    }`}
+                  >
+                    {item.change}
+                  </span>
+                  <span className="text-slate-700 ml-2 select-none">•</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
