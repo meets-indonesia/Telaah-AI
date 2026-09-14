@@ -1,5 +1,18 @@
 import { DailyTransaction } from "../sectors/types";
 
+export interface CandlestickPoint {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  sma20?: number;
+  sma50?: number;
+  isBullish: boolean;
+  changePct: number;
+}
+
 export interface TechnicalAnalysisResult {
   lastPrice: number;
   lastDate: string;
@@ -19,13 +32,7 @@ export interface TechnicalAnalysisResult {
     relativeVolume: number | null; // lastVolume / avgVolume20
   };
   trendAssessment: "Bullish" | "Bearish" | "Neutral" | "Data Terbatas";
-  chartSeries: Array<{
-    date: string;
-    close: number;
-    volume: number;
-    sma20?: number;
-    sma50?: number;
-  }>;
+  chartSeries: CandlestickPoint[];
 }
 
 /**
@@ -239,17 +246,47 @@ export function computeTechnicalIndicators(dailyData: DailyTransaction[]): Techn
     trendAssessment = lastClose >= currentSma20 ? "Bullish" : "Bearish";
   }
 
-  // Chart series for frontend display (last 30-40 trading days)
-  const chartLength = Math.min(45, sorted.length);
+  // Chart series for frontend display (up to 90 trading days for full candlestick analysis)
+  const chartLength = Math.min(90, sorted.length);
   const startSlice = sorted.length - chartLength;
-  const chartSeries = sorted.slice(startSlice).map((item, idx) => {
+  const chartSeries: CandlestickPoint[] = sorted.slice(startSlice).map((item, idx) => {
     const globalIdx = startSlice + idx;
+    const prevItem = globalIdx > 0 ? sorted[globalIdx - 1] : null;
+
+    // Preserve real open, high, low if present; otherwise deduce plausible values
+    let open = item.open;
+    let high = item.high;
+    let low = item.low;
+    const close = item.close;
+
+    if (!open || open <= 0) {
+      open = prevItem ? prevItem.close : close;
+    }
+    if (!high || high <= 0) {
+      high = Math.max(open, close) * 1.005;
+    }
+    if (!low || low <= 0) {
+      low = Math.min(open, close) * 0.995;
+    }
+
+    // Ensure valid high >= max(open, close) and low <= min(open, close)
+    high = Math.max(high, open, close);
+    low = Math.min(low, open, close);
+
+    const isBullish = close >= open;
+    const changePct = open > 0 ? Number((((close - open) / open) * 100).toFixed(2)) : 0;
+
     return {
       date: item.date,
-      close: item.close,
-      volume: item.volume,
+      open: Math.round(open),
+      high: Math.round(high),
+      low: Math.round(low),
+      close: Math.round(close),
+      volume: item.volume || 0,
       sma20: sma20Series[globalIdx] ? Math.round(sma20Series[globalIdx]!) : undefined,
       sma50: sma50Series[globalIdx] ? Math.round(sma50Series[globalIdx]!) : undefined,
+      isBullish,
+      changePct,
     };
   });
 

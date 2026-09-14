@@ -99,6 +99,8 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
               <option value="technical">Technical</option>
               <option value="valuation">Valuation</option>
               <option value="events">Events</option>
+              <option value="insider">Insider & Whale</option>
+              <option value="commodity">Commodity Lens</option>
             </select>
           )}
         </div>

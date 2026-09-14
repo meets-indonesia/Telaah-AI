@@ -9,6 +9,8 @@ import {
   FilingItem,
   NewsItem,
   OwnershipData,
+  InsiderClusterAnalysis,
+  CommodityLensData,
 } from "../sectors/types";
 
 export type AnalysisMode = "quick" | "full";
@@ -47,7 +49,7 @@ export interface ClaimEvaluation {
 
 export interface EvidenceRecord {
   id: string;
-  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership";
+  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership" | "insider" | "commodity";
   sourceEndpoint: string;
   asOfDate: string;
   retrievedAt: string;
@@ -105,6 +107,8 @@ export interface CompanyIntelligenceReport {
   technical: TechnicalAnalysisResult;
   events: EventsTimelineData;
   ownership?: OwnershipData;
+  insiderRadar?: InsiderClusterAnalysis;
+  commodityLens?: CommodityLensData;
 
   // Synthesis, Open Questions, Audit
   openQuestions: string[];

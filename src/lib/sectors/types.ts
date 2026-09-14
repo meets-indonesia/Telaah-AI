@@ -268,3 +268,89 @@ export interface ShareholderCompositionResponse {
     others_f?: number;
   }>;
 }
+
+export interface InsiderTransaction {
+  id: string;
+  date: string;
+  insiderName: string;
+  position: string;
+  action: "BUY" | "SELL" | "TRANSFER" | "NEUTRAL";
+  shares: number;
+  price?: number;
+  value?: number;
+  percentageBefore?: number;
+  percentageAfter?: number;
+  filingTitle: string;
+  filingId?: string | number;
+}
+
+export interface InsiderClusterAnalysis {
+  status: "available" | "partial" | "unavailable";
+  signal: "Cluster Buy (Akumulasi Agresif)" | "Moderate Buy" | "Netral" | "Moderate Sell" | "Cluster Sell (Distribusi Agresif)";
+  score: number; // -100 to +100
+  summary: string;
+  totalBuyShares: number;
+  totalSellShares: number;
+  netShares: number;
+  totalBuyValue: number;
+  totalSellValue: number;
+  netValue: number;
+  uniqueInsiders: number;
+  clusterBuyDetected: boolean;
+  clusterSellDetected: boolean;
+  insiderActors: Array<{
+    name: string;
+    position: string;
+    netShares: number;
+    totalBuyShares: number;
+    totalSellShares: number;
+    actionCount: number;
+    lastDate: string;
+  }>;
+  transactions: InsiderTransaction[];
+}
+
+export interface CommodityBenchmark {
+  commodityName: string;
+  symbol: string;
+  currentPrice: number;
+  currency: string;
+  unit: string;
+  dailyChangePct: number;
+  change30dPct: number;
+  trend: "Bullish" | "Bearish" | "Neutral";
+  lastUpdated: string;
+}
+
+export interface MiningOperationalData {
+  concessionsOrSites: Array<{
+    name: string;
+    location: string;
+    type: string;
+    reserves?: string;
+  }>;
+  provenReserves?: string;
+  probableReserves?: string;
+  annualProductionTarget?: string;
+  cashCostPerUnit?: string;
+  commodityExposure: Array<{
+    commodity: string;
+    revenueContributionPct: number;
+  }>;
+  sensitivityRule: string;
+}
+
+export interface CommodityLensData {
+  isCommodityIssuer: boolean;
+  sectorBadge: string;
+  primaryCommodity: string;
+  benchmarks: CommodityBenchmark[];
+  operations?: MiningOperationalData;
+  sensitivityEstimate: {
+    baseCommodity: string;
+    priceShockPercent: number;
+    estimatedEbitdaImpactPercent: number;
+    narrative: string;
+  };
+}
+
