@@ -61,6 +61,31 @@ export default function Home() {
   const [promptValue, setPromptValue] = useState("");
   const [modeValue, setModeValue] = useState<AnalysisMode>("full");
 
+  // Live Market Ribbon state
+  const [marketIndices, setMarketIndices] = useState<Array<{ name: string; code: string; price: string; change: string; isPositive: boolean; unit?: string }>>([
+    { name: "IHSG", code: "COMPOSITE", price: "6.541,4", change: "-0.73%", isPositive: false },
+    { name: "Brent Crude", code: "BRENT", price: "$109.80", change: "+2.85%", isPositive: true, unit: "/barel" },
+    { name: "USD/IDR", code: "USDIDR", price: "Rp 17.585", change: "+0.45%", isPositive: false },
+    { name: "Newcastle Coal", code: "COAL", price: "$148.50", change: "+1.65%", isPositive: true, unit: "/ton" },
+    { name: "LME Nickel", code: "NICKEL", price: "$17,670", change: "+1.20%", isPositive: true, unit: "/ton" },
+    { name: "COMEX Gold", code: "GOLD", price: "$2,742.5", change: "+1.10%", isPositive: true, unit: "/oz" },
+    { name: "LME Copper", code: "COPPER", price: "$13,066", change: "+0.85%", isPositive: true, unit: "/ton" },
+  ]);
+  const [marketAsOfDate, setMarketAsOfDate] = useState<string>("2026-09-11");
+
+  // Fetch live market overview from Sectors API on mount
+  useEffect(() => {
+    fetch("/api/market-overview")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.indices)) {
+          setMarketIndices(data.indices);
+          if (data.asOfDate) setMarketAsOfDate(data.asOfDate);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Initial load: restore latest viewed report if available
   useEffect(() => {
     const history = getHistory();
@@ -185,56 +210,31 @@ export default function Home() {
       {/* Top Navbar */}
       <Header onSelectExample={handleSelectExample} />
 
-      {/* Global Market Ribbon */}
+      {/* Global Market Ribbon (Live Sectors API Data) */}
       <div className="border-b border-slate-800/60 bg-[#070a12] px-4 py-1.5 overflow-x-auto text-[11px] font-mono select-none">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 whitespace-nowrap">
-          <div className="flex items-center gap-1.5 text-slate-400 font-sans font-semibold">
+          <div className="flex items-center gap-2 text-slate-400 font-sans font-semibold">
             <Globe2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>Market Acuan:</span>
+            <span>Market Acuan ({marketAsOfDate}):</span>
           </div>
 
           <div className="flex items-center gap-6 text-slate-300">
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">IHSG</span>
-              <span className="font-semibold text-white">7.185,2</span>
-              <span className="text-emerald-400 flex items-center text-[10px]">+0.42%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Newcastle Coal</span>
-              <span className="font-semibold text-white">$139.50</span>
-              <span className="text-emerald-400 flex items-center text-[10px]">+1.45%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">LME Nickel</span>
-              <span className="font-semibold text-white">$16,480</span>
-              <span className="text-rose-400 flex items-center text-[10px]">-0.65%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">COMEX Gold</span>
-              <span className="font-semibold text-white">$2,685.2</span>
-              <span className="text-emerald-400 flex items-center text-[10px]">+0.85%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">LME Copper</span>
-              <span className="font-semibold text-white">$9,480</span>
-              <span className="text-emerald-400 flex items-center text-[10px]">+1.12%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Brent Crude</span>
-              <span className="font-semibold text-white">$74.80</span>
-              <span className="text-rose-400 flex items-center text-[10px]">-1.05%</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">USD/IDR</span>
-              <span className="font-semibold text-slate-200">Rp 15.425</span>
-              <span className="text-emerald-400 text-[10px]">-0.18%</span>
-            </div>
+            {marketIndices.map((item) => (
+              <div key={item.code} className="flex items-center gap-1.5">
+                <span className="text-slate-500">{item.name}</span>
+                <span className="font-semibold text-white">
+                  {item.price}
+                  {item.unit && <span className="text-[9px] text-slate-500 font-normal ml-0.5">{item.unit}</span>}
+                </span>
+                <span
+                  className={`text-[10px] font-medium ${
+                    item.isPositive ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {item.change}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
