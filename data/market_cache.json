@@ -1,0 +1,62 @@
+{
+  "lastFetchedAt": 1789347890836,
+  "fetchedDate": "2026-09-14T01:04:50.836Z",
+  "asOfDate": "2026-09-11",
+  "ttlHours": 24,
+  "indices": [
+    {
+      "name": "IHSG",
+      "code": "COMPOSITE",
+      "price": "6.541,38",
+      "change": "-0.73%",
+      "isPositive": false
+    },
+    {
+      "name": "Brent Crude",
+      "code": "BRENT",
+      "price": "$109.80",
+      "change": "+2.85%",
+      "isPositive": true,
+      "unit": "/barel"
+    },
+    {
+      "name": "USD/IDR",
+      "code": "USDIDR",
+      "price": "Rp 17.624",
+      "change": "+0.42%",
+      "isPositive": false
+    },
+    {
+      "name": "Newcastle Coal",
+      "code": "COAL",
+      "price": "$148.50",
+      "change": "+1.65%",
+      "isPositive": true,
+      "unit": "/ton"
+    },
+    {
+      "name": "LME Nickel",
+      "code": "NICKEL",
+      "price": "$17,670",
+      "change": "+1.20%",
+      "isPositive": true,
+      "unit": "/ton"
+    },
+    {
+      "name": "COMEX Gold",
+      "code": "GOLD",
+      "price": "$2,742.5",
+      "change": "+1.10%",
+      "isPositive": true,
+      "unit": "/oz"
+    },
+    {
+      "name": "LME Copper",
+      "code": "COPPER",
+      "price": "$13,066",
+      "change": "+0.85%",
+      "isPositive": true,
+      "unit": "/ton"
+    }
+  ]
+}
