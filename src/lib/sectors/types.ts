@@ -242,6 +242,18 @@ export interface QuarterlyFinancialMetrics {
   financials_sector_metrics?: Record<string, any>;
 }
 
+export interface CompanySegmentItem {
+  value: number;
+  source: string;
+  target: string;
+}
+
+export interface CompanySegmentsResponse {
+  symbol: string;
+  financial_year: number;
+  revenue_breakdown: CompanySegmentItem[];
+}
+
 export interface ShareholderCompositionResponse {
   symbol: string;
   year: number;

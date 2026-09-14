@@ -34,17 +34,24 @@ export async function synthesizeIntelligenceReport(
   claims: AtomicClaim[]
 ): Promise<CompanyIntelligenceReport> {
   const systemPrompt = `Anda adalah "Synthesis & Citation Guard" untuk Telaah 360, asisten riset emiten Bursa Efek Indonesia (IDX).
-Tugas: Buat laporan riset 360° yang objektif, kritis, dan berbasis bukti data terstruktur.
+Tugas: Menjawab PERTANYAAN/PROMPT PENGGUNA SECARA SPESIFIK dan menyusun laporan riset 360° yang objektif berbasis data terstruktur.
 
-ATURAN KEPATUHAN:
-1. Dilarang rekomendasi beli/jual dan target harga (0% financial advice).
-2. Setiap angka harus bersumber dari bukti data yang diberikan.
-3. Vonis klaim harus: "Didukung" | "Bertentangan" | "Perlu konteks" | "Tidak dapat diverifikasi" | "Opini/prediksi".
-4. Jawab dalam Bahasa Indonesia yang formal dan analitis.
+BAHASA: WAJIB MENJAWAB SELURUH TEKS (directAnswer, executiveSummary, dll.) DALAM BAHASA INDONESIA. JANGAN PERNAH MENJAWAB DALAM BAHASA INGGRIS.
+
+ATURAN WAJIB DIRECT ANSWER (SANGAT KRUSIAL):
+1. JAWAB LANGSUNG TOPIK SPESIFIK PENGGUNA DI KALIMAT PERTAMA:
+   - Identifikasi apa inti pertanyaan atau topik yang ditanyakan pengguna (misal: "performa data center", "rights issue", "dividen", "laba anjlok", "margin turun").
+   - directAnswer HARUS fokus menjawab topik spesifik tersebut terlebih dahulu, BUKAN sekadar membaca ulang angka kapitalisasi pasar secara generik!
+   - Jika pengguna bertanya tentang segmen/lini bisnis tertentu (misal: "data center DSSA"), periksa bagian 'segmen_pendapatan_resmi'. Sebutkan nama segmen terkait (misal 'Cable TV, internet and technology'), nilai pendapatannya, dan kontribusinya terhadap total pendapatan.
+   - Jika suatu pos tidak dilaporkan secara terpisah dalam data resmi bursa, nyatakan secara eksplisit dan transparan, lalu tunjukkan pos terdekat yang dilaporkan oleh perseroan.
+   - JANGAN PERNAH mengabaikan pertanyaan pengguna dengan memberikan template ringkasan generik.
+2. DILARANG MEMBERIKAN SARAN FINANSIAL: 0% rekomendasi beli/jual, 0% target harga masa depan.
+3. VONIS KLAIM: "Didukung" | "Bertentangan" | "Perlu konteks" | "Tidak dapat diverifikasi" | "Opini/prediksi".
+4. WAJIB menggunakan Bahasa Indonesia yang formal, analitis, dan presisi.
 
 Jawab HANYA format JSON valid:
 {
-  "directAnswer": "Tanggapan langsung atas isu/pertanyaan pengguna serta data freshness",
+  "directAnswer": "Jawaban langsung dan presisi menjawab topik spesifik pengguna, diperkuat angka bukti data",
   "executiveSummary": "Ringkasan eksekutif 2 paragraf kondisi bisnis, laba, valuasi, dan flow pasar",
   "claimEvaluations": [
     {
@@ -59,6 +66,20 @@ Jawab HANYA format JSON valid:
   "limitations": ["Batasan metodologi data"]
 }`;
 
+  // Siapkan rincian segmen jika tersedia
+  let segmenBreakdown: any = "Data rincian segmen tidak dilaporkan.";
+  if (evidence.segments?.revenue_breakdown && Array.isArray(evidence.segments.revenue_breakdown)) {
+    const sources = evidence.segments.revenue_breakdown
+      .filter((x: any) => x.target === "Total Revenue" && x.value > 0)
+      .map((x: any) => ({
+        lini_bisnis: x.source,
+        pendapatan: `Rp ${(x.value / 1e12).toFixed(2)} Triliun`,
+      }));
+    if (sources.length > 0) {
+      segmenBreakdown = sources;
+    }
+  }
+
   // Siapkan ringkasan bukti data yang padat dan informatif
   const evidenceSummary = {
     emiten: `${evidence.symbol} - ${evidence.companyName}`,
@@ -67,6 +88,7 @@ Jawab HANYA format JSON valid:
     marketCap: evidence.overview?.market_cap
       ? `Rp ${((evidence.overview.market_cap) / 1e12).toFixed(2)} Triliun`
       : "-",
+    segmen_pendapatan_resmi: segmenBreakdown,
     laba_pendapatan: {
       periode: evidence.financials.latestPeriodDate,
       pendapatan: evidence.financials.latest?.revenue
@@ -121,7 +143,7 @@ Jawab HANYA format JSON valid:
     evidenceSummary,
     null,
     2
-  )}\n\nPrompt Pengguna: "${userPrompt}"`;
+  )}\n\nPrompt Pengguna (JAWAB DENGAN FOKUS SPESIFIK PADA TOPIK INI): "${userPrompt}"`;
 
   let response: SynthesisResponse;
   try {
@@ -204,6 +226,7 @@ Jawab HANYA format JSON valid:
     ownership: evidence.ownership,
     insiderRadar: evidence.insiderRadar,
     commodityLens: evidence.commodityLens,
+    segments: evidence.segments,
     openQuestions: Array.isArray(response.openQuestions) && response.openQuestions.length > 0
       ? response.openQuestions
       : ["Perlu mencermati perkembangan realisasi laba kuartal berikutnya."],

@@ -118,6 +118,7 @@ export interface EvidenceCollectionResult {
   ownership?: any;
   insiderRadar: InsiderClusterAnalysis;
   commodityLens: CommodityLensData;
+  segments?: any;
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
   toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
@@ -212,6 +213,10 @@ export async function executeEvidencePlan(
     ? client.getQuarterlyFinancials(clean, mode === "full" ? 4 : 2).catch(() => null)
     : Promise.resolve(null);
 
+  let segmentsPromise: Promise<any | null> = client
+    .getCompanySegments(clean)
+    .catch(() => null);
+
   // Await all parallel fetches
   const [
     companyReport,
@@ -223,6 +228,7 @@ export async function executeEvidencePlan(
     newsRes,
     suspensionsRes,
     quarterlyData,
+    segmentsData,
   ] = await Promise.all([
     companyReportPromise,
     dailyPromise,
@@ -233,6 +239,7 @@ export async function executeEvidencePlan(
     newsPromise,
     suspensionsPromise,
     quarterlyPromise,
+    segmentsPromise,
   ]);
 
   const companyName = companyReport?.company_name || `PT ${clean} Tbk`;
@@ -463,6 +470,25 @@ export async function executeEvidencePlan(
     });
   }
 
+  // 9. Process Segments Breakdown Engine
+  if (segmentsData?.revenue_breakdown && Array.isArray(segmentsData.revenue_breakdown)) {
+    const revSources = segmentsData.revenue_breakdown
+      .filter((x: any) => x.target === "Total Revenue" && x.value > 0)
+      .map((x: any) => `${x.source} (Rp ${(x.value / 1e12).toFixed(2)}T)`);
+
+    if (revSources.length > 0) {
+      evidenceRecords.push({
+        id: "ev_segments_01",
+        module: "segments",
+        sourceEndpoint: `/v2/company/get-segments/${clean}/`,
+        asOfDate: String(segmentsData.financial_year || retrievedAt.split("T")[0]),
+        retrievedAt,
+        summary: `Segmen Pendapatan Resmi (${segmentsData.financial_year}): ${revSources.join(", ")}`,
+        rawData: segmentsData,
+      });
+    }
+  }
+
   return {
     symbol: clean,
     companyName,
@@ -476,6 +502,7 @@ export async function executeEvidencePlan(
     ownership: companyReport?.ownership,
     insiderRadar,
     commodityLens,
+    segments: segmentsData,
     evidenceRecords,
     creditsConsumed: client.getCreditsUsed(),
     toolCallTrace: client.getCallLog(),

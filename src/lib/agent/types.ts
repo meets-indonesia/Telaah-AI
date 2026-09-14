@@ -49,7 +49,7 @@ export interface ClaimEvaluation {
 
 export interface EvidenceRecord {
   id: string;
-  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership" | "insider" | "commodity";
+  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership" | "insider" | "commodity" | "segments";
   sourceEndpoint: string;
   asOfDate: string;
   retrievedAt: string;
@@ -109,6 +109,7 @@ export interface CompanyIntelligenceReport {
   ownership?: OwnershipData;
   insiderRadar?: InsiderClusterAnalysis;
   commodityLens?: CommodityLensData;
+  segments?: any;
 
   // Synthesis, Open Questions, Audit
   openQuestions: string[];

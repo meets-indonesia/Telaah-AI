@@ -308,6 +308,19 @@ export class SectorsClient {
       3600
     );
   }
+
+  /**
+   * Rincian segmen bisnis / pendapatan (Revenue Breakdown Segments)
+   */
+  public async getCompanySegments(symbol: string): Promise<any | null> {
+    const clean = this.normalizeSymbol(symbol);
+    return this.fetchEndpoint<any>(
+      `/v2/company/get-segments/${clean}/`,
+      {},
+      1,
+      3600
+    );
+  }
 }
 
 export const sectorsClient = new SectorsClient();
