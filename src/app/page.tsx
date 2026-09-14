@@ -227,7 +227,7 @@ export default function Home() {
       <Sidebar
         report={report}
         activeTab={activeTab}
-        onTabChange={(t) => setActiveTab(t)}
+        onTabChange={(t: any) => setActiveTab(t)}
         onNewAnalysis={handleNewAnalysis}
         onOpenEvidence={() => {
           setSelectedEvidenceId(null);
