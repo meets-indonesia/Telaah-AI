@@ -4,6 +4,7 @@ import { classifyInputAndExtractClaims } from "@/lib/agent/classifier";
 import { executeEvidencePlan } from "@/lib/agent/coordinator";
 import { synthesizeIntelligenceReport } from "@/lib/agent/synthesizer";
 import { AnalysisMode } from "@/lib/agent/types";
+import { sectorsErrorMessage } from "@/lib/sectors/errors";
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,7 +61,8 @@ export async function POST(req: NextRequest) {
     console.error("Error in /api/analyze:", error);
     return NextResponse.json(
       {
-        error: error.message || "Terjadi kesalahan sistem saat menganalisis emiten.",
+        error: sectorsErrorMessage(error),
+        code: error?.kind || "analysis_error",
       },
       { status: 500 }
     );

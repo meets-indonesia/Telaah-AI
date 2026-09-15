@@ -119,6 +119,7 @@ export interface EvidenceCollectionResult {
   insiderRadar: InsiderClusterAnalysis;
   commodityLens: CommodityLensData;
   segments?: any;
+  providerError?: string;
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
   toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
@@ -171,7 +172,13 @@ export async function executeEvidencePlan(
   }
 
   // Pre-load broker registry from cache (0 credits)
-  const brokerRegistry = await client.getBrokersRegistry();
+  let brokerRegistry: import("../sectors/types").BrokerRegistryItem[];
+  try {
+    brokerRegistry = await client.getBrokersRegistry();
+  } catch (error) {
+    // Registry is optional, but provider failures still need to be visible in the report trace.
+    brokerRegistry = [];
+  }
 
   // Parallel asynchronous fetching with graceful fallbacks
   let companyReportPromise: Promise<CompanyReport | null> = client
@@ -243,6 +250,24 @@ export async function executeEvidencePlan(
   ]);
 
   const companyName = companyReport?.company_name || `PT ${clean} Tbk`;
+  const providerErrors = [
+    companyReport,
+    dailyTransactions,
+    brokerSummary,
+    foreignFlow,
+    corporateActions,
+    filingsRes,
+    newsRes,
+    suspensionsRes,
+    quarterlyData,
+    segmentsData,
+  ].every((value) => value === null)
+    ? "Sectors API tidak mengembalikan data. Periksa subscription/API key Sectors."
+    : undefined;
+
+  if (providerErrors) {
+    throw client.getLastError() instanceof Error ? client.getLastError() : new Error(providerErrors);
+  }
 
   // 1. Process Overview Evidence
   if (companyReport?.overview) {
@@ -503,6 +528,7 @@ export async function executeEvidencePlan(
     insiderRadar,
     commodityLens,
     segments: segmentsData,
+    providerError: providerErrors,
     evidenceRecords,
     creditsConsumed: client.getCreditsUsed(),
     toolCallTrace: client.getCallLog(),

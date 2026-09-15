@@ -139,7 +139,7 @@ Jawab HANYA format JSON valid:
     klaim_pengguna: claims.map((c) => ({ id: c.id, teks: c.originalText })),
   };
 
-  const userInstruction = `Bukti Data Terverifikasi:\n${JSON.stringify(
+  const userInstruction = `${evidence.providerError ? `PERINGATAN PROVIDER: ${evidence.providerError}\nJangan mengarang angka atau menyimpulkan kondisi perusahaan dari data kosong.\n\n` : ""}Bukti Data Terverifikasi:\n${JSON.stringify(
     evidenceSummary,
     null,
     2
@@ -231,6 +231,7 @@ Jawab HANYA format JSON valid:
       ? response.openQuestions
       : ["Perlu mencermati perkembangan realisasi laba kuartal berikutnya."],
     limitations: [
+      ...(evidence.providerError ? [evidence.providerError] : []),
       "Telaah 360 adalah asisten informasi dan riset edukasi, bukan penyedia rekomendasi investasi berlisensi.",
       "FlowLens menyajikan agregasi transaksi broker bursa, bukan identitas pemilik sebenarnya.",
       ...(Array.isArray(response.limitations) ? response.limitations : []),

@@ -74,10 +74,10 @@ export async function getOrFetchDailyMarketData(forceRefresh: boolean = false): 
   }
 
   const apiKey = process.env.SECTORS_API_KEY || "";
-  let ihsgPrice = 6541.38;
-  let ihsgChange = -0.73;
-  let asOfDate = "2026-09-11";
-  let usdIdrRate = 17620;
+  let ihsgPrice: number | null = null;
+  let ihsgChange: number | null = null;
+  let asOfDate = "";
+  let usdIdrRate: number | null = null;
 
   // 2. Fetch live IHSG dari Sectors API v2 (/v2/index-daily/ihsg/)
   try {
@@ -118,63 +118,26 @@ export async function getOrFetchDailyMarketData(forceRefresh: boolean = false): 
     console.warn("Error fetching live USD/IDR:", err);
   }
 
-  // 4. Susun daftar acuan pasar terkini
-  const indices: MarketItem[] = [
-    {
+  // 4. Publish only values fetched successfully. No placeholder market numbers.
+  const indices: MarketItem[] = [];
+  if (ihsgPrice !== null && ihsgChange !== null) {
+    indices.push({
       name: "IHSG",
       code: "COMPOSITE",
       price: ihsgPrice.toLocaleString("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 2 }),
       change: `${ihsgChange >= 0 ? "+" : ""}${ihsgChange}%`,
       isPositive: ihsgChange >= 0,
-    },
-    {
-      name: "Brent Crude",
-      code: "BRENT",
-      price: "$109.80",
-      change: "+2.85%",
-      isPositive: true,
-      unit: "/barel",
-    },
-    {
+    });
+  }
+  if (usdIdrRate !== null) {
+    indices.push({
       name: "USD/IDR",
       code: "USDIDR",
       price: `Rp ${usdIdrRate.toLocaleString("id-ID")}`,
-      change: "+0.42%",
+      change: "",
       isPositive: false,
-    },
-    {
-      name: "Newcastle Coal",
-      code: "COAL",
-      price: "$148.50",
-      change: "+1.65%",
-      isPositive: true,
-      unit: "/ton",
-    },
-    {
-      name: "LME Nickel",
-      code: "NICKEL",
-      price: "$17,670",
-      change: "+1.20%",
-      isPositive: true,
-      unit: "/ton",
-    },
-    {
-      name: "COMEX Gold",
-      code: "GOLD",
-      price: "$2,742.5",
-      change: "+1.10%",
-      isPositive: true,
-      unit: "/oz",
-    },
-    {
-      name: "LME Copper",
-      code: "COPPER",
-      price: "$13,066",
-      change: "+0.85%",
-      isPositive: true,
-      unit: "/ton",
-    },
-  ];
+    });
+  }
 
   const cachePayload: MarketCacheData = {
     lastFetchedAt: Date.now(),

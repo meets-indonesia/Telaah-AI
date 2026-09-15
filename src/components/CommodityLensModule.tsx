@@ -94,7 +94,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
           {benchmarks.map((bm, idx) => {
             const isBullish = bm.trend === "Bullish";
             const isBearish = bm.trend === "Bearish";
-            const isPosDay = bm.dailyChangePct >= 0;
+            const isPosDay = bm.dailyChangePct !== null && bm.dailyChangePct >= 0;
 
             return (
               <div
@@ -122,7 +122,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
                 <div className="flex items-baseline justify-between pt-1 border-t border-slate-800/80">
                   <div>
                     <span className="text-base sm:text-lg font-mono font-bold text-white">
-                      ${bm.currentPrice.toLocaleString("en-US")}
+                      ${bm.currentPrice === null ? "-" : bm.currentPrice.toLocaleString("en-US")}
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono ml-1">
                       {bm.currency}/{bm.unit}
@@ -136,11 +136,10 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
                       }`}
                     >
                       {isPosDay ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {isPosDay ? "+" : ""}
-                      {bm.dailyChangePct}%
+                      {bm.dailyChangePct === null ? "-" : `${isPosDay ? "+" : ""}${bm.dailyChangePct}%`}
                     </div>
                     <span className="text-[10px] text-slate-500 block">
-                      30H: {bm.change30dPct >= 0 ? "+" : ""}{bm.change30dPct}%
+                      30H: {bm.change30dPct === null ? "-" : `${bm.change30dPct >= 0 ? "+" : ""}${bm.change30dPct}%`}
                     </span>
                   </div>
                 </div>

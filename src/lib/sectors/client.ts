@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { SectorsApiError } from "./errors";
 import {
   BrokerRegistryItem,
   BrokerSummaryResponse,
@@ -26,6 +27,7 @@ const memoryCache = new Map<string, CacheEntry<any>>();
 export class SectorsClient {
   private apiKey: string;
   private creditUsed: number = 0;
+  private lastError: unknown = null;
   private callLog: Array<{ endpoint: string; params: any; credits: number; timestamp: string }> = [];
 
   constructor(apiKey?: string) {
@@ -41,6 +43,10 @@ export class SectorsClient {
 
   public getCallLog() {
     return [...this.callLog];
+  }
+
+  public getLastError() {
+    return this.lastError;
   }
 
   public resetCreditTracking() {
@@ -90,7 +96,22 @@ export class SectorsClient {
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => res.statusText);
-      throw new Error(`Sectors API error [${res.status}] at ${endpoint}: ${errorText}`);
+      let code = "";
+      let message = errorText || res.statusText;
+      try {
+        const body = JSON.parse(errorText);
+        code = body.error || body.code || "";
+        message = body.message || body.error || message;
+      } catch {
+        // Provider returned non-JSON text.
+      }
+      const error = new SectorsApiError(
+        res.status,
+        code,
+        `Sectors API error [${res.status}] at ${endpoint}: ${message}`
+      );
+      this.lastError = error;
+      throw error;
     }
 
     const data = (await res.json()) as T;

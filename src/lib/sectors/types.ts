@@ -325,12 +325,12 @@ export interface InsiderClusterAnalysis {
 export interface CommodityBenchmark {
   commodityName: string;
   symbol: string;
-  currentPrice: number;
+  currentPrice: number | null;
   currency: string;
   unit: string;
-  dailyChangePct: number;
-  change30dPct: number;
-  trend: "Bullish" | "Bearish" | "Neutral";
+  dailyChangePct: number | null;
+  change30dPct: number | null;
+  trend: "Bullish" | "Bearish" | "Neutral" | "Unavailable";
   lastUpdated: string;
 }
 
@@ -354,6 +354,8 @@ export interface MiningOperationalData {
 
 export interface CommodityLensData {
   isCommodityIssuer: boolean;
+  status: "available" | "unavailable";
+  reason?: string;
   sectorBadge: string;
   primaryCommodity: string;
   benchmarks: CommodityBenchmark[];

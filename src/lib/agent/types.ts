@@ -110,6 +110,7 @@ export interface CompanyIntelligenceReport {
   insiderRadar?: InsiderClusterAnalysis;
   commodityLens?: CommodityLensData;
   segments?: any;
+  providerError?: string;
 
   // Synthesis, Open Questions, Audit
   openQuestions: string[];
