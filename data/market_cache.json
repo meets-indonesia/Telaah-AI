@@ -1,6 +1,6 @@
 {
-  "lastFetchedAt": 1789347890836,
-  "fetchedDate": "2026-09-14T01:04:50.836Z",
+  "lastFetchedAt": 1789439158250,
+  "fetchedDate": "2026-09-15T02:25:58.250Z",
   "asOfDate": "2026-09-11",
   "ttlHours": 24,
   "indices": [
@@ -22,7 +22,7 @@
     {
       "name": "USD/IDR",
       "code": "USDIDR",
-      "price": "Rp 17.624",
+      "price": "Rp 17.661",
       "change": "+0.42%",
       "isPositive": false
     },

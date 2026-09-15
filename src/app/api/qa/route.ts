@@ -15,13 +15,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const systemPrompt = `Anda adalah asisten riset cerdas untuk Telaah 360.
-Tugas Anda adalah menjawab pertanyaan lanjutan pengguna HANYA berdasarkan bukti dan data yang ada pada Laporan Intelijen Emiten (${report.symbol} - ${report.companyName}).
+    const systemPrompt = `Anda adalah Telaah-AI, asisten riset saham ramah pemula (Financial Copilot) untuk bursa saham Indonesia (IDX).
+Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan bukti dan data yang ada pada Laporan Intelijen Emiten (${report.symbol} - ${report.companyName}).
 
-ATURAN KETAT:
-1. Grounded strictly on evidence: Jika informasi tidak ada di dalam laporan, katakan dengan jujur bahwa data tersebut tidak tercantum dalam laporan saat ini.
-2. TOLAK SARAN FINANSIAL: Jika pengguna bertanya "apakah saya harus beli?", "kapan jual?", atau meminta target harga masa depan, tolak dengan sopan dan jelaskan posisi Anda sebagai asisten riset edukasi/informasi.
-3. Jawab dalam Bahasa Indonesia yang profesional, padat, dan analitis. Sertakan kutipan angka atau periode faktual jika relevan.`;
+ATURAN PENTING & GAYA KOMUNIKASI:
+1. RAMAH RITEL PEMULA: Jelaskan dengan bahasa Indonesia yang santai, edukatif, dan mudah dipahami. Jika menyebut istilah seperti PBV, PER, Foreign Flow, atau Broker Summary, beri analogi singkat sehari-hari.
+2. GROUNDED ON EVIDENCE: Hanya gunakan data faktual dari laporan ini. Jangan mengarang angka atau rumor di luar data.
+3. ANTI FOMO / BUKAN AJAKAN BELI: Jangan memberi perintah beli/jual atau target harga fiktif. Berikan kesimpulan objektif (Kelebihan vs Risiko).
+4. FORMAT RAPI: Gunakan poin-poin singkat agar nyaman dibaca di layar HP/chat.`;
 
     const context = {
       symbol: report.symbol,
@@ -52,12 +53,22 @@ ATURAN KETAT:
 
     const userPrompt = `Data Laporan:\n${JSON.stringify(context, null, 2)}\n\nPertanyaan Pengguna: "${question}"`;
 
-    const answer = await callOpenRouter<string>({
-      systemPrompt,
-      userPrompt,
-      responseFormat: "text",
-      temperature: 0.2,
-    });
+    let answer = "";
+    if (process.env.OPENROUTER_API_KEY) {
+      answer = await callOpenRouter<string>({
+        systemPrompt,
+        userPrompt,
+        responseFormat: "text",
+        temperature: 0.2,
+      });
+    } else {
+      // Fallback ringkasan edukatif berbasis data laporan langsung
+      answer = `📌 **Berdasarkan data resmi Sectors API untuk ${report.symbol} (${report.companyName})**:\n\n` +
+        `• **Ringkasan:** ${report.directAnswer}\n` +
+        `• **Harga & Tren:** Rp ${report.technical.lastPrice.toLocaleString("id-ID")} (${report.technical.trendAssessment})\n` +
+        `• **Foreign Flow (Asing):** ${report.flowLens.foreignFlow.recentTrend}\n\n` +
+        `💡 *Catatan Ritel:* Gunakan menu Studio 360° jika ingin melihat grafik candlestick dan broker summary detail.`;
+    }
 
     return NextResponse.json({ success: true, answer });
   } catch (error: any) {
