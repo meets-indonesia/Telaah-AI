@@ -1,9 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PeerLensData } from "@/lib/agent/types";
 import { ValuationData } from "@/lib/sectors/types";
-import { Scale, Layers } from "lucide-react";
+import { Scale, Layers, BarChart2, Table as TableIcon } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Cell,
+  ReferenceLine,
+} from "recharts";
 
 interface PeerLensModuleProps {
   peerLens?: PeerLensData;
@@ -12,12 +23,19 @@ interface PeerLensModuleProps {
 }
 
 export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuation, symbol }) => {
+  const [metricTab, setMetricTab] = useState<"pe" | "pb" | "marketCap" | "table">("pe");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const safePeers = Array.isArray(peerLens?.peers) ? peerLens.peers : [];
   if (!peerLens || peerLens.status === "unavailable" || safePeers.length === 0) {
     return (
-      <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-6">
-        <h3 className="text-base font-bold text-white mb-2">Valuation & Peer Lens</h3>
-        <p className="text-xs text-slate-500">
+      <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-colors">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">Valuation & Peer Lens</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           Data perbandingan rekan sejenis (peer universe) tidak tersedia pada mode analisis ini atau emiten belum memiliki pembanding langsung yang seimbang.
         </p>
       </div>
@@ -30,78 +48,292 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
     return val.toLocaleString("id-ID");
   };
 
+  // Prepare chart items
+  const chartData = safePeers.map((p) => {
+    const isTarget = p.isTarget || p.symbol === symbol;
+    const peVal = p.pe !== null && p.pe !== undefined && p.pe > 0 ? Number(p.pe.toFixed(2)) : 0;
+    const pbVal = p.pb !== null && p.pb !== undefined && p.pb > 0 ? Number(p.pb.toFixed(2)) : 0;
+    const mCapT = Number((p.marketCap / 1e12).toFixed(2));
+
+    return {
+      symbol: p.symbol,
+      companyName: p.companyName,
+      pe: peVal,
+      pb: pbVal,
+      marketCapT: mCapT,
+      rawMarketCap: p.marketCap,
+      divYield: p.dividendYield ? Number((p.dividendYield * 100).toFixed(2)) : null,
+      isTarget,
+    };
+  });
+
+  // Calculate peer averages for reference line
+  const validPEs = chartData.filter((d) => d.pe > 0).map((d) => d.pe);
+  const avgPE = validPEs.length > 0 ? Number((validPEs.reduce((a, b) => a + b, 0) / validPEs.length).toFixed(1)) : 0;
+
+  const validPBs = chartData.filter((d) => d.pb > 0).map((d) => d.pb);
+  const avgPB = validPBs.length > 0 ? Number((validPBs.reduce((a, b) => a + b, 0) / validPBs.length).toFixed(2)) : 0;
+
   return (
-    <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-5 md:p-6 shadow-xl space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+    <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-xl space-y-4 transition-colors">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-white">Valuation & Peer Lens</h3>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Valuation & Peer Lens</h3>
+            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30">
               Basis: {peerLens.basis}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Perbandingan multiple valuasi terhadap emiten sejenis di subsektor yang sama.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Perbandingan multiple valuasi dan ukuran kapitalisasi terhadap emiten sejenis di subsektor yang sama.
           </p>
+        </div>
+
+        {/* View Switcher Pills */}
+        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+          <button
+            onClick={() => setMetricTab("pe")}
+            type="button"
+            className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+              metricTab === "pe"
+                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            P/E Ratio
+          </button>
+          <button
+            onClick={() => setMetricTab("pb")}
+            type="button"
+            className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+              metricTab === "pb"
+                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            P/B Ratio
+          </button>
+          <button
+            onClick={() => setMetricTab("marketCap")}
+            type="button"
+            className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+              metricTab === "marketCap"
+                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            Market Cap
+          </button>
+          <button
+            onClick={() => setMetricTab("table")}
+            type="button"
+            className={`px-2.5 py-1 rounded-lg font-semibold transition ${
+              metricTab === "table"
+                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            Tabel
+          </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40">
-        <table className="w-full text-left text-xs text-slate-300">
-          <thead className="bg-slate-900/90 text-[11px] uppercase text-slate-400 font-semibold border-b border-slate-800">
-            <tr>
-              <th className="py-2.5 px-3">Emiten</th>
-              <th className="py-2.5 px-3 text-right">Market Cap</th>
-              <th className="py-2.5 px-3 text-right">P/E Ratio</th>
-              <th className="py-2.5 px-3 text-right">P/B Ratio</th>
-              <th className="py-2.5 px-3 text-right">Div. Yield</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
-            {safePeers.map((peer) => {
-              const isTarget = peer.isTarget || peer.symbol === symbol;
-              return (
-                <tr
-                  key={peer.symbol}
-                  className={`transition ${
-                    isTarget
-                      ? "bg-blue-600/15 border-l-4 border-l-blue-500 font-semibold text-white"
-                      : "hover:bg-slate-900/50"
-                  }`}
-                >
-                  <td className="py-2.5 px-3 font-sans">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-mono font-bold px-1.5 py-0.5 rounded text-xs ${
-                          isTarget
-                            ? "bg-blue-500 text-white"
-                            : "bg-slate-800 text-slate-300 border border-slate-700"
-                        }`}
-                      >
-                        {peer.symbol}
-                      </span>
-                      <span className="text-[11px] text-slate-300 truncate max-w-[160px]">
-                        {peer.companyName}
-                      </span>
-                      {isTarget && (
-                        <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-blue-400/20 text-blue-300 border border-blue-400/30 font-sans">
-                          Target
+      {/* Bar Chart Section */}
+      {metricTab !== "table" && (
+        <div className="bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <BarChart2 className="w-4 h-4 text-brand-500" />
+              <span>
+                {metricTab === "pe" && `Perbandingan P/E Ratio (x) — Rata-rata Peer: ${avgPE}x`}
+                {metricTab === "pb" && `Perbandingan P/B Ratio (x) — Rata-rata Peer: ${avgPB}x`}
+                {metricTab === "marketCap" && "Perbandingan Market Cap (Rp Triliun)"}
+              </span>
+            </span>
+            <div className="flex items-center gap-3 text-[11px]">
+              <span className="flex items-center gap-1 text-brand-600 dark:text-brand-400 font-semibold">
+                <span className="w-2.5 h-2.5 rounded-xs bg-brand-600" /> Target ({symbol})
+              </span>
+              <span className="flex items-center gap-1 text-slate-500">
+                <span className="w-2.5 h-2.5 rounded-xs bg-slate-400 dark:bg-slate-600" /> Peer Emiten
+              </span>
+            </div>
+          </div>
+
+          <div className="h-60 w-full">
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 15, right: 10, left: -15, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                  <XAxis
+                    dataKey="symbol"
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 11, fontWeight: 600 }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    tickFormatter={(val) =>
+                      metricTab === "marketCap" ? `${val} T` : `${val}x`
+                    }
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const item = payload[0].payload;
+                        return (
+                          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-3 text-xs space-y-1 font-mono z-50">
+                            <div className="font-sans font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-1 flex items-center justify-between gap-3">
+                              <span className="flex items-center gap-1.5">
+                                <span>{item.symbol}</span>
+                                {item.isTarget && (
+                                  <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-blue-500 text-white font-sans font-bold">
+                                    Target
+                                  </span>
+                                )}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-normal truncate max-w-[130px] font-sans">
+                                {item.companyName}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4 text-slate-700 dark:text-slate-300">
+                              <span>P/E Ratio:</span>
+                              <span className="font-bold">{item.pe > 0 ? `${item.pe}x` : "-"}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4 text-slate-700 dark:text-slate-300">
+                              <span>P/B Ratio:</span>
+                              <span className="font-bold">{item.pb > 0 ? `${item.pb}x` : "-"}</span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4 text-slate-700 dark:text-slate-300">
+                              <span>Market Cap:</span>
+                              <span className="font-bold">Rp {item.marketCapT} T</span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  {metricTab === "pe" && avgPE > 0 && (
+                    <ReferenceLine
+                      y={avgPE}
+                      stroke="#f59e0b"
+                      strokeDasharray="4 4"
+                      label={{
+                        value: `Avg ${avgPE}x`,
+                        fill: "#f59e0b",
+                        fontSize: 10,
+                        position: "insideTopRight",
+                      }}
+                    />
+                  )}
+                  {metricTab === "pb" && avgPB > 0 && (
+                    <ReferenceLine
+                      y={avgPB}
+                      stroke="#f59e0b"
+                      strokeDasharray="4 4"
+                      label={{
+                        value: `Avg ${avgPB}x`,
+                        fill: "#f59e0b",
+                        fontSize: 10,
+                        position: "insideTopRight",
+                      }}
+                    />
+                  )}
+
+                  <Bar
+                    dataKey={
+                      metricTab === "pe"
+                        ? "pe"
+                        : metricTab === "pb"
+                        ? "pb"
+                        : "marketCapT"
+                    }
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={36}
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          entry.isTarget
+                            ? "#2563eb"
+                            : "#94a3b8"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                Memuat Bar Chart Valuasi...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Comparison Table */}
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+          <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+            <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-[11px] uppercase text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                <th className="py-2.5 px-3">Emiten</th>
+                <th className="py-2.5 px-3 text-right">Market Cap</th>
+                <th className="py-2.5 px-3 text-right">P/E Ratio</th>
+                <th className="py-2.5 px-3 text-right">P/B Ratio</th>
+                <th className="py-2.5 px-3 text-right">Div. Yield</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono">
+              {safePeers.map((peer) => {
+                const isTarget = peer.isTarget || peer.symbol === symbol;
+                return (
+                  <tr
+                    key={peer.symbol}
+                    className={`transition ${
+                      isTarget
+                        ? "bg-brand-500/10 dark:bg-blue-600/15 border-l-4 border-l-brand-600 font-semibold text-slate-900 dark:text-white"
+                        : "hover:bg-slate-100/60 dark:hover:bg-slate-900/50"
+                    }`}
+                  >
+                    <td className="py-2.5 px-3 font-sans">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-mono font-bold px-1.5 py-0.5 rounded text-xs ${
+                            isTarget
+                              ? "bg-brand-600 text-white"
+                              : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700"
+                          }`}
+                        >
+                          {peer.symbol}
                         </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-2.5 px-3 text-right">Rp {formatTrillion(peer.marketCap)}</td>
-                  <td className="py-2.5 px-3 text-right">{peer.pe !== null && peer.pe !== undefined ? `${peer.pe.toFixed(1)}x` : "-"}</td>
-                  <td className="py-2.5 px-3 text-right">{peer.pb !== null && peer.pb !== undefined ? `${peer.pb.toFixed(2)}x` : "-"}</td>
-                  <td className="py-2.5 px-3 text-right text-emerald-400">
-                    {peer.dividendYield !== null && peer.dividendYield !== undefined ? `${(peer.dividendYield * 100).toFixed(2)}%` : "-"}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                        <span className="text-[11px] text-slate-700 dark:text-slate-300 truncate max-w-[160px]">
+                          {peer.companyName}
+                        </span>
+                        {isTarget && (
+                          <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-400/20 text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-400/30 font-sans">
+                            Target
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">Rp {formatTrillion(peer.marketCap)}</td>
+                    <td className="py-2.5 px-3 text-right">{peer.pe !== null && peer.pe !== undefined ? `${peer.pe.toFixed(1)}x` : "-"}</td>
+                    <td className="py-2.5 px-3 text-right">{peer.pb !== null && peer.pb !== undefined ? `${peer.pb.toFixed(2)}x` : "-"}</td>
+                    <td className="py-2.5 px-3 text-right text-emerald-600 dark:text-emerald-400">
+                      {peer.dividendYield !== null && peer.dividendYield !== undefined ? `${(peer.dividendYield * 100).toFixed(2)}%` : "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
     </div>
   );
 };
