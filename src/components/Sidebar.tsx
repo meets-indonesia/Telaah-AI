@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   ShieldCheck,
   LayoutDashboard,
-  Compass,
   CandlestickChart as CandleIcon,
   Radar,
   Pickaxe,
@@ -50,7 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navItems = [
     { href: "/", label: "Ringkasan 360°", icon: LayoutDashboard },
-    { href: "/harmonic", label: "Harmonic PRZ Engine", icon: Compass, badge: "NEW" },
     { href: "/technical", label: "Terminal Teknikal", icon: CandleIcon },
     { href: "/insider", label: "Whale & Insider Radar", icon: Radar },
     { href: "/commodity", label: "Commodity Lens", icon: Pickaxe },
@@ -138,11 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {!isCollapsed && (
                   <div className="flex-1 flex items-center justify-between">
                     <span className="truncate">{item.label}</span>
-                    {item.badge && (
-                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 ml-1">
-                        {item.badge}
-                      </span>
-                    )}
+
                   </div>
                 )}
               </Link>

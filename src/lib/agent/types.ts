@@ -1,7 +1,6 @@
 import { TechnicalAnalysisResult } from "../quant/indicators";
 import { FinancialHealthAnalysis } from "../quant/financials";
 import { FlowLensAnalysis } from "../quant/flow";
-import { HarmonicPatternResult } from "../quant/harmonic";
 import {
   CompanyOverview,
   ValuationData,
@@ -50,7 +49,7 @@ export interface ClaimEvaluation {
 
 export interface EvidenceRecord {
   id: string;
-  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership" | "insider" | "commodity" | "segments" | "harmonic";
+  module: "overview" | "financials" | "valuation" | "flowlens" | "technical" | "events" | "ownership" | "insider" | "commodity" | "segments";
   sourceEndpoint: string;
   asOfDate: string;
   retrievedAt: string;
@@ -110,7 +109,6 @@ export interface CompanyIntelligenceReport {
   ownership?: OwnershipData;
   insiderRadar?: InsiderClusterAnalysis;
   commodityLens?: CommodityLensData;
-  harmonic?: HarmonicPatternResult;
   segments?: any;
 
   // Synthesis, Open Questions, Audit

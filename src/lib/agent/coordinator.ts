@@ -27,7 +27,6 @@ import {
 } from "../sectors/types";
 import { analyzeInsiderCluster } from "../quant/insider";
 import { analyzeCommodityLens } from "../quant/commodity";
-import { analyzeHarmonicPattern, HarmonicPatternResult } from "../quant/harmonic";
 
 function normalizeCorporateActions(raw: any): CorporateActionItem[] {
   if (!raw) return [];
@@ -119,7 +118,6 @@ export interface EvidenceCollectionResult {
   ownership?: any;
   insiderRadar: InsiderClusterAnalysis;
   commodityLens: CommodityLensData;
-  harmonic: HarmonicPatternResult;
   segments?: any;
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
@@ -491,29 +489,6 @@ export async function executeEvidencePlan(
     }
   }
 
-  // 10. Process Harmonic Pattern XABCD & PRZ Reversal Engine
-  const harmonic = analyzeHarmonicPattern(dailyTransactions || [], clean);
-  if (harmonic.hasPattern) {
-    evidenceRecords.push({
-      id: "ev_harmonic_01",
-      module: "harmonic",
-      sourceEndpoint: `/v2/daily/${clean}/ & Fibonacci Geometrical Ratios`,
-      asOfDate: retrievedAt.split("T")[0],
-      retrievedAt,
-      summary: `Harmonic Pattern: ${harmonic.patternName} (${harmonic.patternVariant}). Area PRZ: Rp ${harmonic.prz.lower} - Rp ${harmonic.prz.upper}. Target 1 (0.382): Rp ${harmonic.targets.tp1.price}, Target 2 (0.618): Rp ${harmonic.targets.tp2.price}.`,
-      rawData: {
-        pattern: harmonic.patternName,
-        variant: harmonic.patternVariant,
-        type: harmonic.type,
-        status: harmonic.status,
-        ratios: harmonic.ratios,
-        prz: harmonic.prz,
-        targets: harmonic.targets,
-        confidence: harmonic.confidenceScore,
-      },
-    });
-  }
-
   return {
     symbol: clean,
     companyName,
@@ -527,7 +502,6 @@ export async function executeEvidencePlan(
     ownership: companyReport?.ownership,
     insiderRadar,
     commodityLens,
-    harmonic,
     segments: segmentsData,
     evidenceRecords,
     creditsConsumed: client.getCreditsUsed(),
