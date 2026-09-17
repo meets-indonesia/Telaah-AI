@@ -14,7 +14,6 @@ import {
   Swords,
   BookOpen,
   Coins,
-  Wrench,
 } from "lucide-react";
 import { ChatSession } from "./types";
 
@@ -67,8 +66,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       )}
 
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-40 flex flex-col bg-white dark:bg-[#0b101d] border-r border-slate-200 dark:border-slate-800/80 transition-all duration-300 ${
-          isOpen ? "w-72 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-0 overflow-hidden"
+        aria-label="Menu alat dan riwayat"
+        className={`fixed lg:static top-0 bottom-0 left-0 z-40 flex flex-col bg-white dark:bg-[#0b101d] border-r border-slate-200 dark:border-slate-800/80 transition-transform duration-300 w-72 ${
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* Top: New Chat button */}
@@ -95,9 +95,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
           {/* Quick Smart Tools for Retail */}
           <div>
-            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-500" /> Alat Pintar Ritel
+                <Sparkles className="w-3 h-3 text-brand-500" /> Alat bantu pemula
               </span>
             </div>
             <div className="space-y-1">
@@ -108,7 +108,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition text-left"
                 >
                   <Swords className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                  <span className="font-medium">Komparasi Saham (Battle)</span>
+                  <span className="font-medium">Bandingkan dua saham</span>
                 </button>
               )}
               {onOpenJargon && (
@@ -118,7 +118,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition text-left"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-brand-500 shrink-0" />
-                  <span className="font-medium">Kamus Pintar (Jargon Buster)</span>
+                  <span className="font-medium">Kamus istilah saham</span>
                 </button>
               )}
               {onOpenDividend && (
@@ -136,9 +136,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
           {/* Quick Watchlist / Populer */}
           <div>
-            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
-                <Bookmark className="w-3 h-3 text-brand-500" /> Watchlist Pilihan
+                <Bookmark className="w-3 h-3 text-brand-500" /> Saham populer
               </span>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
@@ -161,7 +161,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
           {/* Chat History */}
           <div>
-            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <div className="px-2 mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1">
                 <MessageSquare className="w-3 h-3 text-slate-400" /> Riwayat Obrolan
               </span>

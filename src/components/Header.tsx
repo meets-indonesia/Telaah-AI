@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, MessageSquare, LayoutDashboard, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ShieldCheck, MessageSquare, LayoutDashboard, CandlestickChart, Radar, Pickaxe } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
@@ -17,78 +19,66 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleView,
   hasReport = false,
 }) => {
-  const examples = [
-    {
-      label: "BBCA • Akumulasi Asing",
-      prompt: "BCA (BBCA) labanya naik dan asing akumulasi. Benar gak ya?",
-      mode: "quick" as const,
-    },
-    {
-      label: "TLKM • Valuasi & Risiko",
-      prompt: "Ada rumor laba TLKM tertekan dan asing jualan. Gimana faktanya?",
-      mode: "full" as const,
-    },
-    {
-      label: "ASII • Prospek Ritel",
-      prompt: "ASII prospeknya gimana buat investor pemula tahun ini?",
-      mode: "quick" as const,
-    },
+  const pathname = usePathname();
+  const navItems = [
+    { href: "/", label: "Beranda", icon: LayoutDashboard },
+    { href: "/technical", label: "Teknikal", icon: CandlestickChart },
+    { href: "/insider", label: "Insider", icon: Radar },
+    { href: "/commodity", label: "Komoditas", icon: Pickaxe },
   ];
 
   return (
-    <header className="border-b border-slate-200/90 dark:border-slate-800/80 bg-white/80 dark:bg-[#090d16]/90 backdrop-blur-md sticky top-0 z-30 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Brand & Tagline */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-blue-500 flex items-center justify-center shadow-md shadow-brand-500/25 ring-2 ring-brand-400/20">
-            <ShieldCheck className="w-6 h-6 text-white" />
+    <header className="border-b border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-[#0b101d]/95 backdrop-blur-md sticky top-0 z-30 transition-colors">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Telaah 360, beranda">
+          <div className="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center shadow-sm shadow-brand-500/20">
+            <ShieldCheck className="w-5 h-5 text-white" aria-hidden="true" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                Telaah <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-blue-500 to-indigo-500 dark:from-brand-400 dark:to-blue-300">360</span>
-              </h1>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-brand-50 dark:bg-brand-500/15 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/30">
-                Sectors API v2
-              </span>
-              <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 hidden sm:inline-block">
-                AI Financial Copilot
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Asisten Saham IDX Ramah Ritel • Analisis Faktual Tanpa Pom-Pom
-            </p>
+            <div className="text-base font-bold tracking-tight text-slate-950 dark:text-white">Telaah <span className="text-brand-600 dark:text-brand-400">360</span></div>
+            <p className="hidden sm:block text-[11px] text-slate-500 dark:text-slate-400">Riset saham, dijelaskan sederhana</p>
           </div>
-        </div>
+        </Link>
 
-        {/* View Switcher & Actions */}
-        <div className="flex items-center flex-wrap gap-2.5 justify-between md:justify-end">
+        <nav aria-label="Navigasi utama" className="hidden lg:flex items-center gap-1 ml-4">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active ? "bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"}`}>
+                <Icon className="w-4 h-4" aria-hidden="true" />{item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-2">
           {/* View Mode Toggle: Chat vs Studio */}
           {onToggleView && (
-            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+            <div className="hidden sm:flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs" aria-label="Tampilan beranda">
               <button
                 type="button"
                 onClick={() => onToggleView("chat")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                   currentView === "chat"
-                    ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-sm font-semibold"
+                    ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>AI Chat</span>
+                <span>Tanya AI</span>
               </button>
               <button
                 type="button"
                 onClick={() => onToggleView("dashboard")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
                   currentView === "dashboard"
-                    ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-sm font-semibold"
+                    ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>Studio 360°</span>
+                <span>Laporan</span>
                 {hasReport && (
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 )}
@@ -96,29 +86,16 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* Quick Example Pills on Desktop */}
-          {onSelectExample && (
-            <div className="hidden xl:flex items-center gap-1.5 text-xs">
-              <span className="text-slate-400 text-[11px] flex items-center gap-1 pl-1">
-                <Sparkles className="w-3 h-3 text-amber-500" />
-              </span>
-              {examples.map((ex, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => onSelectExample(ex.prompt, ex.mode)}
-                  className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 transition text-[11px] truncate max-w-[150px]"
-                  title={ex.prompt}
-                >
-                  {ex.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Dark / Light Mode Switcher */}
           <ThemeToggle />
         </div>
       </div>
+      <nav aria-label="Navigasi seluler" className="lg:hidden flex items-center gap-1 overflow-x-auto px-3 pb-2 no-scrollbar">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = pathname === item.href;
+          return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex-1 min-w-fit inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${active ? "bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300" : "text-slate-500 dark:text-slate-400"}`}><Icon className="w-3.5 h-3.5" />{item.label}</Link>;
+        })}
+      </nav>
     </header>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Zap, Shield, Sparkles, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
+import { Send, Zap, Shield, Loader2, Mic } from "lucide-react";
 import { AnalysisMode } from "@/lib/agent/types";
 
 interface ChatInputProps {
@@ -100,13 +100,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-[#0b101d]/90 backdrop-blur-md p-3 sm:p-4">
+    <div className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-[#0b101d]/95 backdrop-blur-md p-3 sm:p-4">
       <div className="max-w-3xl mx-auto space-y-2">
         {/* Quick ticker pills & Mode selector */}
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
           {/* Quick Ticker Chips */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-[11px] text-slate-400 font-medium">Saham:</span>
+            <span className="text-[11px] text-slate-500 font-medium">Contoh:</span>
             {QUICK_TICKERS.map((ticker) => (
               <button
                 key={ticker}
@@ -120,7 +120,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           </div>
 
           {/* Mode Pill Toggle */}
-          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0">
+          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0" aria-label="Kedalaman analisis">
             <button
               type="button"
               onClick={() => setMode("quick")}
@@ -129,10 +129,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-2xs font-semibold"
                   : "text-slate-500 hover:text-slate-800 dark:text-slate-400"
               }`}
-              title="Analisis ringkas dan cepat (hemat kuota API)"
+              title="Jawaban inti, cocok untuk pertanyaan awal"
             >
               <Zap className="w-3 h-3 text-amber-500" />
-              <span>Cepat</span>
+              <span>Ringkas</span>
             </button>
             <button
               type="button"
@@ -142,24 +142,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-2xs font-semibold"
                   : "text-slate-500 hover:text-slate-800 dark:text-slate-400"
               }`}
-              title="Analisis 360° lengkap 5 dimensi"
+              title="Laporan lengkap dengan lebih banyak data"
             >
               <Shield className="w-3 h-3 text-brand-500" />
-              <span>Mendalam</span>
+              <span>Lengkap</span>
             </button>
           </div>
         </div>
 
         {/* Textarea Input Card */}
         <div className="relative flex items-end rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900/90 shadow-sm focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 transition-all">
+          <label htmlFor="chat-question" className="sr-only">Pertanyaan saham</label>
           <textarea
+            id="chat-question"
             ref={textareaRef}
             rows={1}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tanyakan kode saham atau rumor pasar (misal: BBCA prospeknya gimana?)..."
-            className="w-full resize-none bg-transparent py-3 pl-4 pr-20 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none max-h-32 min-h-[44px]"
+            placeholder="Contoh: Apakah BBCA masih menarik untuk pemula?"
+            className="w-full resize-none bg-transparent py-3.5 pl-4 pr-20 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none max-h-32 min-h-[48px]"
             style={{
               height: "auto",
             }}
@@ -204,8 +206,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
         {/* Micro disclaimer */}
         <div className="flex items-center justify-between text-[10px] text-slate-400 px-1">
-          <span>Tekan <strong>Enter</strong> untuk kirim, <strong>Shift + Enter</strong> untuk baris baru</span>
-          <span>Bukan ajakan beli/jual (DYOR)</span>
+          <span className="hidden sm:inline">Enter untuk kirim, Shift + Enter untuk baris baru</span>
+          <span>Selalu cek kembali sebelum mengambil keputusan</span>
         </div>
       </div>
     </div>

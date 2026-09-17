@@ -14,6 +14,8 @@ import {
   HelpCircle,
   Swords,
   ShieldAlert,
+  ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 import { ChatMessage } from "./types";
 import { StockMiniCard } from "./StockMiniCard";
@@ -69,51 +71,61 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
   }, [messages, isLoading, loadingStage]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 space-y-6" aria-live="polite">
       {/* Empty State / Welcome Screen */}
       {messages.length === 0 && (
-        <div className="max-w-2xl mx-auto my-auto pt-6 pb-12 text-center space-y-6">
+        <div className="max-w-3xl mx-auto my-auto pt-4 pb-10 space-y-7">
           {/* Logo & Headline */}
-          <div className="space-y-3">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-tr from-brand-600 via-blue-500 to-indigo-500 text-white shadow-lg shadow-brand-500/30 ring-4 ring-brand-500/10">
-              <Sparkles className="w-8 h-8" />
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-600 text-white shadow-md shadow-brand-500/20">
+              <Sparkles className="w-7 h-7" aria-hidden="true" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Halo! Mau bedah saham apa hari ini?
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
-              Asisten riset saham IDX cerdas berbasis data faktual <strong>Sectors API v2</strong>. Dirancang ramah investor ritel—jelas, lugas, tanpa istilah rumit yang bikin pusing.
+            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-950 dark:text-white">
+              Mulai riset saham tanpa bingung
+            </h1>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
+              Tulis kode saham atau tempel rumor yang kamu temukan. Telaah 360 akan merangkum data, menjelaskan istilah, dan menunjukkan buktinya.
             </p>
           </div>
 
-          {/* Prompt Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left pt-2">
-            {STARTER_PROMPTS.map((starter, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => onSelectPrompt(starter.desc)}
-                className="p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/70 hover:border-brand-400 dark:hover:border-brand-700/80 hover:shadow-md transition-all group flex items-start gap-3 text-left"
-              >
-                <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-brand-50 dark:group-hover:bg-brand-950/60 transition shrink-0">
-                  {starter.icon}
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400">
-                    {starter.title}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
-                    {starter.desc}
-                  </p>
-                </div>
-              </button>
-            ))}
+          <div className="surface dark:!border-slate-800 dark:!bg-[#0f172a] p-4 sm:p-5">
+            <ol className="grid sm:grid-cols-3 gap-4 text-left">
+              {["Tulis pertanyaan", "Kami cek data", "Kamu dapat ringkasan"].map((step, index) => (
+                <li key={step} className="flex items-start gap-3">
+                  <span className="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 flex items-center justify-center text-xs font-bold shrink-0">{index + 1}</span>
+                  <div><p className="text-sm font-semibold text-slate-900 dark:text-white">{step}</p><p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 mt-0.5">{index === 0 ? "Contoh: prospek BBCA" : index === 1 ? "Laporan, harga, dan aliran dana" : "Bahasa sederhana plus risiko"}</p></div>
+                </li>
+              ))}
+            </ol>
           </div>
 
-          {/* Mini Info Footer */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
-            <ShieldCheck className="w-3.5 h-3.5 text-brand-500" />
-            <span>Semua klaim diverifikasi dengan data resmi laporan keuangan & broker IDX</span>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Atau coba salah satu contoh</h2>
+              <span className="text-[11px] text-slate-400">Klik untuk langsung bertanya</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+              {STARTER_PROMPTS.map((starter, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onSelectPrompt(starter.desc)}
+                  className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 hover:border-brand-400 dark:hover:border-brand-700 hover:shadow-sm transition-all group flex items-start gap-3 text-left"
+                >
+                  <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-brand-50 dark:group-hover:bg-brand-950/60 transition shrink-0">{starter.icon}</div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-brand-700 dark:group-hover:text-brand-300">{starter.title}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">{starter.desc}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-brand-500 shrink-0 mt-1" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <span>Sumber data ditampilkan. Hasil bukan ajakan membeli atau menjual.</span>
           </div>
         </div>
       )}

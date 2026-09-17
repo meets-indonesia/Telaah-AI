@@ -30,7 +30,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-200 selection:bg-brand-500 selection:text-white">
+      <body className="antialiased bg-[#f6f8fb] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 min-h-[100dvh] transition-colors duration-200 selection:bg-brand-500 selection:text-white">
+        <a href="#main-content" className="skip-link">Lewati ke konten utama</a>
         {children}
       </body>
     </html>

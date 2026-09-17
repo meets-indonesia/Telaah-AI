@@ -515,7 +515,7 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-[#f6f8fb] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 transition-colors">
       {/* Top Navbar with View Switcher & Theme Toggle */}
       <Header
         onSelectExample={handleSelectExample}
@@ -576,7 +576,7 @@ export default function Home() {
           VIEW MODE 1: CHAT COPILOT (ChatGPT / Gemini Saham IDX)
           ========================================================================= */}
       {currentView === "chat" && (
-        <div className="flex-1 flex overflow-hidden relative">
+        <main id="main-content" className="flex-1 flex overflow-hidden relative">
           {/* Collapsible Left Sidebar */}
           <ChatSidebar
             isOpen={isSidebarOpen}
@@ -605,7 +605,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition"
+                className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition"
               >
                 <Menu className="w-3.5 h-3.5" />
                 <span>Menu & Riwayat</span>
@@ -651,20 +651,20 @@ export default function Home() {
             />
 
           </div>
-        </div>
+        </main>
       )}
 
       {/* =========================================================================
           VIEW MODE 2: STUDIO 360° DASHBOARD (Deep Dive Analisis Kuantitatif)
           ========================================================================= */}
       {currentView === "dashboard" && (
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+        <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
           {/* Quick Back to Chat Banner */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 text-xs">
             <div className="flex items-center gap-2 text-brand-900 dark:text-brand-200 font-medium">
               <LayoutDashboard className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
               <span>
-                Mode <strong>Studio 360°</strong> — Data lengkap, grafik teknikal, laporan keuangan & bandarmologi.
+                Mode <strong>Laporan 360°</strong>. Data lengkap, grafik teknikal, laporan keuangan, dan aliran broker.
               </span>
             </div>
             <button
