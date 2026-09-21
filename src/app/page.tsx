@@ -352,7 +352,7 @@ export default function Home() {
     }
 
     // Otherwise run full or quick analysis
-    await executeAnalysis(userText, mode);
+    await executeAnalysis(userText, mode, undefined, newMessages);
   };
 
   const updateActiveSession = (updatedMessages: ChatMessage[], newReport?: CompanyIntelligenceReport | null) => {
@@ -386,10 +386,29 @@ export default function Home() {
     persistSessions(currentList);
   };
 
-  const executeAnalysis = async (prompt: string, mode: AnalysisMode, confirmedSymbol?: string) => {
+  const executeAnalysis = async (
+    prompt: string,
+    mode: AnalysisMode,
+    confirmedSymbol?: string,
+    existingMessages?: ChatMessage[]
+  ) => {
     setIsLoading(true);
     setErrorMessage(null);
     setNeedsConfirmation(false);
+
+    // If caller didn't pass existingMessages (e.g. from search modal or quick chips), add user message
+    let baseMessages = existingMessages;
+    if (!baseMessages) {
+      const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const userMsg: ChatMessage = {
+        id: "u_" + Date.now(),
+        sender: "user",
+        text: prompt,
+        timestamp: timeStr,
+      };
+      baseMessages = [...messages, userMsg];
+      setMessages(baseMessages);
+    }
 
     setLoadingStage("Menganalisis intensi & mengekstrak data emiten...");
 
@@ -477,7 +496,7 @@ export default function Home() {
           },
         };
 
-        const finalMsgs = [...messages, botReply];
+        const finalMsgs = [...baseMessages, botReply];
         setMessages(finalMsgs);
         updateActiveSession(finalMsgs, rep);
       }
