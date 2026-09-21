@@ -151,7 +151,7 @@ export default function WatchlistPage() {
   }, [items, searchQuery, sortKey, sortAsc]);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
       <Header />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-5">
@@ -159,7 +159,7 @@ export default function WatchlistPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+              <Star className="w-5 h-5 text-zinc-400 fill-zinc-400" />
               <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Daftar Pantauan Emiten (Watchlist)
               </h1>
@@ -182,10 +182,10 @@ export default function WatchlistPage() {
                   }
                 }}
                 placeholder="Tambah ticker (misal: ASII, BREN)..."
-                className="w-64 px-3 py-1.5 text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded focus:border-orange-500/50 focus:outline-none placeholder-slate-400 font-mono uppercase"
+                className="w-64 px-3 py-1.5 text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded focus:border-zinc-500 focus:outline-none placeholder-slate-400 font-mono uppercase"
               />
               {addSuggestions.length > 0 && (
-                <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 rounded shadow-xl z-20 overflow-hidden text-xs">
+                <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded shadow-xl z-20 overflow-hidden text-xs">
                   {addSuggestions.map((s) => (
                     <button
                       key={s.symbol}
@@ -212,7 +212,7 @@ export default function WatchlistPage() {
               title="Perbarui Data"
               className="p-1.5 rounded border border-slate-200 dark:border-white/10 text-slate-400 hover:text-white hover:bg-white/5 transition"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-orange-400" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-zinc-200" : ""}`} />
             </button>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function WatchlistPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Saring emiten di watchlist..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded focus:outline-none focus:border-orange-500/50 text-xs placeholder-slate-400"
+              className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded focus:outline-none focus:border-zinc-500 text-xs placeholder-slate-400"
             />
           </div>
 
@@ -236,11 +236,11 @@ export default function WatchlistPage() {
         </div>
 
         {/* High-Density Watchlist Matrix Table */}
-        <div className="bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black/40 text-slate-500 dark:text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-black/40 text-slate-500 dark:text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                   <th className="py-2.5 px-3">
                     <button onClick={() => handleSort("symbol")} className="flex items-center gap-1 hover:text-slate-200">
                       Emiten <ArrowUpDown className="w-3 h-3" />
@@ -298,14 +298,14 @@ export default function WatchlistPage() {
                       <tr
                         key={item.symbol}
                         onClick={() => router.push(`/?symbol=${item.symbol}`)}
-                        className="hover:bg-slate-50 dark:hover:bg-white/5 transition cursor-pointer group"
+                        className="hover:bg-white dark:hover:bg-white/5 transition cursor-pointer group"
                       >
                         {/* Company / Symbol */}
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2.5 min-w-0">
                             <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
                             <div className="min-w-0">
-                              <span className="font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                              <span className="font-bold text-slate-900 dark:text-slate-100 block group-hover:text-zinc-950 transition-colors">
                                 {item.symbol}
                               </span>
                               <span className="text-[11px] font-sans text-slate-500 truncate block max-w-[180px]">
@@ -387,7 +387,7 @@ export default function WatchlistPage() {
                                 ? "bg-emerald-500/15 text-emerald-400"
                                 : item.trend.toLowerCase().includes("bearish")
                                 ? "bg-rose-500/15 text-rose-400"
-                                : "bg-slate-500/15 text-slate-400"
+                                : "bg-white0/15 text-slate-400"
                             }`}
                           >
                             {item.trend}
@@ -400,7 +400,7 @@ export default function WatchlistPage() {
                             <Link
                               href={`/?symbol=${item.symbol}`}
                               title="Buka Terminal Telaah"
-                              className="p-1 rounded text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 transition"
+                              className="p-1 rounded text-slate-400 hover:text-zinc-950 hover:bg-zinc-500/10 transition"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </Link>
@@ -422,7 +422,7 @@ export default function WatchlistPage() {
                     <td colSpan={10} className="py-12 text-center text-slate-400 font-sans">
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
-                          <RefreshCw className="w-4 h-4 animate-spin text-orange-400" />
+                          <RefreshCw className="w-4 h-4 animate-spin text-zinc-200" />
                           <span>Memuat metrik data bursa watchlist...</span>
                         </div>
                       ) : (

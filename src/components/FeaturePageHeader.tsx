@@ -21,7 +21,7 @@ export function FeaturePageHeader({
     <section className="surface dark:!border-slate-800 dark:!bg-[#0f172a] p-5 sm:p-6" aria-labelledby="feature-title">
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-5">
         <div className="max-w-2xl">
-          <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 flex items-center justify-center mb-4">
+          <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 text-zinc-700 dark:text-zinc-300 flex items-center justify-center mb-4">
             <Icon className="w-5 h-5" aria-hidden="true" />
           </div>
           <h1 id="feature-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950 dark:text-white">{title}</h1>
@@ -39,7 +39,7 @@ export function FeaturePageHeader({
                 aria-pressed={activeSymbol === symbol}
                 className={`min-h-9 px-3 rounded-lg text-xs font-mono font-bold transition-colors ${
                   activeSymbol === symbol
-                    ? "bg-brand-600 text-white shadow-sm"
+                    ? "bg-zinc-900 text-white shadow-sm"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800"
                 }`}
               >

@@ -230,7 +230,7 @@ export const ShareAlphaCardModal: React.FC<ShareAlphaCardModalProps> = ({
         {/* Modal Header */}
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900/40">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-brand-600 text-white">
+            <div className="p-2 rounded-xl bg-zinc-900 text-white">
               <Share2 className="w-4 h-4" />
             </div>
             <div>
@@ -259,7 +259,7 @@ export const ShareAlphaCardModal: React.FC<ShareAlphaCardModalProps> = ({
             onClick={() => setAspectRatio("story")}
             className={`px-3 py-1 rounded-lg font-medium transition ${
               aspectRatio === "story"
-                ? "bg-brand-600 text-white font-semibold"
+                ? "bg-zinc-900 text-white font-semibold"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
             }`}
           >
@@ -270,7 +270,7 @@ export const ShareAlphaCardModal: React.FC<ShareAlphaCardModalProps> = ({
             onClick={() => setAspectRatio("square")}
             className={`px-3 py-1 rounded-lg font-medium transition ${
               aspectRatio === "square"
-                ? "bg-brand-600 text-white font-semibold"
+                ? "bg-zinc-900 text-white font-semibold"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
             }`}
           >
@@ -300,7 +300,7 @@ export const ShareAlphaCardModal: React.FC<ShareAlphaCardModalProps> = ({
           <button
             type="button"
             onClick={handleDownload}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-xs transition"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-700 text-white text-xs font-semibold shadow-xs transition"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Unduh Gambar (.PNG)</span>

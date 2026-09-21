@@ -18,7 +18,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
 }) => {
   if (technical.trendAssessment === "Data Terbatas") {
     return (
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4">
         <h3 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-slate-100 mb-1">
           Terminal Teknikal
         </h3>
@@ -44,7 +44,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
 
       {/* Indicators Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">RSI (14 Wilder)</span>
           <span className={`text-base font-mono font-bold block tabular-nums ${rsiColor}`}>
             {rsi != null ? rsi.toFixed(1) : "-"}
@@ -85,11 +85,11 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
           <span className="text-[10px] text-slate-400 block truncate">{rsiStatus}</span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Moving Averages</span>
           <div className="font-mono text-[11px] space-y-0.5">
             <div className="text-slate-600 dark:text-slate-400">
-              SMA20: <strong className="text-amber-600 dark:text-amber-400 tabular-nums">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong>
+              SMA20: <strong className="text-amber-600 dark:text-zinc-400 tabular-nums">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong>
             </div>
             <div className="text-slate-600 dark:text-slate-400">
               SMA50: <strong className="text-indigo-600 dark:text-indigo-400 tabular-nums">Rp {technical.sma50?.toLocaleString("id-ID") ?? "-"}</strong>
@@ -97,7 +97,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">MACD (12, 26, 9)</span>
           <div className="font-mono text-[11px] space-y-0.5">
             <div className="text-slate-600 dark:text-slate-400">
@@ -109,7 +109,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
           </div>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Volume Transaksi</span>
           <span className="text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums">
             {(technical.volume.lastVolume / 1e6).toFixed(1)}M Lot

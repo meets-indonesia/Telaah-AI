@@ -64,13 +64,13 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900/40">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-500 text-white flex items-center justify-center shadow-xs">
               <Coins className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Kalkulator Dividen & Passive Income</span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-zinc-950 text-amber-700 dark:text-zinc-300 border border-amber-200 dark:border-amber-800">
                   Simulasi Ritel
                 </span>
               </h3>
@@ -104,12 +104,12 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   onClick={() => handleStockSelect(s)}
                   className={`p-2 rounded-xl text-center border transition ${
                     selectedStock === s.symbol
-                      ? "bg-brand-50 dark:bg-brand-950/60 border-brand-500 text-brand-700 dark:text-brand-300 font-bold shadow-xs"
+                      ? "bg-zinc-50 dark:bg-zinc-950/60 border-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold shadow-xs"
                       : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300"
                   }`}
                 >
                   <span className="block text-xs">{s.symbol}</span>
-                  <span className="block text-[10px] text-amber-600 dark:text-amber-400">
+                  <span className="block text-[10px] text-amber-600 dark:text-zinc-400">
                     {s.yieldPct}%
                   </span>
                 </button>
@@ -130,7 +130,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   onClick={() => setCalcMode("monthly")}
                   className={`flex-1 py-1.5 rounded-lg font-medium transition ${
                     calcMode === "monthly"
-                      ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-xs font-semibold"
+                      ? "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-white shadow-xs font-semibold"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                   }`}
                 >
@@ -141,7 +141,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   onClick={() => setCalcMode("lumpSum")}
                   className={`flex-1 py-1.5 rounded-lg font-medium transition ${
                     calcMode === "lumpSum"
-                      ? "bg-white dark:bg-brand-600 text-brand-700 dark:text-white shadow-xs font-semibold"
+                      ? "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-white shadow-xs font-semibold"
                       : "text-slate-500 hover:text-slate-900 dark:text-slate-400"
                   }`}
                 >
@@ -160,7 +160,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                 step={500000}
                 value={amount}
                 onChange={(e) => setAmount(Math.max(100000, Number(e.target.value)))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-700/20"
               />
             </div>
           </div>
@@ -169,7 +169,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
           {calcMode === "monthly" && (
             <div>
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
-                Jangka Waktu Rutin: <strong className="text-brand-600 dark:text-brand-400">{durationYears} Tahun</strong>
+                Jangka Waktu Rutin: <strong className="text-zinc-900 dark:text-zinc-300">{durationYears} Tahun</strong>
               </label>
               <input
                 type="range"
@@ -177,7 +177,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                 max={10}
                 value={durationYears}
                 onChange={(e) => setDurationYears(Number(e.target.value))}
-                className="w-full accent-brand-600"
+                className="w-full accent-zinc-900"
               />
               <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                 <span>1 Tahun</span>
@@ -189,10 +189,10 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
           )}
 
           {/* Results Summary Box */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-brand-500/10 via-amber-500/5 to-slate-50 dark:from-brand-950/60 dark:via-amber-950/30 dark:to-slate-900/60 border border-brand-200 dark:border-brand-800/60 space-y-4">
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-zinc-700/10 via-zinc-500/5 to-slate-50 dark:from-zinc-950/60 dark:via-zinc-950/30 dark:to-slate-900/60 border border-zinc-200 dark:border-zinc-800/60 space-y-4">
             <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-between">
               <span className="flex items-center gap-1.5">
-                <PiggyBank className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                <PiggyBank className="w-4 h-4 text-zinc-900 dark:text-zinc-300" />
                 <span>Estimasi Hasil untuk Saham {selectedStock}:</span>
               </span>
               <span className="text-[11px] font-normal text-slate-500">
@@ -224,7 +224,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
 
               <div className="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-slate-400 block">Total Modal Disetor</span>
-                <span className="text-base sm:text-lg font-black text-brand-600 dark:text-brand-400 block mt-0.5">
+                <span className="text-base sm:text-lg font-black text-zinc-900 dark:text-zinc-300 block mt-0.5">
                   Rp {totalCapital.toLocaleString("id-ID")}
                 </span>
                 <span className="text-[10px] text-slate-500">
@@ -247,7 +247,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   +Rp {bankDepositYearly.toLocaleString("id-ID")} / thn
                 </span>
               </div>
-              <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between font-bold text-[11px] text-brand-700 dark:text-brand-300">
+              <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between font-bold text-[11px] text-zinc-700 dark:text-zinc-300">
                 <span>Selisih Keuntungan Lebih Tinggi:</span>
                 <span>+Rp {Math.max(0, dividendExcess).toLocaleString("id-ID")} / thn</span>
               </div>

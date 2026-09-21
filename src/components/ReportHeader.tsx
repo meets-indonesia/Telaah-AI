@@ -20,14 +20,14 @@ import { CompanyLogo } from "./CompanyLogo";
 interface ReportHeaderProps {
   report: CompanyIntelligenceReport;
   onOpenEvidence: () => void;
-  onOpenQA: () => void;
+  onToggleCopilot?: () => void;
   onShare: () => void;
 }
 
 export const ReportHeader: React.FC<ReportHeaderProps> = ({
   report,
   onOpenEvidence,
-  onOpenQA,
+  onToggleCopilot,
   onShare,
 }) => {
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -63,7 +63,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   return (
     <div className="space-y-2.5">
       {/* Institutional Emiten Strip */}
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
           {/* Company ID & Logo */}
           <div className="flex items-center gap-3 min-w-0">
@@ -102,22 +102,21 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           </div>
 
           {/* Pricing & Performance */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0 sm:self-auto self-end">
-            <button
-              type="button"
-              onClick={handleToggleWatchlist}
-              title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition ${
-                inWatchlist
-                  ? "bg-amber-500/15 border-amber-500/30 text-amber-400 font-semibold"
-                  : "border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
-              }`}
-            >
-              <Star className={`w-3.5 h-3.5 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span className="hidden sm:inline">{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
-            </button>
-
-            <div className="text-right">
+          <div className="flex items-start justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 w-full sm:w-auto">
+            <div className="text-right shrink-0">
+              <button
+                type="button"
+                onClick={handleToggleWatchlist}
+                title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 mb-2 text-xs rounded border transition shrink-0 ${
+                  inWatchlist
+                    ? "bg-yellow-400/15 border-yellow-500/40 text-yellow-700 dark:text-yellow-400 font-semibold"
+                    : "border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-yellow-400 text-yellow-500 dark:text-yellow-400" : ""}`} />
+                <span>{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
+              </button>
               <div className="flex items-baseline gap-2 justify-end">
                 <span className="text-xl sm:text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   {lastPrice ? `Rp ${lastPrice.toLocaleString("id-ID")}` : "-"}
@@ -143,7 +142,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
         {/* High-Density Key Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 pt-3">
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Market Cap
             </span>
@@ -154,7 +153,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               P/E (TTM)
             </span>
@@ -163,7 +162,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               PBV
             </span>
@@ -172,7 +171,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               RSI (14D)
             </span>
@@ -189,7 +188,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Foreign Flow
             </span>
@@ -198,56 +197,63 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 flex items-center justify-between">
-            <div className="min-w-0 pr-1 truncate">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-                Credits
-              </span>
-              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-medium tabular-nums truncate block">
-                {report.fromVectorCache ? (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
-                    0 cr (Cache)
-                  </span>
-                ) : (
-                  `${report.creditsConsumed} cr`
+          <div className="sm:col-span-3 xl:col-span-1 p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 space-y-2">
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="min-w-0">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+                  Biaya Analisis
+                </span>
+                <span className="text-[11px] font-mono font-semibold tabular-nums block whitespace-nowrap">
+                  {report.fromVectorCache ? (
+                    <span className="text-emerald-600 dark:text-emerald-400" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
+                      0 kredit · Cache lokal
+                    </span>
+                  ) : (
+                    <span className="text-zinc-700 dark:text-zinc-300">
+                      {report.creditsConsumed} kredit
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={onOpenEvidence}
+                  title="Lihat Bukti Data"
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                >
+                  <Database className="w-3.5 h-3.5" />
+                </button>
+                {onToggleCopilot && (
+                  <button
+                    type="button"
+                    onClick={onToggleCopilot}
+                    title="Buka atau sembunyikan Copilot emiten ini"
+                    aria-label="Toggle Copilot"
+                    className="p-1.5 rounded text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </button>
                 )}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={onOpenEvidence}
-                title="Bukti Data"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <Database className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={onOpenQA}
-                title="Tanya Laporan"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={onShare}
-                title="Bagikan"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-              </button>
+                <button
+                  type="button"
+                  onClick={onShare}
+                  title="Bagikan Laporan"
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Executive Thesis & Direct Answer Strip */}
-      <div className="bg-black/75 rounded-md border border-white/10 p-3.5 space-y-2">
+      <div className="bg-[#111113] rounded-md border border-black/20 dark:border-white/10 p-3.5 space-y-2 text-white">
         <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-mono">
-          <div className="flex items-center gap-1.5 text-orange-400 uppercase tracking-wider font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+          <div className="flex items-center gap-1.5 text-zinc-200 uppercase tracking-wider font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
             <span>Executive Brief</span>
           </div>
           <span className="text-slate-500 uppercase tracking-widest text-[9px]">

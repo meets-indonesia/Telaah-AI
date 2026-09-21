@@ -166,7 +166,7 @@ export const ReportQADrawer: React.FC<ReportQADrawerProps> = ({ isOpen, onClose,
         {/* Quick Suggestion Pills */}
         <div className="px-4 py-2 border-t border-slate-800 bg-slate-950 flex items-center gap-1.5 overflow-x-auto text-[11px] no-scrollbar">
           <span className="text-slate-500 shrink-0 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-400" /> Contoh:
+            <Sparkles className="w-3 h-3 text-zinc-400" /> Contoh:
           </span>
           {quickQuestions.map((q, idx) => (
             <button

@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const question = body.question?.trim();
     const report: CompanyIntelligenceReport = body.report;
+    const history: Array<{ role: "user" | "assistant"; text: string }> = Array.isArray(body.history) ? body.history : [];
 
     if (!question || !report) {
       return NextResponse.json(
@@ -16,13 +17,13 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPrompt = `Anda adalah Telaah-AI, asisten riset saham ramah pemula (Financial Copilot) untuk bursa saham Indonesia (IDX).
-Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan bukti dan data yang ada pada Laporan Intelijen Emiten (${report.symbol} - ${report.companyName}).
+Tugas Anda: Menjawab pertanyaan HANYA terfokus pada emiten yang sedang aktif di kanvas terminal (${report.symbol} - ${report.companyName}).
 
-ATURAN PENTING & GAYA KOMUNIKASI:
-1. RAMAH RITEL PEMULA: Jelaskan dengan bahasa Indonesia yang santai, edukatif, dan mudah dipahami. Jika menyebut istilah seperti PBV, PER, Foreign Flow, atau Broker Summary, beri analogi singkat sehari-hari.
-2. GROUNDED ON EVIDENCE: Hanya gunakan data faktual dari laporan ini. Jangan mengarang angka atau rumor di luar data.
-3. ANTI FOMO / BUKAN AJAKAN BELI: Jangan memberi perintah beli/jual atau target harga fiktif. Berikan kesimpulan objektif (Kelebihan vs Risiko).
-4. FORMAT RAPI: Gunakan poin-poin singkat agar nyaman dibaca di layar HP/chat.`;
+ATURAN ISOLASI KONTEKS & GROUNDING:
+1. FOCUS PADA ${report.symbol}: Setiap jawaban harus merujuk pada data fundamental, teknikal, dan flow resmi dari ${report.symbol}. Jika pengguna bertanya hal di luar emiten ini, arahkan kembali secara sopan ke data ${report.symbol}.
+2. RAMAH RITEL & EDUKATIF: Bahasa Indonesia jelas, santai, terstruktur, tanpa jargon berbelit.
+3. GROUNDED ON DATA: Jangan mengarang angka di luar data laporan ini.
+4. BUKAN AJAKAN BELI: Jangan memberi perintah beli/jual atau rekomendasi spekulatif.`;
 
     const context = {
       symbol: report.symbol,
@@ -51,7 +52,10 @@ ATURAN PENTING & GAYA KOMUNIKASI:
       claims: report.claims,
     };
 
-    const userPrompt = `Data Laporan:\n${JSON.stringify(context, null, 2)}\n\nPertanyaan Pengguna: "${question}"`;
+    // Format riwayat percakapan copilot sebelumnya untuk context window percakapan
+    const recentHistoryText = history.slice(-6).map((h) => `${h.role === "user" ? "Pengguna" : "Copilot"}: ${h.text}`).join("\n");
+
+    const userPrompt = `Data Laporan Resmi ${report.symbol}:\n${JSON.stringify(context, null, 2)}\n\n${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentHistoryText}\n\n` : ""}Pertanyaan Pengguna: "${question}"`;
 
     let answer = "";
     if (process.env.OPENROUTER_API_KEY) {

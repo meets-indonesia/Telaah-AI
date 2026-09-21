@@ -15,6 +15,7 @@ import { ChatMessage } from "./types";
 import { StockMiniCard } from "./StockMiniCard";
 import { StockCompareCard } from "./StockCompareCard";
 import { RumorFactCheckerCard } from "./RumorFactCheckerCard";
+import { StockInlineArtifact } from "./StockInlineArtifact";
 import { MarkdownText } from "./MarkdownText";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 
@@ -40,7 +41,7 @@ const STARTER_PROMPTS = [
     desc: "Cek akumulasi broker dan net foreign flow TLKM 5 hari terakhir.",
   },
   {
-    icon: <TrendingUp className="w-3.5 h-3.5 text-amber-500" />,
+    icon: <TrendingUp className="w-3.5 h-3.5 text-zinc-500" />,
     title: "Sensitivitas Komoditas ADRO",
     desc: "Telaah korelasi laba dan sensitivitas harga batu bara terhadap operasional ADRO.",
   },
@@ -87,7 +88,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
                 key={i}
                 type="button"
                 onClick={() => onSelectPrompt(starter.desc)}
-                className="w-full p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#12151f] hover:border-slate-300 dark:hover:border-slate-700 transition text-left group flex items-center justify-between gap-2"
+                className="w-full p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-black hover:border-slate-300 dark:hover:border-slate-700 transition text-left group flex items-center justify-between gap-2"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="p-1 rounded bg-white dark:bg-slate-800 shrink-0">
@@ -129,24 +130,53 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
             <div
               className={`space-y-1.5 min-w-0 ${
                 isUser
-                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md px-3 py-2 text-xs max-w-[85%]"
-                  : "bg-transparent text-slate-800 dark:text-slate-200 text-xs w-full min-w-0"
+                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl px-3.5 py-2.5 text-xs max-w-[85%] shadow-xs"
+                  : "bg-transparent text-zinc-800 dark:text-zinc-200 text-xs w-full min-w-0"
               }`}
             >
+              {/* Optional user-attached images */}
+              {msg.images && msg.images.length > 0 && (
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  {msg.images.map((imgSrc, idx) => (
+                    <div
+                      key={idx}
+                      className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-300 dark:border-white/20 bg-zinc-800 shrink-0 shadow-xs"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imgSrc} alt={`Attachment ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Message text with clean formatting */}
-              <div className={!isUser ? "bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed overflow-hidden break-words" : ""}>
+              <div className={!isUser ? "bg-white dark:bg-[#18181b] p-3.5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 leading-relaxed overflow-hidden break-words shadow-xs" : ""}>
                 <MarkdownText content={msg.text} isUser={isUser} />
               </div>
 
-              {/* Optional Stock Card Widget */}
-              {msg.stockCard && (
+              {/* Optional Stock Card Widget & Full Inline Artifact */}
+              {msg.stockCard?.report ? (
+                <StockInlineArtifact
+                  report={msg.stockCard.report}
+                  onToggleCopilot={() => {
+                    if (onOpenDeepDive && msg.stockCard?.report) {
+                      onOpenDeepDive(msg.stockCard.report);
+                    }
+                  }}
+                  onShare={() => {
+                    if (onOpenShareCard && msg.stockCard?.report) {
+                      onOpenShareCard(msg.stockCard.report);
+                    }
+                  }}
+                />
+              ) : msg.stockCard ? (
                 <StockMiniCard
                   card={msg.stockCard}
                   onOpenDeepDive={onOpenDeepDive}
                   onQuickFollowUp={(q) => onSelectPrompt(q)}
                   onOpenShareCard={onOpenShareCard}
                 />
-              )}
+              ) : null}
 
               {/* Optional Head-to-Head Compare Card */}
               {msg.compareCard && (
@@ -193,7 +223,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
 
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="flex items-center gap-2 p-2.5 rounded-md bg-slate-50 dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 font-mono">
+        <div className="flex items-center gap-2 p-2.5 rounded-md bg-white dark:bg-black border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 font-mono">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-500" />
           <span>{loadingStage || "Memproses query data Sectors API v2..."}</span>
         </div>

@@ -6,6 +6,7 @@ export interface ChatMessage {
   sender: "user" | "assistant";
   timestamp: string;
   text: string;
+  images?: string[];
   // Optional rich stock card payload
   stockCard?: {
     symbol: string;
@@ -38,4 +39,5 @@ export interface ChatSession {
   date: string;
   messages: ChatMessage[];
   report?: CompanyIntelligenceReport | null;
+  isPinned?: boolean;
 }

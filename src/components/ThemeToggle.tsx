@@ -39,12 +39,12 @@ export function ThemeToggle() {
       type="button"
       title={isDark ? "Beralih ke Light Mode" : "Beralih ke Dark Mode"}
       aria-label="Toggle theme"
-      className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300 dark:hover:border-brand-700/60 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-zinc-900 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700/60 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-700/20"
     >
       {isDark ? (
-        <Sun className="w-4 h-4 transition-transform duration-300 rotate-0 hover:rotate-45 text-amber-400" />
+        <Sun className="w-4 h-4 transition-transform duration-300 rotate-0 hover:rotate-45 text-zinc-400" />
       ) : (
-        <Moon className="w-4 h-4 transition-transform duration-300 -rotate-12 hover:rotate-0 text-brand-600" />
+        <Moon className="w-4 h-4 transition-transform duration-300 -rotate-12 hover:rotate-0 text-zinc-900" />
       )}
     </button>
   );

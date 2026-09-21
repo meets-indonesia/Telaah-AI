@@ -14,7 +14,6 @@ import { InsiderWhaleRadar } from "@/components/InsiderWhaleRadar";
 import { CommodityLensModule } from "@/components/CommodityLensModule";
 import { HistoryWatchlistBar } from "@/components/HistoryWatchlistBar";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
-import { ReportQADrawer } from "@/components/ReportQADrawer";
 import { ShareModal } from "@/components/ShareModal";
 import { ChatFeed } from "@/components/chat/ChatFeed";
 import { ChatInput } from "@/components/chat/ChatInput";
@@ -26,11 +25,19 @@ import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 import { searchEmiten, IDXCompany } from "@/lib/sectors/companies";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { MinimalSidebar } from "@/components/chat/MinimalSidebar";
 import {
   detectComparisonIntent,
   detectNewTargetSymbol,
 } from "@/lib/agent/chat-router";
-import { saveReportToHistory, getHistory, getReportFromCache } from "@/lib/storage/history";
+import {
+  saveReportToHistory,
+  getHistory,
+  getReportFromCache,
+  clearHistory,
+  removeHistoryItem,
+  getWatchlistSymbols,
+} from "@/lib/storage/history";
 import {
   AlertCircle,
   HelpCircle,
@@ -65,9 +72,16 @@ export default function Home() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Browser storage must be hydrated after mount to keep server/client HTML identical.
+  const [sidebarHistory, setSidebarHistory] = useState<ReturnType<typeof getHistory>>([]);
+  const [sidebarWatchlist, setSidebarWatchlist] = useState<string[]>([]);
 
   // Active Report State
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
+  // Kanvas Copilot Dock Messages (terpisah khusus emiten aktif di kanvas)
+  const [copilotMessages, setCopilotMessages] = useState<ChatMessage[]>([]);
+  const [isCopilotLoading, setIsCopilotLoading] = useState(false);
+  const [copilotLoadingStage, setCopilotLoadingStage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
   const [isWorkstationLoading, setIsWorkstationLoading] = useState(false);
@@ -86,7 +100,6 @@ export default function Home() {
 
   // Drawers & Modals
   const [isEvidenceOpen, setIsEvidenceOpen] = useState(false);
-  const [isQAOpen, setIsQAOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isJargonOpen, setIsJargonOpen] = useState(false);
   const [isDividendOpen, setIsDividendOpen] = useState(false);
@@ -97,6 +110,10 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [modalSearchText, setModalSearchText] = useState("");
   const modalSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Minimalist Left Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [viewMode, setViewMode] = useState<"chat" | "terminal">("chat");
 
   // Trigger from example pills
   const [promptValue, setPromptValue] = useState("");
@@ -143,12 +160,12 @@ export default function Home() {
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
-        setIsCopilotOpen((prev) => !prev);
+        // ⌘J switches between Chat and Terminal Workstation seamlessly
+        setViewMode((prev) => (prev === "terminal" ? "chat" : "terminal"));
       }
       if (e.key === "Escape") {
         setIsSearchOpen(false);
         setIsEvidenceOpen(false);
-        setIsQAOpen(false);
         setIsShareOpen(false);
         setIsJargonOpen(false);
         setIsDividendOpen(false);
@@ -161,6 +178,10 @@ export default function Home() {
 
   // Initial load: restore latest viewed report & chat sessions
   useEffect(() => {
+    const history = getHistory();
+    setSidebarHistory(history);
+    setSidebarWatchlist(getWatchlistSymbols());
+
     try {
       const savedSessions = localStorage.getItem("telaah_chat_sessions");
       if (savedSessions) {
@@ -176,7 +197,6 @@ export default function Home() {
     } catch (e) {}
 
     // Fallback: check history for report
-    const history = getHistory();
     if (history.length > 0 && !report) {
       const latest = getReportFromCache(history[0].symbol);
       if (latest) {
@@ -192,7 +212,53 @@ export default function Home() {
     }
   }, [symbolParam]);
 
-  // Sync sessions to localStorage
+  // Copilot contextual chat khusus emiten aktif di kanvas
+  const handleCopilotSend = async (userText: string) => {
+    if (!report) return;
+    const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    const userMsg: ChatMessage = {
+      id: "u_cop_" + Date.now(),
+      sender: "user",
+      text: userText,
+      timestamp: timeStr,
+    };
+    const nextCopilotMsgs = [...copilotMessages, userMsg];
+    setCopilotMessages(nextCopilotMsgs);
+    setIsCopilotLoading(true);
+    setCopilotLoadingStage(`Menganalisis data ${report.symbol}...`);
+
+    try {
+      const historyPayload = copilotMessages.slice(-6).map((m) => ({
+        role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
+        text: m.text,
+      }));
+
+      const qaRes = await fetch("/api/qa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userText, report, history: historyPayload }),
+      });
+      const qaData = await qaRes.json();
+      const botReply: ChatMessage = {
+        id: "b_cop_" + Date.now(),
+        sender: "assistant",
+        text: qaData.answer || `Informasi mengenai ${report.symbol} telah diperbarui.`,
+        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      };
+      setCopilotMessages([...nextCopilotMsgs, botReply]);
+    } catch (err: any) {
+      const botReply: ChatMessage = {
+        id: "b_cop_" + Date.now(),
+        sender: "assistant",
+        text: `Kendala: ${err.message || "Gagal memproses pertanyaan"}.`,
+        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      };
+      setCopilotMessages([...nextCopilotMsgs, botReply]);
+    } finally {
+      setIsCopilotLoading(false);
+      setCopilotLoadingStage("");
+    }
+  };
   const persistSessions = (updatedSessions: ChatSession[]) => {
     setSessions(updatedSessions);
     try {
@@ -207,12 +273,14 @@ export default function Home() {
       title: "Obrolan Baru",
       date: new Date().toLocaleDateString("id-ID"),
       messages: [],
-      report: report,
+      report: null, // Obrolan baru bersih tanpa terikat emiten sebelumnya
     };
     const updated = [newSession, ...sessions];
     persistSessions(updated);
     setActiveSessionId(newSessionId);
     setMessages([]);
+    setReport(null); // Reset konteks emiten global
+    setViewMode("chat");
   };
 
   const handleSelectSession = (sessionId: string) => {
@@ -221,6 +289,7 @@ export default function Home() {
       setActiveSessionId(session.id);
       setMessages(session.messages);
       if (session.report) setReport(session.report);
+      setViewMode("chat"); // Pastikan selalu kembali ke tampilan history chat utama
     }
   };
 
@@ -238,6 +307,20 @@ export default function Home() {
     }
   };
 
+  const handleTogglePinSession = (sessionId: string) => {
+    const updated = sessions.map((s) =>
+      s.id === sessionId ? { ...s, isPinned: !s.isPinned } : s
+    );
+    persistSessions(updated);
+  };
+
+  const handleClearAllSessions = () => {
+    if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat obrolan?")) {
+      persistSessions([]);
+      handleNewChat();
+    }
+  };
+
   const handleSelectExample = (prompt: string, mode: "quick" | "full" = "full") => {
     setPromptValue(prompt);
     setModeValue(mode);
@@ -248,6 +331,7 @@ export default function Home() {
     const clean = symbol.toUpperCase().trim();
     setIsSearchOpen(false);
     setModalSearchText("");
+    setViewMode("terminal"); // Beralih langsung ke kanvas terminal emiten
 
     // 1. Cek local storage cache terlebih dahulu
     const cached = getReportFromCache(clean);
@@ -284,6 +368,15 @@ export default function Home() {
       if (data.report) {
         setReport(data.report);
         saveReportToHistory(data.report);
+        setSidebarHistory(getHistory());
+        // Reset copilot kanvas dengan sambutan awal khusus emiten ini
+        const initialCopilotMsg: ChatMessage = {
+          id: "b_cop_init_" + Date.now(),
+          sender: "assistant",
+          text: `Halo! Saya Research Copilot untuk **${data.report.symbol} (${data.report.companyName})**. Tanyakan apa saja seputar rasio keuangan, valuasi, atau arus broker emiten ini.`,
+          timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+        };
+        setCopilotMessages([initialCopilotMsg]);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan saat memuat data.");
@@ -294,13 +387,14 @@ export default function Home() {
     }
   };
 
-  // Main chat prompt submission handler
-  const handleChatSend = async (userText: string, mode: AnalysisMode = "quick") => {
+  // Main chat prompt submission handler (supports images & copy-paste)
+  const handleChatSend = async (userText: string, mode: AnalysisMode = "quick", images?: string[]) => {
     const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     const userMsg: ChatMessage = {
       id: "u_" + Date.now(),
       sender: "user",
-      text: userText,
+      text: userText || (images && images.length > 0 ? "Analisis gambar ini..." : ""),
+      images,
       timestamp: timeStr,
     };
 
@@ -595,29 +689,104 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 transition-colors">
-      {/* Top Terminal Bar */}
-      <Header
-        marketIndices={marketIndices}
-        marketAsOfDate={marketAsOfDate}
-        isCopilotOpen={isCopilotOpen}
-        onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
-        onOpenJargon={() => setIsJargonOpen(true)}
-        onOpenDividend={() => setIsDividendOpen(true)}
-        onFocusSearch={() => {
-          setIsSearchOpen(true);
-          setTimeout(() => modalSearchInputRef.current?.focus(), 50);
-        }}
-      />
+    <div className="flex flex-col min-w-0 h-[100dvh] overflow-hidden bg-[#f7f7f8] dark:bg-[#121214] text-zinc-900 dark:text-zinc-100 transition-colors">
+        {/* Top Minimal Navigation Bar */}
+        <Header
+          marketIndices={marketIndices}
+          marketAsOfDate={marketAsOfDate}
+          onOpenJargon={() => setIsJargonOpen(true)}
+          onOpenDividend={() => setIsDividendOpen(true)}
+          onFocusSearch={() => {
+            setIsSearchOpen(true);
+            setTimeout(() => modalSearchInputRef.current?.focus(), 50);
+          }}
+        />
 
-      {/* Unified Split-Pane Terminal Stage */}
-      <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
-        {/* =========================================================================
-            LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
-            ========================================================================= */}
-        <div
-          className={`flex-1 min-w-0 h-[calc(100dvh-5rem)] overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200`}
-        >
+        {/* Dynamic Center Stage */}
+        <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
+          {viewMode === "chat" ? (
+            /* =========================================================================
+                CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-3xl)
+                ========================================================================= */
+            <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-black relative">
+              {/* Conversation Feed */}
+              <div className="flex-1 overflow-y-auto px-4 py-6">
+                <div className="max-w-3xl mx-auto w-full">
+                  <ChatFeed
+                    messages={messages}
+                    isLoading={isLoading || isWorkstationLoading}
+                    loadingStage={loadingStage || workstationLoadingStage}
+                    onSelectPrompt={(p) => handleChatSend(p, "quick")}
+                    onOpenDeepDive={(rep) => {
+                      setReport(rep);
+                      setViewMode("terminal");
+                    }}
+                    onOpenSymbolTerminal={(sym) => {
+                      handleSelectEmitenDirect(sym);
+                    }}
+                    onOpenShareCard={(rep) => {
+                      setReport(rep);
+                      setIsShareCardOpen(true);
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Quick Contextual Prompts Strip when report exists */}
+              {report && (
+                <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black/90 py-2 shrink-0">
+                  <div className="max-w-3xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
+                    <span className="text-slate-500 text-[10px] uppercase font-bold shrink-0">Tanya Cepat:</span>
+                    <button
+                      onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
+                    >
+                      Dividen Yield
+                    </button>
+                    <button
+                      onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
+                    >
+                      Broker Flow 5H
+                    </button>
+                    <button
+                      onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
+                    >
+                      Risiko Utama
+                    </button>
+                    <button
+                      onClick={() => setViewMode("terminal")}
+                      className="px-2.5 py-1 rounded bg-zinc-500/10 border border-zinc-500/30 text-zinc-200 font-semibold hover:bg-zinc-500/15 shrink-0 transition"
+                    >
+                      Lihat Modul Lengkap ↗
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Centered Floating Prompt Input Bar */}
+              <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black shrink-0">
+                <div className="max-w-3xl mx-auto w-full">
+                  <ChatInput
+                    onSend={handleChatSend}
+                    isLoading={isLoading || isWorkstationLoading}
+                    initialValue=""
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* =========================================================================
+                FULL TERMINAL WORKSTATION VIEW (Canvas & All Modul Lengkap)
+                ========================================================================= */
+            <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 min-h-0 overflow-hidden relative">
+          {/* =========================================================================
+              LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
+              ========================================================================= */}
+          <div
+            className={`flex-1 min-w-0 h-full overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200`}
+          >
           {/* Watchlist & Search History Ribbon */}
           <HistoryWatchlistBar
             currentSymbol={report?.symbol}
@@ -632,165 +801,37 @@ export default function Home() {
             </span>
             <button
               onClick={() => handleSelectEmitenDirect("BBCA")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBCA • Cluster Direksi
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("ADRO")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ADRO • Batu Bara
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("ANTM")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ANTM • Nikel & Emas
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("BBRI")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBRI • Foreign Flow
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("TLKM")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               TLKM • Telko
             </button>
           </div>
 
-      {/* Quick Search Dialog Modal (⌘K) */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-          >
-            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
-              <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
-              <input
-                ref={modalSearchInputRef}
-                type="text"
-                value={modalSearchText}
-                onChange={(e) => setModalSearchText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && modalSearchText.trim()) {
-                    const searchResults = searchEmiten(modalSearchText.trim(), 1);
-                    if (searchResults.length > 0) {
-                      handleSelectEmitenDirect(searchResults[0].symbol);
-                    } else {
-                      setIsSearchOpen(false);
-                      handleSelectEmitenDirect(modalSearchText.trim());
-                    }
-                  }
-                }}
-                placeholder="Cari kode emiten (misal: BBCA) atau nama perusahaan (misal: Adaro, BCA)..."
-                className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
-              />
-              <kbd
-                onClick={() => setIsSearchOpen(false)}
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
-              >
-                ESC
-              </kbd>
-            </div>
-
-            {/* Live Search Results or Quick Suggestions */}
-            <div className="p-3 space-y-1.5 text-xs max-h-80 overflow-y-auto">
-              {modalSearchText.trim() ? (
-                <>
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
-                    Hasil Pencarian Emiten ({searchEmiten(modalSearchText.trim(), 8).length}):
-                  </span>
-                  {searchEmiten(modalSearchText.trim(), 8).length > 0 ? (
-                    <div className="space-y-1">
-                      {searchEmiten(modalSearchText.trim(), 8).map((item) => (
-                        <button
-                          key={item.symbol}
-                          type="button"
-                          onClick={() => handleSelectEmitenDirect(item.symbol)}
-                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
-                            <div className="min-w-0">
-                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
-                                {item.symbol}
-                              </span>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block max-w-[340px]">
-                                {item.name}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0 text-slate-400 group-hover:text-orange-400 transition-colors">
-                            <span className="text-[10px] font-mono">Buka Analisis</span>
-                            <span className="text-[10px] font-mono">↵</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center text-slate-400 space-y-2">
-                      <p>Tidak ditemukan emiten dengan kata kunci "{modalSearchText}".</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsSearchOpen(false);
-                          handleSelectEmitenDirect(modalSearchText.trim());
-                        }}
-                        className="px-3 py-1.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs hover:bg-orange-500/30 transition"
-                      >
-                        Tetap analisis kode "{modalSearchText.toUpperCase()}"
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
-                    Emiten Populer:
-                  </span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { sym: "BBCA", name: "Bank Central Asia" },
-                      { sym: "BBRI", name: "Bank Rakyat Indonesia" },
-                      { sym: "TLKM", name: "Telkom Indonesia" },
-                      { sym: "ADRO", name: "Alamtri Resources Indonesia" },
-                      { sym: "ANTM", name: "Aneka Tambang" },
-                      { sym: "ASII", name: "Astra International" },
-                    ].map((item) => (
-                      <button
-                        key={item.sym}
-                        type="button"
-                        onClick={() => handleSelectEmitenDirect(item.sym)}
-                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
-                          <div className="min-w-0">
-                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
-                              {item.sym}
-                            </span>
-                            <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
-                              {item.name}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-400 group-hover:text-orange-400">↵</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-          {/* Error Callout */}
+      {/* Error Callout */}
           {errorMessage && (
             <div className="p-3 rounded bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
@@ -803,14 +844,14 @@ export default function Home() {
 
           {/* Ambiguous Ticker Confirmation */}
           {needsConfirmation && (
-            <div className="p-3.5 rounded bg-amber-500/10 border border-amber-500/20 text-slate-800 dark:text-slate-200 space-y-2 text-xs">
+            <div className="p-3.5 rounded bg-zinc-500/10 border border-zinc-500/20 text-slate-800 dark:text-slate-200 space-y-2 text-xs">
               <div className="flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-amber-500" />
+                <HelpCircle className="w-4 h-4 text-zinc-500" />
                 <h3 className="font-bold text-slate-900 dark:text-white">Konfirmasi Kode Emiten IDX</h3>
               </div>
               <p className="text-slate-600 dark:text-slate-300">
                 Sistem mendeteksi kemungkinan emiten{" "}
-                <strong className="text-amber-600 dark:text-amber-400 font-mono">
+                <strong className="text-amber-600 dark:text-zinc-400 font-mono">
                   {candidateSymbol || "tidak terdeteksi jelas"}
                 </strong>
                 . Mohon konfirmasi kode 4 huruf:
@@ -829,7 +870,7 @@ export default function Home() {
                     const input = document.getElementById("confirmedSymbolInput") as HTMLInputElement;
                     handleConfirmSymbol(input.value.trim());
                   }}
-                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs rounded transition"
+                  className="px-3 py-1 bg-zinc-500 hover:bg-zinc-400 text-slate-950 font-semibold text-xs rounded transition"
                 >
                   Lanjutkan Telaah
                 </button>
@@ -839,15 +880,15 @@ export default function Home() {
 
           {/* Emiten Workstation Exclusive Loading Banner */}
           {isWorkstationLoading && (
-            <div className="p-4 rounded-xl border border-orange-500/30 bg-orange-500/10 backdrop-blur-md text-xs space-y-3 animate-pulse">
+            <div className="p-4 rounded-xl border border-zinc-500/30 bg-zinc-500/10 backdrop-blur-md text-xs space-y-3 animate-pulse">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin shrink-0" />
-                  <span className="font-mono font-bold text-orange-400 text-sm">
+                  <div className="w-5 h-5 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="font-mono font-bold text-zinc-200 text-sm">
                     MEMUAT KANVAS EMITEN: {loadingEmitenSymbol}
                   </span>
                 </div>
-                <span className="font-mono text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded">
+                <span className="font-mono text-[10px] text-zinc-300 bg-zinc-500/15 px-2 py-0.5 rounded">
                   Sectors v2 Engine
                 </span>
               </div>
@@ -867,22 +908,22 @@ export default function Home() {
                   setSelectedEvidenceId(null);
                   setIsEvidenceOpen(true);
                 }}
-                onOpenQA={() => setIsQAOpen(true)}
+                onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
                 onShare={() => setIsShareOpen(true)}
               />
 
               {/* Workstation Tab Bar */}
-              <div className="bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
+              <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
                 <div className="flex items-center gap-1 flex-1 min-w-max font-medium">
                   <button
                     onClick={() => setActiveTab("overview")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "overview"
-                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
                         : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
+                    <LayoutDashboard className="w-3.5 h-3.5 text-zinc-200" />
                     <span>Ringkasan 360°</span>
                   </button>
 
@@ -890,11 +931,11 @@ export default function Home() {
                     onClick={() => setActiveTab("technical")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "technical"
-                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
                         : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <CandleIcon className="w-3.5 h-3.5 text-orange-400" />
+                    <CandleIcon className="w-3.5 h-3.5 text-zinc-200" />
                     <span>Terminal Teknikal</span>
                   </button>
 
@@ -902,11 +943,11 @@ export default function Home() {
                     onClick={() => setActiveTab("insider")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "insider"
-                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
                         : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <Radar className="w-3.5 h-3.5 text-orange-400" />
+                    <Radar className="w-3.5 h-3.5 text-zinc-200" />
                     <span>Whale & Broker Flow</span>
                     {report.insiderRadar?.clusterBuyDetected && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -918,8 +959,8 @@ export default function Home() {
                       onClick={() => setActiveTab("commodity")}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                         activeTab === "commodity"
-                          ? "bg-amber-600/30 text-amber-400 border border-amber-500/40 font-semibold shadow-2xs"
-                          : "text-amber-500 hover:bg-amber-950/40"
+                          ? "bg-amber-600/30 text-zinc-400 border border-zinc-500/40 font-semibold shadow-2xs"
+                          : "text-zinc-500 hover:bg-zinc-950/40"
                       }`}
                     >
                       <Pickaxe className="w-3.5 h-3.5" />
@@ -931,11 +972,11 @@ export default function Home() {
                     onClick={() => setActiveTab("all")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "all"
-                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
                         : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-orange-400" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-200" />
                     <span>Semua Modul</span>
                   </button>
                 </div>
@@ -1002,16 +1043,16 @@ export default function Home() {
               onClick={() => setIsCopilotOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-30"
             />
-            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
+            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-white/10 bg-white dark:bg-black flex flex-col h-full shadow-xl lg:shadow-none">
             {/* Copilot Header */}
-            <div className="px-3.5 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-black/80">
+            <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 bg-white dark:bg-black">
               <div className="flex items-center gap-2">
-                <Bot className="w-4 h-4 text-orange-400" />
+                <Bot className="w-4 h-4 text-zinc-200" />
                 <span className="font-mono text-xs font-bold text-slate-100 uppercase tracking-wider">
                   RESEARCH COPILOT
                 </span>
                 {report && (
-                  <span className="px-1.5 py-0.2 rounded bg-orange-500/15 text-[10px] font-mono font-bold text-orange-400 border border-orange-500/30">
+                  <span className="px-1.5 py-0.2 rounded bg-zinc-500/10 text-[10px] font-mono font-bold text-zinc-200 border border-zinc-500/30">
                     {report.symbol}
                   </span>
                 )}
@@ -1040,13 +1081,18 @@ export default function Home() {
             {/* Chat Feed */}
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <ChatFeed
-                messages={messages}
-                isLoading={isLoading}
-                loadingStage={loadingStage}
-                onSelectPrompt={(p) => handleChatSend(p, "quick")}
-                onOpenDeepDive={(rep) => {
-                  setReport(rep);
-                }}
+                messages={copilotMessages.length > 0 ? copilotMessages : [
+                  {
+                    id: "b_cop_fallback",
+                    sender: "assistant",
+                    text: `Silakan tanyakan detail lanjutan seputar data fundamental, arus broker, atau valuasi **${report?.symbol || "emiten ini"}**.`,
+                    timestamp: "",
+                  }
+                ]}
+                isLoading={isCopilotLoading}
+                loadingStage={copilotLoadingStage}
+                onSelectPrompt={(p) => handleCopilotSend(p)}
+                onOpenDeepDive={() => {}}
                 onOpenSymbolTerminal={(sym) => {
                   handleSelectEmitenDirect(sym);
                 }}
@@ -1061,20 +1107,20 @@ export default function Home() {
             {report && (
               <div className="px-3 py-1.5 border-t border-white/10 bg-black/70 flex items-center gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
                 <button
-                  onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  onClick={() => handleCopilotSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`)}
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
                 >
                   Dividen Yield
                 </button>
                 <button
-                  onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  onClick={() => handleCopilotSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`)}
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
                 >
                   Broker Flow 5H
                 </button>
                 <button
-                  onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  onClick={() => handleCopilotSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`)}
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-zinc-950 hover:border-zinc-500/40 shrink-0 transition"
                 >
                   Risiko Utama
                 </button>
@@ -1083,26 +1129,16 @@ export default function Home() {
 
             {/* Sticky Bottom Chat Input */}
             <ChatInput
-              onSend={handleChatSend}
-              isLoading={isLoading}
+              onSend={handleCopilotSend}
+              isLoading={isCopilotLoading}
               initialValue=""
             />
           </aside>
           </>
         )}
       </main>
-
-      {/* Floating Copilot Toggle when collapsed */}
-      {!isCopilotOpen && (
-        <button
-          type="button"
-          onClick={() => setIsCopilotOpen(true)}
-          className="fixed bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-md bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-lg text-xs font-semibold hover:bg-slate-800 transition"
-        >
-          <PanelRightOpen className="w-4 h-4" />
-          <span>Buka Copilot (⌘J)</span>
-        </button>
-      )}
+        )}
+        </div>
 
       {/* Drawers and Modals */}
       {report && (
@@ -1116,12 +1152,6 @@ export default function Home() {
             evidenceRecords={report.evidenceRecords}
             toolCallTrace={report.toolCallTrace}
             selectedEvidenceId={selectedEvidenceId}
-          />
-
-          <ReportQADrawer
-            isOpen={isQAOpen}
-            onClose={() => setIsQAOpen(false)}
-            report={report}
           />
 
           <ShareModal
@@ -1154,6 +1184,136 @@ export default function Home() {
           report={report}
         />
       )}
+    
+      {/* Quick Search Dialog Modal (⌘K) */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
+              <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
+              <input
+                ref={modalSearchInputRef}
+                type="text"
+                value={modalSearchText}
+                onChange={(e) => setModalSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && modalSearchText.trim()) {
+                    const searchResults = searchEmiten(modalSearchText.trim(), 1);
+                    if (searchResults.length > 0) {
+                      handleSelectEmitenDirect(searchResults[0].symbol);
+                    } else {
+                      setIsSearchOpen(false);
+                      handleSelectEmitenDirect(modalSearchText.trim());
+                    }
+                  }
+                }}
+                placeholder="Cari kode emiten (misal: BBCA) atau nama perusahaan (misal: Adaro, BCA)..."
+                className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
+              />
+              <kbd
+                onClick={() => setIsSearchOpen(false)}
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
+              >
+                ESC
+              </kbd>
+            </div>
+
+            {/* Live Search Results or Quick Suggestions */}
+            <div className="p-3 space-y-1.5 text-xs max-h-80 overflow-y-auto">
+              {modalSearchText.trim() ? (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Hasil Pencarian Emiten ({searchEmiten(modalSearchText.trim(), 8).length}):
+                  </span>
+                  {searchEmiten(modalSearchText.trim(), 8).length > 0 ? (
+                    <div className="space-y-1">
+                      {searchEmiten(modalSearchText.trim(), 8).map((item) => (
+                        <button
+                          key={item.symbol}
+                          type="button"
+                          onClick={() => handleSelectEmitenDirect(item.symbol)}
+                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
+                            <div className="min-w-0">
+                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-zinc-950 transition-colors">
+                                {item.symbol}
+                              </span>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block max-w-[340px]">
+                                {item.name}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 text-slate-400 group-hover:text-zinc-950 transition-colors">
+                            <span className="text-[10px] font-mono">Buka Analisis</span>
+                            <span className="text-[10px] font-mono">↵</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center text-slate-400 space-y-2">
+                      <p>Tidak ditemukan emiten dengan kata kunci "{modalSearchText}".</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          handleSelectEmitenDirect(modalSearchText.trim());
+                        }}
+                        className="px-3 py-1.5 rounded bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 text-xs hover:bg-zinc-500/20 transition"
+                      >
+                        Tetap analisis kode "{modalSearchText.toUpperCase()}"
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Emiten Populer:
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { sym: "BBCA", name: "Bank Central Asia" },
+                      { sym: "BBRI", name: "Bank Rakyat Indonesia" },
+                      { sym: "TLKM", name: "Telkom Indonesia" },
+                      { sym: "ADRO", name: "Alamtri Resources Indonesia" },
+                      { sym: "ANTM", name: "Aneka Tambang" },
+                      { sym: "ASII", name: "Astra International" },
+                    ].map((item) => (
+                      <button
+                        key={item.sym}
+                        type="button"
+                        onClick={() => handleSelectEmitenDirect(item.sym)}
+                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
+                          <div className="min-w-0">
+                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-zinc-950 transition-colors">
+                              {item.sym}
+                            </span>
+                            <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
+                              {item.name}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 group-hover:text-zinc-950">↵</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+          
     </div>
   );
 }

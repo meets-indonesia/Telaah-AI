@@ -54,8 +54,8 @@ export const StockMiniCard: React.FC<StockMiniCardProps> = ({
       case "caution":
         return {
           label: "WASPADA / VOLATIL",
-          badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-          icon: <TrendingDown className="w-3 h-3 text-amber-500" />,
+          badge: "bg-zinc-500/10 text-amber-700 dark:text-zinc-400 border-zinc-500/20",
+          icon: <TrendingDown className="w-3 h-3 text-zinc-500" />,
         };
       default:
         return {

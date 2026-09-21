@@ -17,7 +17,7 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
   return (
     <div className="mt-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#10131d] overflow-hidden text-xs transition-colors">
       {/* Header Strip */}
-      <div className="p-2.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#131622] flex items-center justify-between gap-2">
+      <div className="p-2.5 border-b border-slate-100 dark:border-slate-800/80 bg-white/50 dark:bg-[#131622] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Scale className="w-3.5 h-3.5 text-indigo-400" />
           <span className="font-mono font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-tight">
@@ -28,7 +28,7 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
       </div>
 
       {/* Side-by-Side Emiten Profile */}
-      <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-[#121520] p-2.5 text-center">
+      <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800 bg-white/30 dark:bg-[#121520] p-2.5 text-center">
         {/* Emiten A */}
         <div className="space-y-1 pr-2 flex flex-col items-center">
           <CompanyLogo symbol={comparison.symbolA} companyName={comparison.nameA} size="sm" />
@@ -78,7 +78,7 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
       <div className="p-2.5 space-y-1.5">
         <div className="divide-y divide-slate-100 dark:divide-slate-800/80 border border-slate-100 dark:border-slate-800 rounded-md overflow-hidden text-xs">
           {comparison.metrics.map((m, idx) => (
-            <div key={idx} className="p-2 bg-slate-50/50 dark:bg-[#12151f] space-y-1">
+            <div key={idx} className="p-2 bg-white/50 dark:bg-black space-y-1">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="font-semibold text-slate-700 dark:text-slate-300">
                   {m.name}
@@ -101,7 +101,7 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
 
         {/* Summary Note */}
         {comparison.retailSummary && (
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#121520] border-l-2 border-l-indigo-500 border-y border-r border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
+          <div className="p-2 rounded bg-white dark:bg-[#121520] border-l-2 border-l-indigo-500 border-y border-r border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
             <strong className="text-slate-900 dark:text-slate-100 mr-1 font-mono">
               [Tesis Komparasi]:
             </strong>
