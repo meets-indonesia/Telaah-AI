@@ -73,6 +73,9 @@ export default function Home() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Browser storage must be hydrated after mount to keep server/client HTML identical.
+  const [sidebarHistory, setSidebarHistory] = useState<ReturnType<typeof getHistory>>([]);
+  const [sidebarWatchlist, setSidebarWatchlist] = useState<string[]>([]);
 
   // Active Report State
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
@@ -173,6 +176,10 @@ export default function Home() {
 
   // Initial load: restore latest viewed report & chat sessions
   useEffect(() => {
+    const history = getHistory();
+    setSidebarHistory(history);
+    setSidebarWatchlist(getWatchlistSymbols());
+
     try {
       const savedSessions = localStorage.getItem("telaah_chat_sessions");
       if (savedSessions) {
@@ -188,7 +195,6 @@ export default function Home() {
     } catch (e) {}
 
     // Fallback: check history for report
-    const history = getHistory();
     if (history.length > 0 && !report) {
       const latest = getReportFromCache(history[0].symbol);
       if (latest) {
@@ -296,6 +302,7 @@ export default function Home() {
       if (data.report) {
         setReport(data.report);
         saveReportToHistory(data.report);
+        setSidebarHistory(getHistory());
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan saat memuat data.");
@@ -613,16 +620,18 @@ export default function Home() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((prev) => !prev)}
         onNewChat={handleNewChat}
-        historyItems={getHistory()}
-        watchlistSymbols={getWatchlistSymbols()}
+        historyItems={sidebarHistory}
+        watchlistSymbols={sidebarWatchlist}
         currentSymbol={report?.symbol}
         onSelectSymbol={(sym) => handleSelectEmitenDirect(sym)}
         onRemoveHistory={(sym) => {
           removeHistoryItem(sym);
+          setSidebarHistory(getHistory());
           if (report?.symbol === sym) setReport(null);
         }}
         onClearHistory={() => {
           clearHistory();
+          setSidebarHistory([]);
           setReport(null);
         }}
       />
