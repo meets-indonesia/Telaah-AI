@@ -12,6 +12,15 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        terminal: {
+          bg: "var(--background)",
+          surface: "var(--card-bg)",
+          border: "var(--card-border)",
+          subtle: "var(--card-border-subtle)",
+          emerald: "#10b981",
+          rose: "#f43f5e",
+          indigo: "#6366f1",
+        },
         brand: {
           50: "#eff6ff",
           100: "#dbeafe",
