@@ -520,14 +520,12 @@ export default function Home() {
       />
 
       {/* Unified Split-Pane Terminal Stage */}
-      <main id="main-content" className="flex-1 flex overflow-hidden">
+      <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
         {/* =========================================================================
             LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
             ========================================================================= */}
         <div
-          className={`h-[calc(100dvh-5rem)] overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200 ${
-            isCopilotOpen ? "w-full lg:w-[64%] xl:w-[67%]" : "w-full"
-          }`}
+          className={`flex-1 min-w-0 h-[calc(100dvh-5rem)] overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200`}
         >
           {/* Watchlist & Search History Ribbon */}
           <HistoryWatchlistBar
@@ -773,7 +771,13 @@ export default function Home() {
             RIGHT DOCK: DOCKED AI RESEARCH COPILOT (Collapsible ⌘J)
             ========================================================================= */}
         {isCopilotOpen && (
-          <aside className="w-full lg:w-[36%] xl:w-[33%] border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-[calc(100dvh-5rem)]">
+          <>
+            {/* Mobile Backdrop Overlay */}
+            <div
+              onClick={() => setIsCopilotOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-30"
+            />
+            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[88vw] sm:w-[380px] lg:w-[360px] xl:w-[390px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
             {/* Copilot Header */}
             <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-2 bg-slate-50/70 dark:bg-[#0f1118]">
               <div className="flex items-center gap-2">
@@ -856,6 +860,7 @@ export default function Home() {
               initialValue=""
             />
           </aside>
+          </>
         )}
       </main>
 
