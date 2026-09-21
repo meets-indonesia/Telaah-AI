@@ -92,19 +92,25 @@ export default function Home() {
     { name: "COMEX Gold", code: "GOLD", price: "$2,742.5", change: "+1.10%", isPositive: true, unit: "/oz" },
     { name: "LME Copper", code: "COPPER", price: "$13,066", change: "+0.85%", isPositive: true, unit: "/ton" },
   ]);
-  const [marketAsOfDate, setMarketAsOfDate] = useState<string>("2026-09-11");
+  const [marketAsOfDate, setMarketAsOfDate] = useState<string>("2026-09-18");
 
-  // Fetch live market overview from Sectors API on mount
+  // Fetch live market overview from Sectors API on mount & poll every 1 hour
   useEffect(() => {
-    fetch("/api/market-overview")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.indices)) {
-          setMarketIndices(data.indices);
-          if (data.asOfDate) setMarketAsOfDate(data.asOfDate);
-        }
-      })
-      .catch(() => {});
+    const fetchMarket = () => {
+      fetch("/api/market-overview")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.indices)) {
+            setMarketIndices(data.indices);
+            if (data.asOfDate) setMarketAsOfDate(data.asOfDate);
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchMarket();
+    const interval = setInterval(fetchMarket, 60 * 60 * 1000); // Poll every 1 hour
+    return () => clearInterval(interval);
   }, []);
 
   // Global Keyboard Shortcuts (⌘K search, ⌘J toggle copilot, Esc close modals)
