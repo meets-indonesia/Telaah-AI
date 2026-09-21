@@ -9,6 +9,7 @@ import {
   BookOpen,
   PanelRightClose,
   PanelRightOpen,
+  Bot,
   Search,
   Command,
 } from "lucide-react";
@@ -30,6 +31,10 @@ interface HeaderProps {
   hasReport?: boolean;
   marketIndices?: MarketIndexItem[];
   marketAsOfDate?: string;
+  viewMode?: "chat" | "terminal";
+  onToggleViewMode?: () => void;
+  isCopilotOpen?: boolean;
+  onToggleCopilot?: () => void;
   onOpenJargon?: () => void;
   onOpenDividend?: () => void;
   onFocusSearch?: () => void;
@@ -38,6 +43,10 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   marketIndices = [],
   marketAsOfDate = "2026-09-11",
+  viewMode,
+  onToggleViewMode,
+  isCopilotOpen = true,
+  onToggleCopilot,
   onOpenJargon,
   onOpenDividend,
   onFocusSearch,
@@ -118,6 +127,50 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <BookOpen className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
               <span className="hidden xl:inline">Jargon</span>
+            </button>
+          )}
+
+          {/* Seamless Mode Switcher Button */}
+          {onToggleViewMode && (
+            <button
+              type="button"
+              onClick={onToggleViewMode}
+              title={viewMode === "terminal" ? "Kembali ke Percakapan Utama" : "Buka Kanvas Data Terminal"}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition rounded ${
+                viewMode === "terminal"
+                  ? "bg-orange-500/15 border border-orange-500/30 text-orange-600 dark:text-orange-400 font-semibold"
+                  : "border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
+              }`}
+            >
+              {viewMode === "terminal" ? (
+                <>
+                  <PanelRightClose className="w-3.5 h-3.5 text-orange-500" />
+                  <span>Obrolan</span>
+                </>
+              ) : (
+                <>
+                  <PanelRightOpen className="w-3.5 h-3.5" />
+                  <span>Kanvas Data</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Toggle Copilot Dock inside Terminal view */}
+          {viewMode === "terminal" && onToggleCopilot && (
+            <button
+              type="button"
+              onClick={onToggleCopilot}
+              title={isCopilotOpen ? "Sembunyikan Copilot Samping (⌘J)" : "Buka Copilot Samping (⌘J)"}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition rounded ${
+                isCopilotOpen
+                  ? "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
+              }`}
+            >
+              <Bot className="w-3.5 h-3.5" />
+              <span>Copilot</span>
+              <kbd className="hidden lg:inline-flex items-center text-[9px] font-mono text-slate-500 ml-0.5">⌘J</kbd>
             </button>
           )}
 

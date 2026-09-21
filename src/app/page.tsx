@@ -162,7 +162,8 @@ export default function Home() {
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
-        setIsCopilotOpen((prev) => !prev);
+        // ⌘J switches between Chat and Terminal Workstation seamlessly
+        setViewMode((prev) => (prev === "terminal" ? "chat" : "terminal"));
       }
       if (e.key === "Escape") {
         setIsSearchOpen(false);
@@ -291,6 +292,7 @@ export default function Home() {
       setActiveSessionId(session.id);
       setMessages(session.messages);
       if (session.report) setReport(session.report);
+      setViewMode("chat"); // Pastikan selalu kembali ke tampilan history chat utama
     }
   };
 
@@ -711,6 +713,10 @@ export default function Home() {
         <Header
           marketIndices={marketIndices}
           marketAsOfDate={marketAsOfDate}
+          viewMode={viewMode}
+          onToggleViewMode={() => setViewMode((prev) => (prev === "terminal" ? "chat" : "terminal"))}
+          isCopilotOpen={isCopilotOpen}
+          onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
           onOpenJargon={() => setIsJargonOpen(true)}
           onOpenDividend={() => setIsDividendOpen(true)}
           onFocusSearch={() => {
