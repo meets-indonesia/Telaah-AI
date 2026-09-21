@@ -30,8 +30,8 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
   if (financials.status === "unavailable" || !financials.latest) {
     return (
-      <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 transition-colors shadow-sm">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">Business & Financial Health</h3>
+      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors shadow-2xs">
+        <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">Business & Financial Health</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data laporan keuangan kuartalan tidak tersedia atau belum dipublikasikan untuk emiten ini.
         </p>
@@ -76,7 +76,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
   });
 
   return (
-    <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-xl space-y-5 transition-colors">
+    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>

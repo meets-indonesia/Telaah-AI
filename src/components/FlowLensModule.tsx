@@ -28,8 +28,8 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
 
   if (flowLens.status === "unavailable") {
     return (
-      <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-colors">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">FlowLens — Broker & Foreign Flow</h3>
+      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs transition-colors">
+        <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">FlowLens — Broker & Foreign Flow</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data agregat broker tidak tersedia atau tidak dipicu pada mode analisis ini.
         </p>
@@ -66,7 +66,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
   const maxSellerVal = Math.max(...flowLens.topSellers.map((s) => Math.abs(s.netValue)), 1);
 
   return (
-    <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-xl space-y-5 transition-colors">
+    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>

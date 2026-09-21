@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
+import React, { useState, useEffect, useRef } from "react";
+import { Header, MarketIndexItem } from "@/components/Header";
 import { InputStation } from "@/components/InputStation";
 import { ReportHeader } from "@/components/ReportHeader";
 import { ClaimCards } from "@/components/ClaimCards";
@@ -16,7 +16,6 @@ import { HistoryWatchlistBar } from "@/components/HistoryWatchlistBar";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
 import { ReportQADrawer } from "@/components/ReportQADrawer";
 import { ShareModal } from "@/components/ShareModal";
-import { ChatSidebar } from "@/components/chat/ChatSidebar";
 import { ChatFeed } from "@/components/chat/ChatFeed";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { JargonBusterModal } from "@/components/retail/JargonBusterModal";
@@ -33,21 +32,18 @@ import {
   Radar,
   Pickaxe,
   FileSpreadsheet,
-  Globe2,
-  Sparkles,
-  MessageSquare,
-  Menu,
-  ExternalLink,
-  ArrowLeft,
+  Bot,
+  PanelRightClose,
+  PanelRightOpen,
+  Plus,
+  Terminal,
 } from "lucide-react";
 
 type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
-type ViewMode = "chat" | "dashboard";
 
 export default function Home() {
-  // Current View: "chat" (default copilot) or "dashboard" (Studio 360°)
-  const [currentView, setCurrentView] = useState<ViewMode>("chat");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Split pane: Copilot dock visibility
+  const [isCopilotOpen, setIsCopilotOpen] = useState(true);
 
   // Chat Sessions & Messages State
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -78,12 +74,15 @@ export default function Home() {
   const [isShareCardOpen, setIsShareCardOpen] = useState(false);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
 
+  // Search input ref for hotkey focus
+  const searchInputRef = useRef<HTMLTextAreaElement>(null);
+
   // Trigger from example pills
   const [promptValue, setPromptValue] = useState("");
   const [modeValue, setModeValue] = useState<AnalysisMode>("full");
 
   // Live Market Ribbon state
-  const [marketIndices, setMarketIndices] = useState<Array<{ name: string; code: string; price: string; change: string; isPositive: boolean; unit?: string }>>([
+  const [marketIndices, setMarketIndices] = useState<MarketIndexItem[]>([
     { name: "IHSG", code: "COMPOSITE", price: "6.541,4", change: "-0.73%", isPositive: false },
     { name: "Brent Crude", code: "BRENT", price: "$109.80", change: "+2.85%", isPositive: true, unit: "/barel" },
     { name: "USD/IDR", code: "USDIDR", price: "Rp 17.585", change: "+0.45%", isPositive: false },
@@ -105,6 +104,30 @@ export default function Home() {
         }
       })
       .catch(() => {});
+  }, []);
+
+  // Global Keyboard Shortcuts (⌘K search, ⌘J toggle copilot, Esc close modals)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsCopilotOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setIsEvidenceOpen(false);
+        setIsQAOpen(false);
+        setIsShareOpen(false);
+        setIsJargonOpen(false);
+        setIsDividendOpen(false);
+        setIsShareCardOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Initial load: restore latest viewed report & chat sessions
@@ -148,34 +171,30 @@ export default function Home() {
       title: "Obrolan Baru",
       date: new Date().toLocaleDateString("id-ID"),
       messages: [],
-      report: null,
+      report: report,
     };
     const updated = [newSession, ...sessions];
     persistSessions(updated);
     setActiveSessionId(newSessionId);
     setMessages([]);
-    setReport(null);
-    setCurrentView("chat");
   };
 
-  const handleSelectSession = (id: string) => {
-    const found = sessions.find((s) => s.id === id);
-    if (found) {
-      setActiveSessionId(id);
-      setMessages(found.messages || []);
-      if (found.report) setReport(found.report);
-      setCurrentView("chat");
+  const handleSelectSession = (sessionId: string) => {
+    const session = sessions.find((s) => s.id === sessionId);
+    if (session) {
+      setActiveSessionId(session.id);
+      setMessages(session.messages);
+      if (session.report) setReport(session.report);
     }
   };
 
-  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const updated = sessions.filter((s) => s.id !== id);
+  const handleDeleteSession = (sessionId: string) => {
+    const updated = sessions.filter((s) => s.id !== sessionId);
     persistSessions(updated);
-    if (activeSessionId === id) {
+    if (activeSessionId === sessionId) {
       if (updated.length > 0) {
         setActiveSessionId(updated[0].id);
-        setMessages(updated[0].messages || []);
+        setMessages(updated[0].messages);
         if (updated[0].report) setReport(updated[0].report);
       } else {
         handleNewChat();
@@ -183,7 +202,7 @@ export default function Home() {
     }
   };
 
-  const handleSelectExample = (prompt: string, mode: AnalysisMode) => {
+  const handleSelectExample = (prompt: string, mode: "quick" | "full" = "full") => {
     setPromptValue(prompt);
     setModeValue(mode);
     executeAnalysis(prompt, mode);
@@ -221,7 +240,7 @@ export default function Home() {
       const botReply: ChatMessage = {
         id: "b_" + Date.now(),
         sender: "assistant",
-        text: "📖 Saya telah membuka **Kamus Pintar Saham Ritel (Jargon Buster)** untuk Anda! Di sana Anda bisa membaca arti istilah pasar modal (PBV, PER, Foreign Flow, HAKA/HAKI) dengan analogi sehari-hari.",
+        text: "Saya telah membuka **Kamus Pintar Saham (Jargon Buster)**. Anda dapat memeriksa penjelasan istilah pasar modal resmi IDX.",
         timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
       };
       const finalMsgs = [...newMessages, botReply];
@@ -236,7 +255,7 @@ export default function Home() {
       const botReply: ChatMessage = {
         id: "b_" + Date.now(),
         sender: "assistant",
-        text: "💰 Saya telah membuka **Kalkulator Dividen & Simulasi Passive Income** untuk Anda! Anda bisa mensimulasikan tabungan bulanan (DCA) atau modal awal dan melihat potensi dividen per tahun vs bunga deposito bank.",
+        text: "Saya telah membuka **Kalkulator Dividen**. Anda dapat memproyeksikan yield dan estimasi dividen tunai per tahun.",
         timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
       };
       const finalMsgs = [...newMessages, botReply];
@@ -245,14 +264,14 @@ export default function Home() {
       return;
     }
 
-    // 3. Check if user requested a Head-to-Head Comparison (e.g., "BBCA vs BBRI" or "Bandingkan BBCA dan BBRI")
+    // 3. Check if user requested a Head-to-Head Comparison
     const compareMatch = userText.match(/\b([A-Z]{4})\b.*?(?:vs|dan|dengan|lawan|bandingkan)\b.*?([A-Z]{4})\b/i);
     if (compareMatch) {
       const symA = compareMatch[1].toUpperCase();
       const symB = compareMatch[2].toUpperCase();
       if (symA !== symB) {
         setIsLoading(true);
-        setLoadingStage(`Membandingkan data resmi ${symA} vs ${symB} secara paralel...`);
+        setLoadingStage(`Membandingkan data resmi ${symA} vs ${symB}...`);
 
         try {
           const compRes = await fetch("/api/compare", {
@@ -266,7 +285,7 @@ export default function Home() {
             const botReply: ChatMessage = {
               id: "b_" + Date.now(),
               sender: "assistant",
-              text: `⚔️ **Hasil Komparasi Head-to-Head: ${symA} vs ${symB}**\n\n${compData.comparison.retailSummary}\n\n*Periksa kartu perbandingan metrik utama di bawah:*`,
+              text: `**Hasil Komparasi: ${symA} vs ${symB}**\n\n${compData.comparison.retailSummary}`,
               timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
               compareCard: compData.comparison,
             };
@@ -277,9 +296,7 @@ export default function Home() {
             setLoadingStage("");
             return;
           }
-        } catch (e) {
-          // If compare endpoint errors, continue to normal analysis
-        }
+        } catch (e) {}
       }
     }
 
@@ -300,7 +317,7 @@ export default function Home() {
         const botReply: ChatMessage = {
           id: "b_" + Date.now(),
           sender: "assistant",
-          text: qaData.answer || `Data untuk ${report.symbol} tercatat dengan baik. Silakan cek modul studio jika perlu detail tambahan.`,
+          text: qaData.answer || `Data untuk ${report.symbol} tercatat dengan baik. Silakan cek modul terminal jika perlu rincian lanjutan.`,
           timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         };
 
@@ -311,7 +328,7 @@ export default function Home() {
         const botReply: ChatMessage = {
           id: "b_" + Date.now(),
           sender: "assistant",
-          text: `Maaf, terjadi kendala: ${err.message || "Gagal memproses pertanyaan"}.`,
+          text: `Kendala: ${err.message || "Gagal memproses pertanyaan"}.`,
           timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         };
         setMessages([...newMessages, botReply]);
@@ -362,21 +379,9 @@ export default function Home() {
     setErrorMessage(null);
     setNeedsConfirmation(false);
 
-    setLoadingStage("Menganalisis intensi & mengekstrak klaim atomik...");
+    setLoadingStage("Menganalisis intensi & mengekstrak data emiten...");
 
     try {
-      const stageTimer1 = setTimeout(() => {
-        setLoadingStage("Mengambil data resmi Sectors API v2 (Financials, Flow, Price, Filings)...");
-      }, 1200);
-
-      const stageTimer2 = setTimeout(() => {
-        setLoadingStage("Menghitung indikator teknikal & rasio keuangan deterministik...");
-      }, 2800);
-
-      const stageTimer3 = setTimeout(() => {
-        setLoadingStage("Sintesis laporan ramah ritel & verifikasi bukti citation guard...");
-      }, 4500);
-
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -386,10 +391,6 @@ export default function Home() {
           confirmedSymbol,
         }),
       });
-
-      clearTimeout(stageTimer1);
-      clearTimeout(stageTimer2);
-      clearTimeout(stageTimer3);
 
       const data = await res.json();
 
@@ -420,73 +421,52 @@ export default function Home() {
 
         const trendText = rep.technical?.trendAssessment || "";
         const isBullish = trendText.toLowerCase().includes("bullish") || (rep.flowLens?.foreignFlow?.cumulative5d ?? 0) > 0;
-        const verdict = isBullish ? "bullish" : "neutral";
+        const verdict: "bullish" | "neutral" = isBullish ? "bullish" : "neutral";
         const verdictText = isBullish ? "AKUMULASI / POSITIF" : "NETRAL / WAIT & SEE";
 
-        const summaryText = `✨ **Hasil Telaah Cerdas untuk ${rep.symbol} (${rep.companyName})**:\n\n` +
-          `• **Intisari:** ${rep.directAnswer}\n` +
-          `• **Kondisi Keuangan:** ${rep.financials?.solvencyHealth?.description || "Kondisi keuangan terpantau stabil."}\n` +
-          `• **Arus Bandar / Asing:** ${rep.flowLens?.foreignFlow?.recentTrend || "Flow normal"}\n` +
-          `• **Valuasi Saham:** PER ${peStr} | PBV ${pbStr}.\n\n` +
-          `💡 *Tips Ritel:* Simak kartu ringkasan di bawah, atau klik **"Buka Studio 360°"** untuk melihat grafik candlestick, broker summary, dan radar insider komplit!`;
+        const botMsgText = `**Hasil Telaah: ${rep.symbol} (${rep.companyName})**\n\n- **Intisari:** ${rep.directAnswer}\n- **Kondisi Keuangan:** ${rep.financials?.solvencyHealth?.description || "Kondisi keuangan terpantau stabil."}\n- **Arus Bandar / Asing:** ${rep.flowLens?.foreignFlow?.recentTrend || "Flow normal"}\n- **Valuasi Saham:** PER ${peStr} | PBV ${pbStr}.`;
 
-        const isRumorQuery =
-          prompt.toLowerCase().includes("rumor") ||
-          prompt.toLowerCase().includes("pom-pom") ||
-          prompt.toLowerCase().includes("hoaks") ||
-          (Array.isArray(rep.claims) && rep.claims.length > 0 && rep.intent === "claim_check");
-
-        let factCheckCard = undefined;
-        if (isRumorQuery && Array.isArray(rep.claims) && rep.claims.length > 0) {
-          const hasRefuted = rep.claims.some((c) => c.verdict === "Bertentangan");
-          const hasContext = rep.claims.some((c) => c.verdict === "Perlu konteks");
-          const overallRisk: "low" | "medium" | "high" = hasRefuted ? "high" : hasContext ? "medium" : "low";
-          factCheckCard = {
-            symbol: rep.symbol,
-            originalRumor: prompt,
-            claims: rep.claims,
-            overallRisk,
-          };
-        }
-
-        const botMsg: ChatMessage = {
+        const botReply: ChatMessage = {
           id: "b_" + Date.now(),
           sender: "assistant",
-          text: summaryText,
+          text: botMsgText,
           timestamp: timeStr,
           stockCard: {
             symbol: rep.symbol,
             companyName: rep.companyName,
             sector: rep.overview?.sector,
             price: rep.technical?.lastPrice,
-            changePct: rep.technical?.dailyReturnPct ?? 0,
+            changePct: rep.technical?.dailyReturnPct,
             verdict,
             verdictText,
             highlights: [
-              { title: "Fundamental & Laba", desc: rep.financials?.solvencyHealth?.description || "Kondisi keuangan sehat" },
-              { title: "Arus Asing", desc: rep.flowLens?.foreignFlow?.recentTrend || "Flow terpantau" },
-              { title: "Teknikal & RSI", desc: `${rep.technical?.trendAssessment || "Netral"} (RSI: ${rep.technical?.rsi14 ? Math.round(rep.technical.rsi14) : 50})` },
+              {
+                title: "Fundamental & Laba",
+                desc: rep.financials?.solvencyHealth?.description || "Data keuangan tercatat sesuai laporan berkala.",
+                icon: "check",
+              },
+              {
+                title: "Arus Asing",
+                desc: rep.flowLens?.foreignFlow?.recentTrend || "Netral",
+                icon: "info",
+              },
+              {
+                title: "Teknikal & RSI",
+                desc: `${rep.technical?.trendAssessment || "Netral"} (RSI: ${rep.technical?.rsi14?.toFixed(0) || "50"})`,
+                icon: "alert",
+              },
             ],
             retailTakeaway: rep.directAnswer,
             report: rep,
           },
-          factCheckCard,
         };
 
-        // If in chat view, append to chat
-        const updatedMsgs = [...messages, botMsg];
-        setMessages(updatedMsgs);
-        updateActiveSession(updatedMsgs, rep);
+        const finalMsgs = [...messages, botReply];
+        setMessages(finalMsgs);
+        updateActiveSession(finalMsgs, rep);
       }
     } catch (err: any) {
-      setErrorMessage(err.message || "Terjadi kesalahan saat memproses permintaan.");
-      const errorMsg: ChatMessage = {
-        id: "err_" + Date.now(),
-        sender: "assistant",
-        text: `⚠️ Maaf, terjadi kendala saat memproses: ${err.message || "Gagal mengambil data Sectors"}. Coba periksa koneksi internet atau simbol saham yang Anda cari.`,
-        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      setErrorMessage(err.message || "Terjadi kesalahan saat memproses data.");
     } finally {
       setIsLoading(false);
       setLoadingStage("");
@@ -515,168 +495,29 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f6f8fb] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 transition-colors">
-      {/* Top Navbar with View Switcher & Theme Toggle */}
+    <div className="min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 transition-colors">
+      {/* Top Terminal Bar */}
       <Header
-        onSelectExample={handleSelectExample}
-        currentView={currentView}
-        onToggleView={(view) => setCurrentView(view)}
-        hasReport={!!report}
+        marketIndices={marketIndices}
+        marketAsOfDate={marketAsOfDate}
+        isCopilotOpen={isCopilotOpen}
+        onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
+        onOpenCompare={() => handleChatSend("Bandingkan BBCA vs BBRI", "quick")}
+        onOpenJargon={() => setIsJargonOpen(true)}
+        onOpenDividend={() => setIsDividendOpen(true)}
+        onFocusSearch={() => searchInputRef.current?.focus()}
       />
 
-      {/* Global Market Ribbon (Live Animated Financial Ticker Tape) */}
-      <div className="border-b border-slate-200/80 dark:border-slate-800/60 bg-white dark:bg-[#070a12] px-3 sm:px-4 py-1.5 overflow-hidden text-[11px] font-mono select-none relative transition-colors">
-        <div className="max-w-7xl mx-auto flex items-center relative">
-          {/* Static Left Label with Live Pulse */}
-          <div className="shrink-0 z-20 flex items-center gap-2 bg-white dark:bg-[#070a12] pr-3 sm:pr-4 border-r border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 font-sans font-semibold">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-xs text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-              <Globe2 className="w-3.5 h-3.5 text-brand-600 dark:text-blue-400" />
-              <span className="hidden sm:inline">Market Acuan</span>
-              <span className="text-[10px] text-slate-500 font-mono">({marketAsOfDate})</span>
-            </span>
-          </div>
-
-          {/* Fade Gradients for smooth tape entry/exit */}
-          <div className="pointer-events-none absolute left-[125px] sm:left-[215px] top-0 bottom-0 w-8 bg-gradient-to-r from-white dark:from-[#070a12] to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-[#070a12] to-transparent z-10" />
-
-          {/* Continuous Moving Tape Track */}
-          <div className="overflow-hidden relative w-full ml-3 flex items-center">
-            <div className="animate-ticker flex items-center gap-8 py-0.5" title="Arahkan kursor untuk menjeda pita pasar">
-              {[...marketIndices, ...marketIndices].map((item, idx) => (
-                <div
-                  key={`${item.code}-${idx}`}
-                  className="flex items-center gap-1.5 shrink-0 hover:bg-slate-100 dark:hover:bg-slate-800/60 px-2 py-0.5 rounded transition cursor-pointer"
-                >
-                  <span className="text-slate-500 dark:text-slate-400 font-sans">{item.name}</span>
-                  <span className="font-semibold text-slate-800 dark:text-white">
-                    {item.price}
-                    {item.unit && <span className="text-[9px] text-slate-400 font-normal ml-0.5">{item.unit}</span>}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold ${
-                      item.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-                    }`}
-                  >
-                    {item.change}
-                  </span>
-                  <span className="text-slate-300 dark:text-slate-700 ml-2 select-none">•</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          VIEW MODE 1: CHAT COPILOT (ChatGPT / Gemini Saham IDX)
-          ========================================================================= */}
-      {currentView === "chat" && (
-        <main id="main-content" className="flex-1 flex overflow-hidden relative">
-          {/* Collapsible Left Sidebar */}
-          <ChatSidebar
-            isOpen={isSidebarOpen}
-            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-            sessions={sessions}
-            activeSessionId={activeSessionId}
-            onSelectSession={handleSelectSession}
-            onNewChat={handleNewChat}
-            onDeleteSession={handleDeleteSession}
-            onSelectQuickSymbol={(sym) => {
-              handleChatSend(`Bagaimana prospek dan valuasi saham ${sym} saat ini?`, "quick");
-              if (window.innerWidth < 1024) setIsSidebarOpen(false);
-            }}
-            onOpenCompare={() => {
-              handleChatSend("Bandingkan BBCA vs BBRI", "quick");
-              if (window.innerWidth < 1024) setIsSidebarOpen(false);
-            }}
-            onOpenJargon={() => setIsJargonOpen(true)}
-            onOpenDividend={() => setIsDividendOpen(true)}
-          />
-
-          {/* Main Chat Area */}
-          <div className="flex-1 flex flex-col min-w-0 bg-slate-50/50 dark:bg-[#090d16] relative">
-            {/* Top Sub-Bar for Mobile Sidebar Toggle & Active Symbol Pill */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/40 text-xs">
-              <button
-                type="button"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition"
-              >
-                <Menu className="w-3.5 h-3.5" />
-                <span>Menu & Riwayat</span>
-              </button>
-
-              {report && (
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-500 text-[11px] hidden sm:inline">Emiten Aktif:</span>
-                  <button
-                    onClick={() => setCurrentView("dashboard")}
-                    type="button"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 dark:bg-brand-950/60 dark:hover:bg-brand-900/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 text-[11px] font-bold transition"
-                  >
-                    <span>{report.symbol}</span>
-                    <ExternalLink className="w-3 h-3 ml-0.5" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Chat Feed */}
-            <ChatFeed
-              messages={messages}
-              isLoading={isLoading}
-              loadingStage={loadingStage}
-              onSelectPrompt={(p) => handleChatSend(p, "quick")}
-              onOpenDeepDive={(rep) => {
-                setReport(rep);
-                setCurrentView("dashboard");
-              }}
-              onOpenShareCard={(rep) => {
-                setReport(rep);
-                setIsShareCardOpen(true);
-              }}
-            />
-
-
-            {/* Sticky Bottom Chat Input */}
-            <ChatInput
-              onSend={handleChatSend}
-              isLoading={isLoading}
-              initialValue=""
-            />
-
-          </div>
-        </main>
-      )}
-
-      {/* =========================================================================
-          VIEW MODE 2: STUDIO 360° DASHBOARD (Deep Dive Analisis Kuantitatif)
-          ========================================================================= */}
-      {currentView === "dashboard" && (
-        <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
-          {/* Quick Back to Chat Banner */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 text-xs">
-            <div className="flex items-center gap-2 text-brand-900 dark:text-brand-200 font-medium">
-              <LayoutDashboard className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
-              <span>
-                Mode <strong>Laporan 360°</strong>. Data lengkap, grafik teknikal, laporan keuangan, dan aliran broker.
-              </span>
-            </div>
-            <button
-              onClick={() => setCurrentView("chat")}
-              type="button"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-xs transition active:scale-95 shrink-0"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Kembali ke Chat AI</span>
-            </button>
-          </div>
-
+      {/* Unified Split-Pane Terminal Stage */}
+      <main id="main-content" className="flex-1 flex overflow-hidden">
+        {/* =========================================================================
+            LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
+            ========================================================================= */}
+        <div
+          className={`h-[calc(100dvh-5rem)] overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200 ${
+            isCopilotOpen ? "w-full lg:w-[64%] xl:w-[67%]" : "w-full"
+          }`}
+        >
           {/* Watchlist & Search History Ribbon */}
           <HistoryWatchlistBar
             currentSymbol={report?.symbol}
@@ -686,45 +527,46 @@ export default function Home() {
             }
           />
 
-          {/* Quick Emiten Shortcuts */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-            <span className="text-slate-400 shrink-0 font-medium text-[11px] flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Emiten Pilihan:
+          {/* Quick Emiten Shortcuts Strip */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs">
+            <span className="text-slate-400 shrink-0 font-mono text-[10px] uppercase tracking-wider">
+              Quick:
             </span>
             <button
               onClick={() => handleQuickEmiten("BBCA", "Bagaimana aksi akumulasi direksi dan kinerja laba BBCA terkini?")}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
-              BBCA • Cluster-Buy Direksi
+              BBCA • Cluster Direksi
             </button>
             <button
               onClick={() => handleQuickEmiten("ADRO", "Bagaimana dampak harga batu bara acuan terhadap laba dan cadangan ADRO?")}
-              className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
-              ADRO • Komoditas Batu Bara
+              ADRO • Batu Bara
             </button>
             <button
               onClick={() => handleQuickEmiten("ANTM", "Cek sensitivitas laba ANTM terhadap harga emas dan nikel LME")}
-              className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ANTM • Nikel & Emas
             </button>
             <button
               onClick={() => handleQuickEmiten("BBRI", "Telaah fundamental, foreign flow dan dividen yield BBRI")}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
-              BBRI • Finansial & Flow
+              BBRI • Foreign Flow
             </button>
             <button
               onClick={() => handleQuickEmiten("TLKM", "Cek evaluasi klaim margin laba dan foreign flow TLKM")}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
-              TLKM • Telekomunikasi
+              TLKM • Telko
             </button>
           </div>
 
-          {/* Input Station (if user wants to submit new prompt inside Studio) */}
+          {/* Terminal Command Search Bar */}
           <InputStation
+            inputRef={searchInputRef}
             onAnalyze={executeAnalysis}
             isLoading={isLoading}
             loadingStage={loadingStage}
@@ -734,44 +576,44 @@ export default function Home() {
 
           {/* Error Callout */}
           {errorMessage && (
-            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs flex items-start gap-3 animate-in fade-in duration-200">
-              <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+            <div className="p-3 rounded bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-semibold block mb-0.5">Terjadi Kendala Analisis</strong>
+                <strong className="font-semibold block mb-0.5">Kendala Analisis:</strong>
                 <p>{errorMessage}</p>
               </div>
             </div>
           )}
 
-          {/* Needs Confirmation Prompt (Ambiguous Ticker) */}
+          {/* Ambiguous Ticker Confirmation */}
           {needsConfirmation && (
-            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-slate-800 dark:text-slate-200 space-y-3 animate-in fade-in duration-200">
+            <div className="p-3.5 rounded bg-amber-500/10 border border-amber-500/20 text-slate-800 dark:text-slate-200 space-y-2 text-xs">
               <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-amber-500" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Konfirmasi Kode Emiten IDX</h3>
+                <HelpCircle className="w-4 h-4 text-amber-500" />
+                <h3 className="font-bold text-slate-900 dark:text-white">Konfirmasi Kode Emiten IDX</h3>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
+              <p className="text-slate-600 dark:text-slate-300">
                 Sistem mendeteksi kemungkinan emiten{" "}
                 <strong className="text-amber-600 dark:text-amber-400 font-mono">
                   {candidateSymbol || "tidak terdeteksi jelas"}
                 </strong>
-                , namun membutuhkan konfirmasi Anda untuk memastikan data yang ditarik 100% akurat.
+                . Mohon konfirmasi kode 4 huruf:
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <input
                   type="text"
                   defaultValue={candidateSymbol}
-                  placeholder="Misal: BBCA"
+                  placeholder="BBCA"
                   maxLength={4}
                   id="confirmedSymbolInput"
-                  className="w-28 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-mono text-center tracking-wider text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-24 px-2 py-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-white font-mono text-center tracking-wider text-xs focus:outline-none"
                 />
                 <button
                   onClick={() => {
                     const input = document.getElementById("confirmedSymbolInput") as HTMLInputElement;
                     handleConfirmSymbol(input.value.trim());
                   }}
-                  className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs rounded-lg transition"
+                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs rounded transition"
                 >
                   Lanjutkan Telaah
                 </button>
@@ -779,10 +621,10 @@ export default function Home() {
             </div>
           )}
 
-          {/* The 360° Dossier / Dashboard Canvas */}
-          {report && (
-            <div className="space-y-5 animate-in fade-in duration-300">
-              {/* Header & Direct Answer */}
+          {/* Active Emiten Intelligence Canvas */}
+          {report ? (
+            <div className="space-y-3">
+              {/* Institutional Emiten Strip */}
               <ReportHeader
                 report={report}
                 onOpenEvidence={() => {
@@ -793,84 +635,81 @@ export default function Home() {
                 onShare={() => setIsShareOpen(true)}
               />
 
-              {/* Dashboard Navigation Tabs */}
-              <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-1.5 rounded-2xl flex items-center justify-between gap-2 overflow-x-auto shadow-md">
-                <div className="flex items-center gap-1.5 flex-1 min-w-max">
+              {/* Workstation Tab Bar */}
+              <div className="bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
+                <div className="flex items-center gap-1 flex-1 min-w-max font-medium">
                   <button
                     onClick={() => setActiveTab("overview")}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "overview"
-                        ? "bg-brand-600 text-white shadow-sm shadow-brand-600/30"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <LayoutDashboard className="w-4 h-4" />
+                    <LayoutDashboard className="w-3.5 h-3.5" />
                     <span>Ringkasan 360°</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("technical")}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "technical"
-                        ? "bg-brand-600 text-white shadow-sm shadow-brand-600/30"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <CandleIcon className="w-4 h-4" />
+                    <CandleIcon className="w-3.5 h-3.5" />
                     <span>Terminal Teknikal</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("insider")}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "insider"
-                        ? "bg-brand-600 text-white shadow-sm shadow-brand-600/30"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <Radar className="w-4 h-4" />
-                    <span>Whale & Insider Radar</span>
+                    <Radar className="w-3.5 h-3.5" />
+                    <span>Whale & Broker Flow</span>
                     {report.insiderRadar?.clusterBuyDetected && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     )}
                   </button>
 
                   {isCommodity && (
                     <button
                       onClick={() => setActiveTab("commodity")}
-                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                         activeTab === "commodity"
-                          ? "bg-amber-600 text-white shadow-sm shadow-amber-600/30"
-                          : "text-amber-600 dark:text-amber-400 hover:text-amber-700 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20"
+                          ? "bg-amber-600 text-white font-semibold shadow-2xs"
+                          : "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                       }`}
                     >
-                      <Pickaxe className="w-4 h-4" />
+                      <Pickaxe className="w-3.5 h-3.5" />
                       <span>Commodity Lens</span>
-                      <span className="text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.2 rounded font-bold">
-                        Aktif
-                      </span>
                     </button>
                   )}
 
                   <button
                     onClick={() => setActiveTab("all")}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "all"
-                        ? "bg-brand-600 text-white shadow-sm shadow-brand-600/30"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <FileSpreadsheet className="w-4 h-4" />
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
                     <span>Semua Modul</span>
                   </button>
                 </div>
               </div>
 
-              {/* Tab 1: Ringkasan 360° (Default Overview) */}
+              {/* Tab Content: Overview */}
               {(activeTab === "overview" || activeTab === "all") && (
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <ClaimCards claims={report.claims} onSelectEvidence={handleOpenEvidenceWithId} />
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     <FlowLensModule flowLens={report.flowLens} />
                     <FinancialModule financials={report.financials} />
                   </div>
@@ -879,23 +718,23 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tab 2: Terminal Teknikal */}
+              {/* Tab Content: Technical */}
               {(activeTab === "technical" || activeTab === "all") && (
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <TechnicalModule technical={report.technical} symbol={report.symbol} companyName={report.companyName} />
                 </div>
               )}
 
-              {/* Tab 3: Whale & Insider Radar */}
+              {/* Tab Content: Insider & Whale Radar */}
               {(activeTab === "insider" || activeTab === "all") && (
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <InsiderWhaleRadar insiderRadar={report.insiderRadar} symbol={report.symbol} />
                 </div>
               )}
 
-              {/* Tab 4: Commodity Lens (Only for Commodity Issuers) */}
+              {/* Tab Content: Commodity Lens */}
               {(activeTab === "commodity" || activeTab === "all") && isCommodity && (
-                <div className="space-y-5">
+                <div className="space-y-3">
                   <CommodityLensModule
                     commodityLens={report.commodityLens!}
                     symbol={report.symbol}
@@ -904,8 +743,121 @@ export default function Home() {
                 </div>
               )}
             </div>
+          ) : (
+            <div className="p-8 rounded-lg border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-3">
+              <Terminal className="w-8 h-8 text-slate-400 mx-auto" />
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Terminal Saham Siap Digunakan
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                  Ketik kode emiten atau ajukan pertanyaan di search bar di atas, atau klik salah satu saham acuan (BBCA, ADRO, BBRI) untuk memulai riset.
+                </p>
+              </div>
+            </div>
           )}
-        </main>
+        </div>
+
+        {/* =========================================================================
+            RIGHT DOCK: DOCKED AI RESEARCH COPILOT (Collapsible ⌘J)
+            ========================================================================= */}
+        {isCopilotOpen && (
+          <aside className="w-full lg:w-[36%] xl:w-[33%] border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-[calc(100dvh-5rem)]">
+            {/* Copilot Header */}
+            <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-2 bg-slate-50/70 dark:bg-[#0f1118]">
+              <div className="flex items-center gap-2">
+                <Bot className="w-4 h-4 text-emerald-500" />
+                <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                  RESEARCH COPILOT
+                </span>
+                {report && (
+                  <span className="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-[10px] font-mono font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                    {report.symbol}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleNewChat}
+                  title="Obrolan Baru"
+                  className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCopilotOpen(false)}
+                  title="Tutup Copilot (⌘J)"
+                  className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition"
+                >
+                  <PanelRightClose className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Chat Feed */}
+            <div className="flex-1 overflow-y-auto">
+              <ChatFeed
+                messages={messages}
+                isLoading={isLoading}
+                loadingStage={loadingStage}
+                onSelectPrompt={(p) => handleChatSend(p, "quick")}
+                onOpenDeepDive={(rep) => {
+                  setReport(rep);
+                }}
+                onOpenShareCard={(rep) => {
+                  setReport(rep);
+                  setIsShareCardOpen(true);
+                }}
+              />
+            </div>
+
+            {/* Quick Contextual Prompts Strip */}
+            {report && (
+              <div className="px-3 py-1.5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0e1017] flex items-center gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
+                <button
+                  onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
+                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                >
+                  Dividen Yield
+                </button>
+                <button
+                  onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
+                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                >
+                  Broker Flow 5H
+                </button>
+                <button
+                  onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
+                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                >
+                  Risiko Utama
+                </button>
+              </div>
+            )}
+
+            {/* Sticky Bottom Chat Input */}
+            <ChatInput
+              onSend={handleChatSend}
+              isLoading={isLoading}
+              initialValue=""
+            />
+          </aside>
+        )}
+      </main>
+
+      {/* Floating Copilot Toggle when collapsed */}
+      {!isCopilotOpen && (
+        <button
+          type="button"
+          onClick={() => setIsCopilotOpen(true)}
+          className="fixed bottom-4 right-4 z-40 flex items-center gap-2 px-3 py-2 rounded-md bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-lg text-xs font-semibold hover:bg-slate-800 transition"
+        >
+          <PanelRightOpen className="w-4 h-4" />
+          <span>Buka Copilot (⌘J)</span>
+        </button>
       )}
 
       {/* Drawers and Modals */}
