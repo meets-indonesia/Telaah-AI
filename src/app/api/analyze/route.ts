@@ -5,6 +5,11 @@ import { executeEvidencePlan } from "@/lib/agent/coordinator";
 import { synthesizeIntelligenceReport } from "@/lib/agent/synthesizer";
 import { AnalysisMode } from "@/lib/agent/types";
 import { sectorsErrorMessage } from "@/lib/sectors/errors";
+import {
+  searchSemanticReportCache,
+  upsertReportToVectorCache,
+  getTodayWIB,
+} from "@/lib/vector/qdrant";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +23,22 @@ export async function POST(req: NextRequest) {
         { error: "Prompt atau teks analisis tidak boleh kosong." },
         { status: 400 }
       );
+    }
+
+    // Fast-path: Check semantic cache if confirmedSymbol is passed
+    if (confirmedSymbol && /^[A-Z]{4}$/.test(confirmedSymbol)) {
+      const cacheCheck = await searchSemanticReportCache(prompt, confirmedSymbol, 0.88, mode);
+      if (cacheCheck.isMatch && cacheCheck.isFresh && cacheCheck.payload?.report) {
+        return NextResponse.json({
+          success: true,
+          report: {
+            ...cacheCheck.payload.report,
+            fromVectorCache: true,
+            cacheScore: Number(cacheCheck.score.toFixed(3)),
+            cacheDate: cacheCheck.payload.capturedDate,
+          },
+        });
+      }
     }
 
     // Step 1: Input Classification & Claim Extraction
@@ -37,7 +58,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 2: Coordinator & Evidence Collection
+    // Step 1b: Semantic Vector Cache Check with targetSymbol
+    const cacheHit = await searchSemanticReportCache(prompt, targetSymbol, 0.88, mode);
+    if (cacheHit.isMatch && cacheHit.isFresh && cacheHit.payload?.report) {
+      return NextResponse.json({
+        success: true,
+        report: {
+          ...cacheHit.payload.report,
+          fromVectorCache: true,
+          cacheScore: Number(cacheHit.score.toFixed(3)),
+          cacheDate: cacheHit.payload.capturedDate,
+        },
+      });
+    }
+
+    // Step 2: Coordinator & Evidence Collection (Cache Miss / Stale Day)
     const sectorsClient = new SectorsClient();
     const evidence = await executeEvidencePlan(
       sectorsClient,
@@ -55,6 +90,11 @@ export async function POST(req: NextRequest) {
       classification.intent,
       classification.claims
     );
+
+    // Step 4: Asynchronously update Qdrant Vector Cache with today's capturedDate
+    upsertReportToVectorCache(prompt, targetSymbol, report, mode).catch((err) => {
+      console.warn("Failed to async upsert report to Qdrant:", err);
+    });
 
     return NextResponse.json({ success: true, report });
   } catch (error: any) {

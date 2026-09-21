@@ -118,4 +118,9 @@ export interface CompanyIntelligenceReport {
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
   toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
+
+  // Vector Semantic Cache Metadata
+  fromVectorCache?: boolean;
+  cacheScore?: number;
+  cacheDate?: string;
 }
