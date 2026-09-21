@@ -11,6 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
+import { CompanyLogo } from "../CompanyLogo";
 
 interface StockMiniCardProps {
   card: {
@@ -71,13 +72,21 @@ export const StockMiniCard: React.FC<StockMiniCardProps> = ({
     <div className="mt-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#10131d] overflow-hidden text-xs transition-colors">
       {/* Header Strip */}
       <div className="p-2.5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#131622] flex items-center justify-between gap-1.5 min-w-0">
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono font-bold text-xs tracking-tight shrink-0">
-            {card.symbol}
-          </span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate text-[11px]">
-            {card.companyName}
-          </span>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <CompanyLogo
+            symbol={card.symbol}
+            website={card.report?.overview?.website}
+            companyName={card.companyName}
+            size="sm"
+          />
+          <div className="min-w-0 truncate">
+            <span className="font-mono font-bold text-xs text-slate-100 mr-1.5">
+              {card.symbol}
+            </span>
+            <span className="text-slate-400 truncate text-[11px]">
+              {card.companyName}
+            </span>
+          </div>
         </div>
 
         <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-mono font-semibold shrink-0 ${style.badge}`}>

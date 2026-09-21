@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import { CompanyLogo } from "./CompanyLogo";
 
 interface ReportHeaderProps {
   report: CompanyIntelligenceReport;
@@ -48,11 +49,14 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       {/* Institutional Emiten Strip */}
       <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
-          {/* Company ID */}
+          {/* Company ID & Logo */}
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center text-slate-900 dark:text-slate-100 font-mono font-bold text-lg tracking-tight shrink-0">
-              {report.symbol}
-            </div>
+            <CompanyLogo
+              symbol={report.symbol}
+              website={report.overview?.website}
+              companyName={report.companyName}
+              size="lg"
+            />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none truncate max-w-[200px] sm:max-w-md">

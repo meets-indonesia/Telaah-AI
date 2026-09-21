@@ -3,6 +3,7 @@
 import React from "react";
 import { Scale, ChevronRight, ExternalLink } from "lucide-react";
 import { StockCompareResult } from "@/app/api/compare/route";
+import { CompanyLogo } from "../CompanyLogo";
 
 interface StockCompareCardProps {
   comparison: StockCompareResult;
@@ -29,14 +30,15 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
       {/* Side-by-Side Emiten Profile */}
       <div className="grid grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-[#121520] p-2.5 text-center">
         {/* Emiten A */}
-        <div className="space-y-0.5 pr-2">
+        <div className="space-y-1 pr-2 flex flex-col items-center">
+          <CompanyLogo symbol={comparison.symbolA} companyName={comparison.nameA} size="sm" />
           <span className="font-mono font-bold text-xs text-slate-100 px-2 py-0.5 rounded bg-slate-800 inline-block">
             {comparison.symbolA}
           </span>
           <div className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
             Rp {comparison.priceA ? comparison.priceA.toLocaleString("id-ID") : "-"}
           </div>
-          <div className="text-[10px] text-slate-400 truncate">{comparison.nameA}</div>
+          <div className="text-[10px] text-slate-400 truncate max-w-[120px]">{comparison.nameA}</div>
           {onOpenDeepDive && (
             <button
               onClick={() => onOpenDeepDive(comparison.symbolA)}
@@ -50,14 +52,15 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
         </div>
 
         {/* Emiten B */}
-        <div className="space-y-0.5 pl-2">
+        <div className="space-y-1 pl-2 flex flex-col items-center">
+          <CompanyLogo symbol={comparison.symbolB} companyName={comparison.nameB} size="sm" />
           <span className="font-mono font-bold text-xs text-slate-100 px-2 py-0.5 rounded bg-slate-800 inline-block">
             {comparison.symbolB}
           </span>
           <div className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
             Rp {comparison.priceB ? comparison.priceB.toLocaleString("id-ID") : "-"}
           </div>
-          <div className="text-[10px] text-slate-400 truncate">{comparison.nameB}</div>
+          <div className="text-[10px] text-slate-400 truncate max-w-[120px]">{comparison.nameB}</div>
           {onOpenDeepDive && (
             <button
               onClick={() => onOpenDeepDive(comparison.symbolB)}

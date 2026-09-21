@@ -24,6 +24,7 @@ import { ShareAlphaCardModal } from "@/components/retail/ShareAlphaCardModal";
 import { ChatMessage, ChatSession } from "@/components/chat/types";
 import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import {
   detectComparisonIntent,
   detectNewTargetSymbol,
@@ -662,13 +663,16 @@ export default function Home() {
                     }}
                     className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition"
                   >
-                    <div>
-                      <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">
-                        {item.sym}
-                      </span>
-                      <span className="text-[10px] text-slate-500 truncate block">
-                        {item.name}
-                      </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
+                      <div className="min-w-0">
+                        <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">
+                          {item.sym}
+                        </span>
+                        <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
+                          {item.name}
+                        </span>
+                      </div>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400">↵</span>
                   </button>

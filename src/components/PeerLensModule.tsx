@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { PeerLensData } from "@/lib/agent/types";
 import { ValuationData } from "@/lib/sectors/types";
 import { Scale, Layers, BarChart2, Table as TableIcon } from "lucide-react";
+import { CompanyLogo } from "./CompanyLogo";
 import {
   ResponsiveContainer,
   BarChart,
@@ -303,6 +304,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
                   >
                     <td className="py-2.5 px-3 font-sans">
                       <div className="flex items-center gap-2">
+                        <CompanyLogo symbol={peer.symbol} companyName={peer.companyName} size="xs" />
                         <span
                           className={`font-mono font-bold px-1.5 py-0.5 rounded text-xs ${
                             isTarget
