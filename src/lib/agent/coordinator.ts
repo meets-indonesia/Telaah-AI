@@ -190,9 +190,10 @@ export async function executeEvidencePlan(
       return null;
     });
 
-  // Always fetch daily transactions (1 credit) so terminal price, return %, RSI, and charts are always live
+  // Always fetch up to 90 days of daily transactions (1 credit in Sectors v2) so SMA20, SMA50, MACD, and charts are fully populated
+  const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   let dailyPromise: Promise<DailyTransaction[] | null> = client
-    .getDailyTransactions(clean)
+    .getDailyTransactions(clean, ninetyDaysAgo)
     .catch((err) => {
       console.warn(`Daily transactions fetch failed for ${clean}:`, err.message);
       return null;
