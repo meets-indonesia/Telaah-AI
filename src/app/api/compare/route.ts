@@ -51,13 +51,14 @@ export async function POST(req: NextRequest) {
     }
 
     const client = new SectorsClient();
+    const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
     // Fetch data in parallel for both tickers
     const [reportA, reportB, dailyA, dailyB, flowA, flowB] = await Promise.allSettled([
       client.getCompanyReport(symbolA, ["overview", "valuation", "financials", "peers"]),
       client.getCompanyReport(symbolB, ["overview", "valuation", "financials", "peers"]),
-      client.getDailyTransactions(symbolA),
-      client.getDailyTransactions(symbolB),
+      client.getDailyTransactions(symbolA, ninetyDaysAgo),
+      client.getDailyTransactions(symbolB, ninetyDaysAgo),
       client.getForeignFlow(symbolA),
       client.getForeignFlow(symbolB),
     ]);
@@ -129,11 +130,11 @@ export async function POST(req: NextRequest) {
 
     const result: StockCompareResult = {
       symbolA,
-      nameA: repA?.overview?.company_name || symbolA,
+      nameA: repA?.company_name || repA?.overview?.company_name || symbolA,
       priceA,
       sectorA: repA?.overview?.sector || "IDX",
       symbolB,
-      nameB: repB?.overview?.company_name || symbolB,
+      nameB: repB?.company_name || repB?.overview?.company_name || symbolB,
       priceB,
       sectorB: repB?.overview?.sector || "IDX",
       metrics,

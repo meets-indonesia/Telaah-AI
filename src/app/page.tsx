@@ -24,6 +24,10 @@ import { ShareAlphaCardModal } from "@/components/retail/ShareAlphaCardModal";
 import { ChatMessage, ChatSession } from "@/components/chat/types";
 import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import {
+  detectComparisonIntent,
+  detectNewTargetSymbol,
+} from "@/lib/agent/chat-router";
 import { saveReportToHistory, getHistory, getReportFromCache } from "@/lib/storage/history";
 import {
   AlertCircle,
@@ -276,45 +280,49 @@ export default function Home() {
       return;
     }
 
-    // 3. Check if user requested a Head-to-Head Comparison
-    const compareMatch = userText.match(/\b([A-Z]{4})\b.*?(?:vs|dan|dengan|lawan|bandingkan)\b.*?([A-Z]{4})\b/i);
-    if (compareMatch) {
-      const symA = compareMatch[1].toUpperCase();
-      const symB = compareMatch[2].toUpperCase();
-      if (symA !== symB) {
-        setIsLoading(true);
-        setLoadingStage(`Membandingkan data resmi ${symA} vs ${symB}...`);
+    // 3. Check if user requested a Head-to-Head Comparison (Context-Aware)
+    const compIntent = detectComparisonIntent(userText, report?.symbol);
+    if (compIntent.isCompare && compIntent.symbolA && compIntent.symbolB) {
+      const symA = compIntent.symbolA;
+      const symB = compIntent.symbolB;
+      setIsLoading(true);
+      setLoadingStage(`Membandingkan data resmi ${symA} vs ${symB}...`);
 
-        try {
-          const compRes = await fetch("/api/compare", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ symbolA: symA, symbolB: symB }),
-          });
-          const compData = await compRes.json();
+      try {
+        const compRes = await fetch("/api/compare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ symbolA: symA, symbolB: symB }),
+        });
+        const compData = await compRes.json();
 
-          if (compData.success && compData.comparison) {
-            const botReply: ChatMessage = {
-              id: "b_" + Date.now(),
-              sender: "assistant",
-              text: `**Hasil Komparasi: ${symA} vs ${symB}**\n\n${compData.comparison.retailSummary}`,
-              timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-              compareCard: compData.comparison,
-            };
-            const finalMsgs = [...newMessages, botReply];
-            setMessages(finalMsgs);
-            updateActiveSession(finalMsgs, report);
-            setIsLoading(false);
-            setLoadingStage("");
-            return;
-          }
-        } catch (e) {}
-      }
+        if (compData.success && compData.comparison) {
+          const botReply: ChatMessage = {
+            id: "b_" + Date.now(),
+            sender: "assistant",
+            text: `**Komparasi Finansial & Valuasi: ${symA} vs ${symB}**\n\n${compData.comparison.retailSummary}`,
+            timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+            compareCard: compData.comparison,
+          };
+          const finalMsgs = [...newMessages, botReply];
+          setMessages(finalMsgs);
+          updateActiveSession(finalMsgs, report);
+          setIsLoading(false);
+          setLoadingStage("");
+          return;
+        }
+      } catch (e) {}
     }
 
-    // If report is already active and the question doesn't clearly introduce a new ticker, ask QA first
-    const isNewTickerPattern = /\b[A-Z]{4}\b/i.test(userText);
-    if (report && !isNewTickerPattern) {
+    // 4. Check if user introduced a NEW stock ticker to switch focus
+    const newTarget = detectNewTargetSymbol(userText, report?.symbol);
+    if (newTarget) {
+      await executeAnalysis(userText, mode, newTarget, newMessages);
+      return;
+    }
+
+    // 5. If a report is already active and NO new stock was introduced, answer as contextual QA
+    if (report) {
       setIsLoading(true);
       setLoadingStage(`Menjawab pertanyaan berbasis data ${report.symbol}...`);
 
