@@ -50,6 +50,14 @@ import {
 type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
 
 export default function Home() {
+  const [symbolParam, setSymbolParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setSymbolParam(params.get("symbol"));
+    }
+  }, []);
   // Split pane: Copilot dock visibility
   const [isCopilotOpen, setIsCopilotOpen] = useState(true);
 
@@ -176,6 +184,13 @@ export default function Home() {
       }
     }
   }, []);
+
+  // Handle URL ?symbol= query parameter (e.g. redirected from Watchlist)
+  useEffect(() => {
+    if (symbolParam) {
+      handleSelectEmitenDirect(symbolParam);
+    }
+  }, [symbolParam]);
 
   // Sync sessions to localStorage
   const persistSessions = (updatedSessions: ChatSession[]) => {

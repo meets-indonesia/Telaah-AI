@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Database,
@@ -10,9 +10,11 @@ import {
   TrendingUp,
   TrendingDown,
   Sparkles,
+  Star,
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import { toggleWatchlist, isWatchlisted } from "@/lib/storage/history";
 import { CompanyLogo } from "./CompanyLogo";
 
 interface ReportHeaderProps {
@@ -28,6 +30,20 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   onOpenQA,
   onShare,
 }) => {
+  const [inWatchlist, setInWatchlist] = useState(false);
+
+  useEffect(() => {
+    if (report?.symbol) {
+      setInWatchlist(isWatchlisted(report.symbol));
+    }
+  }, [report?.symbol]);
+
+  const handleToggleWatchlist = () => {
+    if (!report?.symbol) return;
+    const newState = toggleWatchlist(report.symbol);
+    setInWatchlist(newState);
+  };
+
   const multiples = extractValuationMultiples(report.valuation);
   const lastPrice = report.technical?.lastPrice || multiples.lastClosePrice;
   const dailyReturn = report.technical?.lastPrice
@@ -87,6 +103,20 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
           {/* Pricing & Performance */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0 sm:self-auto self-end">
+            <button
+              type="button"
+              onClick={handleToggleWatchlist}
+              title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition ${
+                inWatchlist
+                  ? "bg-amber-500/15 border-amber-500/30 text-amber-400 font-semibold"
+                  : "border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <Star className={`w-3.5 h-3.5 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="hidden sm:inline">{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
+            </button>
+
             <div className="text-right">
               <div className="flex items-baseline gap-2 justify-end">
                 <span className="text-xl sm:text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
