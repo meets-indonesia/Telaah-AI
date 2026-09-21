@@ -79,6 +79,10 @@ export default function Home() {
 
   // Active Report State
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
+  // Kanvas Copilot Dock Messages (terpisah khusus emiten aktif di kanvas)
+  const [copilotMessages, setCopilotMessages] = useState<ChatMessage[]>([]);
+  const [isCopilotLoading, setIsCopilotLoading] = useState(false);
+  const [copilotLoadingStage, setCopilotLoadingStage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
   const [isWorkstationLoading, setIsWorkstationLoading] = useState(false);
@@ -210,7 +214,48 @@ export default function Home() {
     }
   }, [symbolParam]);
 
-  // Sync sessions to localStorage
+  // Copilot contextual chat khusus emiten aktif di kanvas
+  const handleCopilotSend = async (userText: string) => {
+    if (!report) return;
+    const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+    const userMsg: ChatMessage = {
+      id: "u_cop_" + Date.now(),
+      sender: "user",
+      text: userText,
+      timestamp: timeStr,
+    };
+    const nextCopilotMsgs = [...copilotMessages, userMsg];
+    setCopilotMessages(nextCopilotMsgs);
+    setIsCopilotLoading(true);
+    setCopilotLoadingStage(`Menganalisis data ${report.symbol}...`);
+
+    try {
+      const qaRes = await fetch("/api/qa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userText, report }),
+      });
+      const qaData = await qaRes.json();
+      const botReply: ChatMessage = {
+        id: "b_cop_" + Date.now(),
+        sender: "assistant",
+        text: qaData.answer || `Informasi mengenai ${report.symbol} telah diperbarui.`,
+        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      };
+      setCopilotMessages([...nextCopilotMsgs, botReply]);
+    } catch (err: any) {
+      const botReply: ChatMessage = {
+        id: "b_cop_" + Date.now(),
+        sender: "assistant",
+        text: `Kendala: ${err.message || "Gagal memproses pertanyaan"}.`,
+        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      };
+      setCopilotMessages([...nextCopilotMsgs, botReply]);
+    } finally {
+      setIsCopilotLoading(false);
+      setCopilotLoadingStage("");
+    }
+  };
   const persistSessions = (updatedSessions: ChatSession[]) => {
     setSessions(updatedSessions);
     try {
@@ -256,6 +301,20 @@ export default function Home() {
     }
   };
 
+  const handleTogglePinSession = (sessionId: string) => {
+    const updated = sessions.map((s) =>
+      s.id === sessionId ? { ...s, isPinned: !s.isPinned } : s
+    );
+    persistSessions(updated);
+  };
+
+  const handleClearAllSessions = () => {
+    if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat obrolan?")) {
+      persistSessions([]);
+      handleNewChat();
+    }
+  };
+
   const handleSelectExample = (prompt: string, mode: "quick" | "full" = "full") => {
     setPromptValue(prompt);
     setModeValue(mode);
@@ -266,6 +325,7 @@ export default function Home() {
     const clean = symbol.toUpperCase().trim();
     setIsSearchOpen(false);
     setModalSearchText("");
+    setViewMode("terminal"); // Beralih langsung ke kanvas terminal emiten
 
     // 1. Cek local storage cache terlebih dahulu
     const cached = getReportFromCache(clean);
@@ -303,6 +363,14 @@ export default function Home() {
         setReport(data.report);
         saveReportToHistory(data.report);
         setSidebarHistory(getHistory());
+        // Reset copilot kanvas dengan sambutan awal khusus emiten ini
+        const initialCopilotMsg: ChatMessage = {
+          id: "b_cop_init_" + Date.now(),
+          sender: "assistant",
+          text: `Halo! Saya Research Copilot untuk **${data.report.symbol} (${data.report.companyName})**. Tanyakan apa saja seputar rasio keuangan, valuasi, atau arus broker emiten ini.`,
+          timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+        };
+        setCopilotMessages([initialCopilotMsg]);
       }
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan saat memuat data.");
@@ -620,20 +688,14 @@ export default function Home() {
         isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen((prev) => !prev)}
         onNewChat={handleNewChat}
-        historyItems={sidebarHistory}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onTogglePinSession={handleTogglePinSession}
+        onDeleteSession={handleDeleteSession}
         watchlistSymbols={sidebarWatchlist}
-        currentSymbol={report?.symbol}
         onSelectSymbol={(sym) => handleSelectEmitenDirect(sym)}
-        onRemoveHistory={(sym) => {
-          removeHistoryItem(sym);
-          setSidebarHistory(getHistory());
-          if (report?.symbol === sym) setReport(null);
-        }}
-        onClearHistory={() => {
-          clearHistory();
-          setSidebarHistory([]);
-          setReport(null);
-        }}
+        onClearAllSessions={handleClearAllSessions}
       />
 
       {/* 2. Main Work Area */}
@@ -642,8 +704,6 @@ export default function Home() {
         <Header
           marketIndices={marketIndices}
           marketAsOfDate={marketAsOfDate}
-          isCopilotOpen={viewMode === "terminal"}
-          onToggleCopilot={() => setViewMode((prev) => (prev === "terminal" ? "chat" : "terminal"))}
           onOpenJargon={() => setIsJargonOpen(true)}
           onOpenDividend={() => setIsDividendOpen(true)}
           onFocusSearch={() => {
@@ -1030,13 +1090,18 @@ export default function Home() {
             {/* Chat Feed */}
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <ChatFeed
-                messages={messages}
-                isLoading={isLoading}
-                loadingStage={loadingStage}
-                onSelectPrompt={(p) => handleChatSend(p, "quick")}
-                onOpenDeepDive={(rep) => {
-                  setReport(rep);
-                }}
+                messages={copilotMessages.length > 0 ? copilotMessages : [
+                  {
+                    id: "b_cop_fallback",
+                    sender: "assistant",
+                    text: `Silakan tanyakan detail lanjutan seputar data fundamental, arus broker, atau valuasi **${report?.symbol || "emiten ini"}**.`,
+                    timestamp: "",
+                  }
+                ]}
+                isLoading={isCopilotLoading}
+                loadingStage={copilotLoadingStage}
+                onSelectPrompt={(p) => handleCopilotSend(p)}
+                onOpenDeepDive={() => {}}
                 onOpenSymbolTerminal={(sym) => {
                   handleSelectEmitenDirect(sym);
                 }}
@@ -1051,19 +1116,19 @@ export default function Home() {
             {report && (
               <div className="px-3 py-1.5 border-t border-white/10 bg-black/70 flex items-center gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
                 <button
-                  onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
+                  onClick={() => handleCopilotSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`)}
                   className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Dividen Yield
                 </button>
                 <button
-                  onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
+                  onClick={() => handleCopilotSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`)}
                   className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Broker Flow 5H
                 </button>
                 <button
-                  onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
+                  onClick={() => handleCopilotSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`)}
                   className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Risiko Utama
@@ -1073,8 +1138,8 @@ export default function Home() {
 
             {/* Sticky Bottom Chat Input */}
             <ChatInput
-              onSend={handleChatSend}
-              isLoading={isLoading}
+              onSend={handleCopilotSend}
+              isLoading={isCopilotLoading}
               initialValue=""
             />
           </aside>

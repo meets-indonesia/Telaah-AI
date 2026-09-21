@@ -7,20 +7,14 @@ import {
   SquarePen,
   ChevronLeft,
   ChevronRight,
-  History,
-  Star,
+  MessageSquare,
+  Pin,
   Trash2,
-  Clock,
-  TrendingUp,
-  TrendingDown,
+  Star,
   LayoutDashboard,
-  Search,
-  BookOpen,
-  Calculator,
   Compass,
   Zap,
 } from "lucide-react";
-import { SavedReportItem, formatRelativeTime } from "@/lib/storage/history";
 import { ChatSession } from "@/components/chat/types";
 import { CompanyLogo } from "@/components/CompanyLogo";
 
@@ -28,27 +22,38 @@ interface MinimalSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   onNewChat: () => void;
-  historyItems: SavedReportItem[];
+  sessions: ChatSession[];
+  activeSessionId?: string | null;
+  onSelectSession: (id: string) => void;
+  onTogglePinSession: (id: string) => void;
+  onDeleteSession: (id: string) => void;
   watchlistSymbols: string[];
-  currentSymbol?: string;
   onSelectSymbol: (symbol: string) => void;
-  onRemoveHistory: (symbol: string) => void;
-  onClearHistory: () => void;
+  onClearAllSessions: () => void;
 }
 
 export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
   isOpen,
   onToggle,
   onNewChat,
-  historyItems,
+  sessions,
+  activeSessionId,
+  onSelectSession,
+  onTogglePinSession,
+  onDeleteSession,
   watchlistSymbols,
-  currentSymbol,
   onSelectSymbol,
-  onRemoveHistory,
-  onClearHistory,
+  onClearAllSessions,
 }) => {
   const pathname = usePathname();
-  const [activeSubTab, setActiveSubTab] = useState<"history" | "watchlist">("history");
+  const [activeSubTab, setActiveSubTab] = useState<"chats" | "watchlist">("chats");
+
+  // Sort sessions: pinned first, then chronological
+  const sortedSessions = [...sessions].sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return (b.id > a.id ? 1 : -1);
+  });
 
   return (
     <>
@@ -107,14 +112,14 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
             }`}
           >
             <SquarePen className="w-4 h-4 text-orange-500 shrink-0" />
-            {isOpen && <span>Riset Emiten Baru</span>}
+            {isOpen && <span>Obrolan Baru</span>}
           </button>
         </div>
 
         {/* Navigation Stations */}
         <div className="px-2 space-y-0.5 shrink-0 text-xs font-medium">
           {[
-            { href: "/", label: "Percakapan Terminal", icon: LayoutDashboard },
+            { href: "/", label: "Percakapan Pintar", icon: LayoutDashboard },
             { href: "/watchlist", label: "Watchlist Matriks", icon: Star },
             { href: "/technical", label: "Screener Teknikal", icon: Compass },
             { href: "/insider", label: "Insider Whales", icon: Zap },
@@ -139,22 +144,22 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
           })}
         </div>
 
-        {/* Middle Content: History & Watchlist (Only visible when open) */}
+        {/* Middle Content: Riwayat Chat & Watchlist */}
         {isOpen ? (
           <div className="flex-1 flex flex-col min-h-0 mt-3 border-t border-slate-200 dark:border-white/10">
             {/* Sub Tabs */}
             <div className="flex items-center px-3 pt-2.5 gap-2 text-xs border-b border-slate-100 dark:border-white/5">
               <button
                 type="button"
-                onClick={() => setActiveSubTab("history")}
+                onClick={() => setActiveSubTab("chats")}
                 className={`pb-1.5 flex items-center gap-1.5 text-[11px] font-medium transition border-b-2 ${
-                  activeSubTab === "history"
+                  activeSubTab === "chats"
                     ? "border-orange-500 text-orange-400 font-semibold"
                     : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <History className="w-3.5 h-3.5" />
-                <span>Riwayat ({historyItems.length})</span>
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Riwayat Chat ({sessions.length})</span>
               </button>
 
               <button
@@ -173,51 +178,57 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
 
             {/* List Body */}
             <div className="flex-1 overflow-y-auto p-2 space-y-1 text-xs">
-              {activeSubTab === "history" ? (
-                historyItems.length > 0 ? (
-                  historyItems.map((item) => {
-                    const isSelected = currentSymbol === item.symbol;
-                    const isPositive = (item.dailyReturnPct ?? 0) >= 0;
+              {activeSubTab === "chats" ? (
+                sortedSessions.length > 0 ? (
+                  sortedSessions.map((session) => {
+                    const isSelected = activeSessionId === session.id;
                     return (
                       <div
-                        key={item.id}
-                        onClick={() => onSelectSymbol(item.symbol)}
+                        key={session.id}
+                        onClick={() => onSelectSession(session.id)}
                         className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${
                           isSelected
                             ? "bg-orange-500/10 text-orange-400 border border-orange-500/25"
                             : "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300"
                         }`}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <CompanyLogo symbol={item.symbol} companyName={item.companyName} size="sm" />
-                          <div className="min-w-0">
-                            <span className="font-mono font-bold block leading-tight">
-                              {item.symbol}
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${session.isPinned ? "text-amber-400" : "text-slate-400"}`} />
+                          <div className="min-w-0 flex-1">
+                            <span className="truncate block font-medium leading-tight">
+                              {session.title || "Obrolan Riset"}
                             </span>
-                            <span className="text-[10px] text-slate-400 truncate block max-w-[110px]">
-                              {item.companyName}
+                            <span className="text-[10px] text-slate-400 truncate block">
+                              {session.date}
                             </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 shrink-0">
-                          {item.lastPrice ? (
-                            <span
-                              className={`text-[10px] font-mono font-bold ${
-                                isPositive ? "text-emerald-400" : "text-rose-400"
-                              }`}
-                            >
-                              {item.lastPrice.toLocaleString("id-ID")}
-                            </span>
-                          ) : null}
+                        {/* Action Buttons: Pin & Delete */}
+                        <div className="flex items-center gap-1 shrink-0 ml-1.5">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onRemoveHistory(item.symbol);
+                              onTogglePinSession(session.id);
                             }}
-                            title="Hapus dari riwayat"
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-400 transition"
+                            title={session.isPinned ? "Lepas Pin Chat" : "Pin Chat Ini"}
+                            className={`p-1 rounded transition ${
+                              session.isPinned
+                                ? "text-amber-400 hover:text-amber-500"
+                                : "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-amber-400"
+                            }`}
+                          >
+                            <Pin className={`w-3 h-3 ${session.isPinned ? "fill-amber-400" : ""}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteSession(session.id);
+                            }}
+                            title="Hapus Chat"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 transition"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -226,8 +237,15 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                     );
                   })
                 ) : (
-                  <div className="p-4 text-center text-slate-400 text-xs">
-                    Belum ada riwayat telaah.
+                  <div className="p-4 text-center text-slate-400 text-xs space-y-2">
+                    <p>Belum ada riwayat chat.</p>
+                    <button
+                      type="button"
+                      onClick={onNewChat}
+                      className="px-2.5 py-1 text-[11px] rounded bg-orange-500/10 text-orange-400 border border-orange-500/25 hover:bg-orange-500/20 transition"
+                    >
+                      + Buat Obrolan Baru
+                    </button>
                   </div>
                 )
               ) : (
@@ -236,11 +254,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                     <div
                       key={sym}
                       onClick={() => onSelectSymbol(sym)}
-                      className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${
-                        currentSymbol === sym
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/25"
-                          : "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300"
-                      }`}
+                      className="group flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 transition"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <CompanyLogo symbol={sym} size="sm" />
@@ -257,30 +271,38 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
               )}
             </div>
 
-            {/* Bottom Footer Actions */}
-            {activeSubTab === "history" && historyItems.length > 0 && (
+            {/* Bottom Clear All Chats */}
+            {activeSubTab === "chats" && sessions.length > 0 && (
               <div className="p-2 border-t border-slate-100 dark:border-white/5 shrink-0">
                 <button
                   type="button"
-                  onClick={onClearHistory}
+                  onClick={onClearAllSessions}
                   className="w-full text-center text-[10px] text-slate-400 hover:text-rose-400 py-1 transition font-mono"
                 >
-                  Bersihkan Riwayat
+                  Bersihkan Seluruh Chat
                 </button>
               </div>
             )}
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center py-4 space-y-3">
-            {historyItems.slice(0, 5).map((item) => (
+            <button
+              type="button"
+              onClick={onNewChat}
+              title="Obrolan Baru"
+              className="p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-orange-500 transition"
+            >
+              <SquarePen className="w-4 h-4" />
+            </button>
+            {sortedSessions.slice(0, 5).map((session) => (
               <button
-                key={item.id}
+                key={session.id}
                 type="button"
-                onClick={() => onSelectSymbol(item.symbol)}
-                title={item.symbol}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-white/10 transition"
+                onClick={() => onSelectSession(session.id)}
+                title={session.title}
+                className="p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-white transition"
               >
-                <CompanyLogo symbol={item.symbol} size="sm" />
+                <MessageSquare className="w-4 h-4" />
               </button>
             ))}
           </div>

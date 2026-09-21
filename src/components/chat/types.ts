@@ -38,4 +38,5 @@ export interface ChatSession {
   date: string;
   messages: ChatMessage[];
   report?: CompanyIntelligenceReport | null;
+  isPinned?: boolean;
 }

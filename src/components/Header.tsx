@@ -30,8 +30,6 @@ interface HeaderProps {
   hasReport?: boolean;
   marketIndices?: MarketIndexItem[];
   marketAsOfDate?: string;
-  isCopilotOpen?: boolean;
-  onToggleCopilot?: () => void;
   onOpenJargon?: () => void;
   onOpenDividend?: () => void;
   onFocusSearch?: () => void;
@@ -40,8 +38,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   marketIndices = [],
   marketAsOfDate = "2026-09-11",
-  isCopilotOpen = true,
-  onToggleCopilot,
   onOpenJargon,
   onOpenDividend,
   onFocusSearch,
@@ -122,24 +118,6 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <BookOpen className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
               <span className="hidden xl:inline">Jargon</span>
-            </button>
-          )}
-
-          {/* Conversation / Canvas Toggle Button with Hotkey */}
-          {onToggleCopilot && (
-            <button
-              type="button"
-              onClick={onToggleCopilot}
-              title={isCopilotOpen ? "Kembali ke Chat (⌘J)" : "Buka Kanvas Lengkap (⌘J)"}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition rounded ${
-                isCopilotOpen
-                  ? "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
-              }`}
-            >
-              {isCopilotOpen ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
-              <span>{isCopilotOpen ? "Chat" : "Kanvas"}</span>
-              <kbd className="hidden lg:inline-flex items-center text-[9px] font-mono text-slate-500 ml-0.5">⌘J</kbd>
             </button>
           )}
 
