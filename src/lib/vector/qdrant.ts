@@ -65,15 +65,19 @@ export async function ensureCollectionExists(): Promise<boolean> {
     });
 
     if (createRes.ok) {
-      // Create payload index for symbol to allow fast filtered search
-      await fetch(`${QDRANT_BASE_URL}/collections/${COLLECTION_NAME}/index`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          field_name: "symbol",
-          field_schema: "keyword",
+      // Create payload index for symbol and mode to allow fast filtered search
+      await Promise.all([
+        fetch(`${QDRANT_BASE_URL}/collections/${COLLECTION_NAME}/index`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field_name: "symbol", field_schema: "keyword" }),
         }),
-      }).catch(() => {});
+        fetch(`${QDRANT_BASE_URL}/collections/${COLLECTION_NAME}/index`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field_name: "mode", field_schema: "keyword" }),
+        }),
+      ]).catch(() => {});
 
       isCollectionReady = true;
       return true;
@@ -93,7 +97,8 @@ export async function ensureCollectionExists(): Promise<boolean> {
 export async function searchSemanticReportCache(
   prompt: string,
   symbol?: string,
-  minSimilarity: number = 0.88
+  minSimilarity: number = 0.88,
+  requiredMode?: AnalysisMode
 ): Promise<SemanticMatchResult> {
   try {
     const collectionOk = await ensureCollectionExists();
@@ -107,13 +112,25 @@ export async function searchSemanticReportCache(
     }
 
     const filterClause: any = {};
+    const mustConditions: any[] = [];
+
     if (symbol) {
-      filterClause.must = [
-        {
-          key: "symbol",
-          match: { value: symbol.toUpperCase().replace(".JK", "") },
-        },
-      ];
+      mustConditions.push({
+        key: "symbol",
+        match: { value: symbol.toUpperCase().replace(".JK", "") },
+      });
+    }
+
+    // If caller specifically asks for "full" mode, do not serve a "quick" cache
+    if (requiredMode === "full") {
+      mustConditions.push({
+        key: "mode",
+        match: { value: "full" },
+      });
+    }
+
+    if (mustConditions.length > 0) {
+      filterClause.must = mustConditions;
     }
 
     const searchBody: any = {
@@ -123,7 +140,7 @@ export async function searchSemanticReportCache(
       score_threshold: minSimilarity,
     };
 
-    if (symbol) {
+    if (mustConditions.length > 0) {
       searchBody.filter = filterClause;
     }
 

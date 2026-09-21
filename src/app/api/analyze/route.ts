@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     // Fast-path: Check semantic cache if confirmedSymbol is passed
     if (confirmedSymbol && /^[A-Z]{4}$/.test(confirmedSymbol)) {
-      const cacheCheck = await searchSemanticReportCache(prompt, confirmedSymbol, 0.88);
+      const cacheCheck = await searchSemanticReportCache(prompt, confirmedSymbol, 0.88, mode);
       if (cacheCheck.isMatch && cacheCheck.isFresh && cacheCheck.payload?.report) {
         return NextResponse.json({
           success: true,
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 1b: Semantic Vector Cache Check with targetSymbol
-    const cacheHit = await searchSemanticReportCache(prompt, targetSymbol, 0.88);
+    const cacheHit = await searchSemanticReportCache(prompt, targetSymbol, 0.88, mode);
     if (cacheHit.isMatch && cacheHit.isFresh && cacheHit.payload?.report) {
       return NextResponse.json({
         success: true,
