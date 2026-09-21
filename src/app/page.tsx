@@ -23,6 +23,7 @@ import { DividendCalculatorModal } from "@/components/retail/DividendCalculatorM
 import { ShareAlphaCardModal } from "@/components/retail/ShareAlphaCardModal";
 import { ChatMessage, ChatSession } from "@/components/chat/types";
 import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 import { saveReportToHistory, getHistory, getReportFromCache } from "@/lib/storage/history";
 import {
   AlertCircle,
@@ -414,8 +415,9 @@ export default function Home() {
 
         // Build friendly retail text & rich card
         const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-        const peVal = rep.valuation?.historical_valuation?.pe?.current ?? rep.peerLens?.peers?.find((p) => p.isTarget)?.pe;
-        const pbVal = rep.valuation?.historical_valuation?.pb?.current ?? rep.peerLens?.peers?.find((p) => p.isTarget)?.pb;
+        const multiples = extractValuationMultiples(rep.valuation);
+        const peVal = multiples.pe ?? rep.peerLens?.peers?.find((p) => p.isTarget)?.pe;
+        const pbVal = multiples.pb ?? rep.peerLens?.peers?.find((p) => p.isTarget)?.pb;
         const peStr = peVal ? `${peVal.toFixed(1)}x` : "-";
         const pbStr = pbVal ? `${pbVal.toFixed(2)}x` : "-";
 

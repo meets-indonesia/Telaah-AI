@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 
 interface ReportHeaderProps {
   report: CompanyIntelligenceReport;
@@ -26,11 +27,14 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   onOpenQA,
   onShare,
 }) => {
-  const dailyReturn = report.technical?.dailyReturnPct ?? 0;
+  const multiples = extractValuationMultiples(report.valuation);
+  const lastPrice = report.technical?.lastPrice || multiples.lastClosePrice;
+  const dailyReturn = report.technical?.lastPrice
+    ? (report.technical?.dailyReturnPct ?? 0)
+    : (multiples.dailyChange ? multiples.dailyChange * 100 : 0);
   const isPositive = dailyReturn >= 0;
-  const lastPrice = report.technical?.lastPrice;
-  const peRatio = report.valuation?.historical_valuation?.pe?.current ?? report.valuation?.forward_pe;
-  const pbvRatio = report.valuation?.historical_valuation?.pb?.current;
+  const peRatio = multiples.pe;
+  const pbvRatio = multiples.pb;
   const rsi = report.technical?.rsi14;
   const foreignVal = report.flowLens?.cohortSummary?.foreignNetValue;
   const foreignFlow = foreignVal

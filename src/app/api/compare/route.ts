@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SectorsClient } from "@/lib/sectors/client";
 import { computeTechnicalIndicators } from "@/lib/quant/indicators";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 
 export interface StockCompareMetric {
   category: string;
@@ -71,15 +72,18 @@ export async function POST(req: NextRequest) {
     const techA = computeTechnicalIndicators(txA);
     const techB = computeTechnicalIndicators(txB);
 
+    const multA = extractValuationMultiples(repA?.valuation);
+    const multB = extractValuationMultiples(repB?.valuation);
+
     // Extract metrics
-    const priceA = techA.lastPrice || 0;
-    const priceB = techB.lastPrice || 0;
+    const priceA = techA.lastPrice || multA.lastClosePrice || 0;
+    const priceB = techB.lastPrice || multB.lastClosePrice || 0;
 
-    const peA = repA?.valuation?.historical_valuation?.pe?.current ?? null;
-    const peB = repB?.valuation?.historical_valuation?.pe?.current ?? null;
+    const peA = multA.pe;
+    const peB = multB.pe;
 
-    const pbA = repA?.valuation?.historical_valuation?.pb?.current ?? null;
-    const pbB = repB?.valuation?.historical_valuation?.pb?.current ?? null;
+    const pbA = multA.pb;
+    const pbB = multB.pb;
 
     // Foreign net flow (sum last 5 days)
     const flowItemsA = Array.isArray(fA) ? fA : Array.isArray((fA as any)?.data) ? (fA as any).data : [];

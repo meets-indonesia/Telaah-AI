@@ -22,13 +22,30 @@ export interface CompanyOverview {
   listing_shares?: number;
 }
 
+export interface HistoricalValuationYear {
+  year: number;
+  pe?: number | null;
+  pb?: number | null;
+  ps?: number | null;
+  pcf?: number | null;
+  enterprise_to_ebitda?: number | null;
+  enterprise_to_revenue?: number | null;
+  peg?: number | null;
+  pe_peer_avg?: number | null;
+  pb_peer_avg?: number | null;
+  ps_peer_avg?: number | null;
+}
+
 export interface ValuationData {
   last_close_price?: number;
   latest_close_date?: string;
   daily_close_change?: number;
   forward_pe?: number | null;
   intrinsic_value?: number | null;
-  historical_valuation?: {
+  current_pe?: number | null;
+  current_pb?: number | null;
+  current_ps?: number | null;
+  historical_valuation?: HistoricalValuationYear[] | {
     pe?: {
       current?: number;
       mean_3yr?: number;
@@ -48,6 +65,61 @@ export interface ValuationData {
       mean_3yr?: number;
     };
     dividend_yield?: number;
+  };
+}
+
+export function extractValuationMultiples(valuation?: ValuationData | null): {
+  pe: number | null;
+  pb: number | null;
+  ps: number | null;
+  forwardPe: number | null;
+  intrinsicValue: number | null;
+  lastClosePrice: number | null;
+  dailyChange: number | null;
+} {
+  if (!valuation) {
+    return {
+      pe: null,
+      pb: null,
+      ps: null,
+      forwardPe: null,
+      intrinsicValue: null,
+      lastClosePrice: null,
+      dailyChange: null,
+    };
+  }
+
+  let pe: number | null = valuation.current_pe ?? null;
+  let pb: number | null = valuation.current_pb ?? null;
+  let ps: number | null = valuation.current_ps ?? null;
+
+  if (Array.isArray(valuation.historical_valuation)) {
+    const list = [...valuation.historical_valuation].sort((a, b) => (b.year || 0) - (a.year || 0));
+    const withPe = list.find((item) => item.pe != null && item.pe > 0);
+    const withPb = list.find((item) => item.pb != null && item.pb > 0);
+    const withPs = list.find((item) => item.ps != null && item.ps > 0);
+    if (pe == null && withPe?.pe != null) pe = withPe.pe;
+    if (pb == null && withPb?.pb != null) pb = withPb.pb;
+    if (ps == null && withPs?.ps != null) ps = withPs.ps;
+  } else if (valuation.historical_valuation && typeof valuation.historical_valuation === "object") {
+    const hist = valuation.historical_valuation as any;
+    if (pe == null && hist.pe?.current != null) pe = hist.pe.current;
+    if (pb == null && hist.pb?.current != null) pb = hist.pb.current;
+    if (ps == null && hist.ps?.current != null) ps = hist.ps.current;
+  }
+
+  if (pe == null && valuation.forward_pe != null) {
+    pe = valuation.forward_pe;
+  }
+
+  return {
+    pe,
+    pb,
+    ps,
+    forwardPe: valuation.forward_pe ?? null,
+    intrinsicValue: valuation.intrinsic_value ?? null,
+    lastClosePrice: valuation.last_close_price ?? null,
+    dailyChange: valuation.daily_close_change ?? null,
   };
 }
 

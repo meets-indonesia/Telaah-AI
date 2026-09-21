@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Download, Copy, Check, X, Sparkles, Image as ImageIcon, Share2 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 
 interface ShareAlphaCardModalProps {
   isOpen: boolean;
@@ -146,8 +147,9 @@ export const ShareAlphaCardModal: React.FC<ShareAlphaCardModalProps> = ({
     // 5. Three Key Pillars Cards
     const pillarsY = lineY + 90;
     const pillarHeight = 150;
-    const pe = report.valuation?.historical_valuation?.pe?.current ?? report.peerLens?.peers?.find(p => p.isTarget)?.pe;
-    const pb = report.valuation?.historical_valuation?.pb?.current ?? report.peerLens?.peers?.find(p => p.isTarget)?.pb;
+    const multiples = extractValuationMultiples(report.valuation);
+    const pe = multiples.pe ?? report.peerLens?.peers?.find(p => p.isTarget)?.pe;
+    const pb = multiples.pb ?? report.peerLens?.peers?.find(p => p.isTarget)?.pb;
 
     const pillars = [
       {
