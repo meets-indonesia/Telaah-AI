@@ -261,11 +261,11 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
             <button
               onClick={() => setShowSMA20(!showSMA20)}
               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono transition ${
-                showSMA20 ? "text-amber-400 font-bold bg-amber-500/10" : "text-slate-500"
+                showSMA20 ? "text-zinc-400 font-bold bg-zinc-500/10" : "text-slate-500"
               }`}
               title="Toggle SMA 20"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <span className="w-2 h-2 rounded-full bg-zinc-400" />
               SMA20
             </button>
             <button
@@ -338,7 +338,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
               </span>
             </div>
             {activeItem.sma20 && showSMA20 && (
-              <div className="text-amber-400 hidden sm:inline">
+              <div className="text-zinc-400 hidden sm:inline">
                 <span className="text-slate-500 mr-1">SMA20:</span>
                 Rp {activeItem.sma20.toLocaleString("id-ID")}
               </div>

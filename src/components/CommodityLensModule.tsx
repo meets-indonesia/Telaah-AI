@@ -55,11 +55,11 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
+            <div className="w-6 h-6 rounded bg-zinc-500/10 border border-zinc-500/20 text-zinc-500 flex items-center justify-center">
               <Pickaxe className="w-3.5 h-3.5" />
             </div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Commodity & Mining Lens</h3>
-            <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+            <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-500/15 text-amber-700 dark:text-zinc-300 border border-zinc-500/30">
               {sectorBadge}
             </span>
           </div>
@@ -71,7 +71,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
         <div className="flex items-center gap-2">
           <div className="bg-white dark:bg-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
             <span className="text-[10px] font-mono text-slate-400 block">Komoditas Inti</span>
-            <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-xs">{primaryCommodity}</span>
+            <span className="font-bold text-amber-600 dark:text-zinc-400 font-mono text-xs">{primaryCommodity}</span>
           </div>
         </div>
       </div>
@@ -80,7 +80,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
-            <Flame className="w-3.5 h-3.5 text-amber-400" /> Harga Acuan Komoditas Global Terkait
+            <Flame className="w-3.5 h-3.5 text-zinc-400" /> Harga Acuan Komoditas Global Terkait
           </h4>
           <span className="text-[10px] text-slate-500 font-mono">
             Data Benchmark: {benchmarks[0]?.lastUpdated || "Live"}
@@ -171,7 +171,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
               <span className="text-[10px] uppercase tracking-wider text-slate-400 block mb-1">
                 Target Volume Produksi
               </span>
-              <span className="text-sm sm:text-base font-mono font-bold text-amber-400 block">
+              <span className="text-sm sm:text-base font-mono font-bold text-zinc-400 block">
                 {operations.annualProductionTarget || "Sesuai RKAB"}
               </span>
               <span className="text-[10px] text-slate-500 block mt-0.5">
@@ -211,7 +211,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
                       <div className="flex items-center justify-between">
                         <strong className="text-slate-200 font-semibold">{site.name}</strong>
                         {site.reserves && site.reserves !== "-" && (
-                          <span className="text-[10px] font-mono text-amber-400">
+                          <span className="text-[10px] font-mono text-zinc-400">
                             {site.reserves}
                           </span>
                         )}

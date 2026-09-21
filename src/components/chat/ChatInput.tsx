@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Zap, Compass, Loader2, Mic, Paperclip, X, Image as ImageIcon } from "lucide-react";
+import { Send, Zap, Compass, Loader2, Mic, Paperclip, X } from "lucide-react";
 import { AnalysisMode } from "@/lib/agent/types";
 
 interface ChatInputProps {

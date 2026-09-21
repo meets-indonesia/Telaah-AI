@@ -191,7 +191,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
             type="button"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition ${
               activeView === "chart-nominal"
-                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
@@ -203,7 +203,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
             type="button"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition ${
               activeView === "chart-margin"
-                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
@@ -215,7 +215,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
             type="button"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition ${
               activeView === "table"
-                ? "bg-white dark:bg-brand-600 text-brand-600 dark:text-white shadow-xs"
+                ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
@@ -363,7 +363,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
                               <span>Gross Margin:</span>
                               <span className="font-bold">{data.grossMargin}%</span>
                             </div>
-                            <div className="flex items-center justify-between gap-4 text-amber-600 dark:text-amber-400">
+                            <div className="flex items-center justify-between gap-4 text-amber-600 dark:text-zinc-400">
                               <span>Operating Margin:</span>
                               <span className="font-bold">{data.operatingMargin}%</span>
                             </div>

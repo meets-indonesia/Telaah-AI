@@ -121,13 +121,13 @@ export const JargonBusterModal: React.FC<JargonBusterModalProps> = ({
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900/40">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-zinc-900 text-white flex items-center justify-center shadow-xs">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>Kamus Pintar Saham Ritel</span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800">
                   Jargon Buster
                 </span>
               </h3>
@@ -156,7 +156,7 @@ export const JargonBusterModal: React.FC<JargonBusterModalProps> = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari istilah saham (misal: PBV, Foreign Flow, HAKA, Dividen)..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-zinc-700/20 focus:border-zinc-700 transition"
             />
           </div>
 
@@ -169,7 +169,7 @@ export const JargonBusterModal: React.FC<JargonBusterModalProps> = ({
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1 rounded-lg text-[11px] font-medium transition shrink-0 ${
                   selectedCategory === cat
-                    ? "bg-brand-600 text-white font-semibold shadow-xs"
+                    ? "bg-zinc-900 text-white font-semibold shadow-xs"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"
                 }`}
               >
@@ -190,7 +190,7 @@ export const JargonBusterModal: React.FC<JargonBusterModalProps> = ({
             filtered.map((item) => (
               <div
                 key={item.term}
-                className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0f172a] shadow-xs space-y-2.5 hover:border-brand-300 dark:hover:border-brand-800 transition"
+                className="p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-[#0f172a] shadow-xs space-y-2.5 hover:border-zinc-300 dark:hover:border-zinc-800 transition"
               >
                 {/* Title and Category */}
                 <div className="flex items-center justify-between gap-2">
@@ -213,9 +213,9 @@ export const JargonBusterModal: React.FC<JargonBusterModalProps> = ({
                 </p>
 
                 {/* Everyday Analogy */}
-                <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 text-xs text-amber-950 dark:text-amber-200 space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-300 text-[11px]">
-                    <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-zinc-950/30 border border-amber-200/80 dark:border-amber-800/50 text-xs text-zinc-950 dark:text-amber-200 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-zinc-300 text-[11px]">
+                    <Lightbulb className="w-3.5 h-3.5 text-zinc-500" />
                     <span>Analogi Sehari-hari:</span>
                   </div>
                   <p className="text-[11px] leading-relaxed text-amber-900 dark:text-amber-100/90">

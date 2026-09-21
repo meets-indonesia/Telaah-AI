@@ -110,11 +110,11 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 mb-1 text-xs rounded border transition shrink-0 ${
                   inWatchlist
-                    ? "bg-amber-500/15 border-amber-500/30 text-amber-500 dark:text-amber-400 font-semibold"
+                    ? "bg-zinc-500/15 border-zinc-500/30 text-zinc-500 dark:text-zinc-400 font-semibold"
                     : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
-                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
+                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-zinc-400 text-zinc-400" : ""}`} />
                 <span>{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
               </button>
               <div className="flex items-baseline gap-2 justify-end">
@@ -209,7 +209,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                       0 kredit · Cache lokal
                     </span>
                   ) : (
-                    <span className="text-amber-600 dark:text-amber-400">
+                    <span className="text-amber-600 dark:text-zinc-400">
                       {report.creditsConsumed} kredit API
                     </span>
                   )}
@@ -228,11 +228,11 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                   <button
                     type="button"
                     onClick={onToggleCopilot}
-                    title="Buka Copilot Emiten Ini"
-                    className="flex items-center gap-1 px-2 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 text-xs font-semibold transition"
+                    title="Buka atau sembunyikan Copilot emiten ini"
+                    aria-label="Toggle Copilot"
+                    className="p-1.5 rounded text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Copilot</span>
+                    <MessageSquare className="w-4 h-4" />
                   </button>
                 )}
                 <button
@@ -252,8 +252,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       {/* Executive Thesis & Direct Answer Strip */}
       <div className="bg-black/75 rounded-md border border-white/10 p-3.5 space-y-2">
         <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-mono">
-          <div className="flex items-center gap-1.5 text-orange-400 uppercase tracking-wider font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+          <div className="flex items-center gap-1.5 text-zinc-200 uppercase tracking-wider font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
             <span>Executive Brief</span>
           </div>
           <span className="text-slate-500 uppercase tracking-widest text-[9px]">

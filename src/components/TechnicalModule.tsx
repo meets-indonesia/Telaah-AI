@@ -89,7 +89,7 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Moving Averages</span>
           <div className="font-mono text-[11px] space-y-0.5">
             <div className="text-slate-600 dark:text-slate-400">
-              SMA20: <strong className="text-amber-600 dark:text-amber-400 tabular-nums">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong>
+              SMA20: <strong className="text-amber-600 dark:text-zinc-400 tabular-nums">Rp {technical.sma20?.toLocaleString("id-ID") ?? "-"}</strong>
             </div>
             <div className="text-slate-600 dark:text-slate-400">
               SMA50: <strong className="text-indigo-600 dark:text-indigo-400 tabular-nums">Rp {technical.sma50?.toLocaleString("id-ID") ?? "-"}</strong>

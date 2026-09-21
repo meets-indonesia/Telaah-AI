@@ -93,11 +93,11 @@ export const InputStation: React.FC<InputStationProps> = ({
               onClick={() => setMode("quick")}
               className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition ${
                 mode === "quick"
-                  ? "bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 shadow-2xs font-semibold"
+                  ? "bg-white dark:bg-slate-800 text-amber-700 dark:text-zinc-400 shadow-2xs font-semibold"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <Zap className="w-3 h-3 text-amber-500" />
+              <Zap className="w-3 h-3 text-zinc-500" />
               <span>Quick</span>
               <span className="text-[10px] font-mono text-slate-400">~6 cr</span>
             </button>

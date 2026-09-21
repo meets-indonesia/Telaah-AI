@@ -208,7 +208,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                     key={idx}
                     className="p-2.5 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
                   >
-                    <div className="w-7 h-7 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
+                    <div className="w-7 h-7 rounded bg-zinc-500/10 text-zinc-400 flex items-center justify-center shrink-0 border border-zinc-500/20">
                       <Newspaper className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">

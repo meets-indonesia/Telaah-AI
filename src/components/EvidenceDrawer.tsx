@@ -192,7 +192,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                 >
                   <div className="flex items-center justify-between text-slate-300 mb-1">
                     <span className="font-semibold text-blue-400">GET {call.endpoint}</span>
-                    <span className="text-amber-400 text-[11px] font-bold">
+                    <span className="text-zinc-400 text-[11px] font-bold">
                       +{call.credits} Kredit
                     </span>
                   </div>

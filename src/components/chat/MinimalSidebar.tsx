@@ -111,7 +111,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
               !isOpen ? "md:px-0" : ""
             }`}
           >
-            <SquarePen className="w-4 h-4 text-orange-500 shrink-0" />
+            <SquarePen className="w-4 h-4 text-zinc-700 shrink-0" />
             {isOpen && <span>Obrolan Baru</span>}
           </button>
         </div>
@@ -133,7 +133,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                 title={item.label}
                 className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md transition ${
                   active
-                    ? "bg-orange-500/15 text-orange-400 font-semibold"
+                    ? "bg-zinc-500/10 text-zinc-200 font-semibold"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                 } ${!isOpen ? "justify-center px-0" : ""}`}
               >
@@ -154,7 +154,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                 onClick={() => setActiveSubTab("chats")}
                 className={`pb-1.5 flex items-center gap-1.5 text-[11px] font-medium transition border-b-2 ${
                   activeSubTab === "chats"
-                    ? "border-orange-500 text-orange-400 font-semibold"
+                    ? "border-zinc-500 text-zinc-200 font-semibold"
                     : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
@@ -167,7 +167,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                 onClick={() => setActiveSubTab("watchlist")}
                 className={`pb-1.5 flex items-center gap-1.5 text-[11px] font-medium transition border-b-2 ${
                   activeSubTab === "watchlist"
-                    ? "border-orange-500 text-orange-400 font-semibold"
+                    ? "border-zinc-500 text-zinc-200 font-semibold"
                     : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
@@ -188,12 +188,12 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                         onClick={() => onSelectSession(session.id)}
                         className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${
                           isSelected
-                            ? "bg-orange-500/10 text-orange-400 border border-orange-500/25"
+                            ? "bg-zinc-500/10 text-zinc-200 border border-zinc-500/25"
                             : "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${session.isPinned ? "text-amber-400" : "text-slate-400"}`} />
+                          <MessageSquare className={`w-3.5 h-3.5 shrink-0 ${session.isPinned ? "text-zinc-400" : "text-slate-400"}`} />
                           <div className="min-w-0 flex-1">
                             <span className="truncate block font-medium leading-tight">
                               {session.title || "Obrolan Riset"}
@@ -215,11 +215,11 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                             title={session.isPinned ? "Lepas Pin Chat" : "Pin Chat Ini"}
                             className={`p-1 rounded transition ${
                               session.isPinned
-                                ? "text-amber-400 hover:text-amber-500"
-                                : "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-amber-400"
+                                ? "text-zinc-400 hover:text-zinc-500"
+                                : "opacity-0 group-hover:opacity-100 text-slate-400 hover:text-zinc-400"
                             }`}
                           >
-                            <Pin className={`w-3 h-3 ${session.isPinned ? "fill-amber-400" : ""}`} />
+                            <Pin className={`w-3 h-3 ${session.isPinned ? "fill-zinc-400" : ""}`} />
                           </button>
                           <button
                             type="button"
@@ -242,7 +242,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                     <button
                       type="button"
                       onClick={onNewChat}
-                      className="px-2.5 py-1 text-[11px] rounded bg-orange-500/10 text-orange-400 border border-orange-500/25 hover:bg-orange-500/20 transition"
+                      className="px-2.5 py-1 text-[11px] rounded bg-zinc-500/10 text-zinc-200 border border-zinc-500/25 hover:bg-zinc-500/15 transition"
                     >
                       + Buat Obrolan Baru
                     </button>
@@ -260,7 +260,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                         <CompanyLogo symbol={sym} size="sm" />
                         <span className="font-mono font-bold block">{sym}</span>
                       </div>
-                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <Star className="w-3.5 h-3.5 text-zinc-400 fill-zinc-400" />
                     </div>
                   ))
                 ) : (
@@ -290,7 +290,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
               type="button"
               onClick={onNewChat}
               title="Obrolan Baru"
-              className="p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-orange-500 transition"
+              className="p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-zinc-700 transition"
             >
               <SquarePen className="w-4 h-4" />
             </button>

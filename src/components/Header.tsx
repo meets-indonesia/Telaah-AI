@@ -63,10 +63,10 @@ export const Header: React.FC<HeaderProps> = ({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 text-xs transition-colors ${
                     active
-                      ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/30 font-semibold"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
+                      ? "font-bold text-zinc-950 dark:text-white"
+                      : "font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onFocusSearch}
-            className="w-full flex items-center justify-between px-3 py-2 rounded bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-orange-500/50 hover:text-slate-900 dark:hover:text-slate-200 transition text-xs"
+            className="w-full flex items-center justify-between px-3 py-2 rounded bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-zinc-500 hover:text-slate-900 dark:hover:text-slate-200 transition text-xs"
           >
             <span className="flex items-center gap-1.5">
               <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Kalkulator Dividen"
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white text-xs transition"
             >
-              <Calculator className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+              <Calculator className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
               <span className="hidden xl:inline">Dividen</span>
             </button>
           )}
@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Kamus Jargon Saham"
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-50 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white text-xs transition"
             >
-              <BookOpen className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+              <BookOpen className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
               <span className="hidden xl:inline">Jargon</span>
             </button>
           )}
@@ -149,10 +149,10 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/60 px-3 py-1 flex items-center text-[11px] font-mono overflow-hidden">
           <div className="shrink-0 flex items-center gap-2 pr-3 border-r border-slate-200 dark:border-white/10 font-sans font-medium text-slate-500 dark:text-slate-400">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-700"></span>
             </span>
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-orange-600 dark:text-orange-400">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-900 dark:text-zinc-100">
               IDX LIVE
             </span>
             <span className="text-[9px] text-slate-500 dark:text-slate-400 hidden sm:inline">

@@ -159,7 +159,7 @@ export default function WatchlistPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+              <Star className="w-5 h-5 text-zinc-400 fill-zinc-400" />
               <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Daftar Pantauan Emiten (Watchlist)
               </h1>
@@ -182,7 +182,7 @@ export default function WatchlistPage() {
                   }
                 }}
                 placeholder="Tambah ticker (misal: ASII, BREN)..."
-                className="w-64 px-3 py-1.5 text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded focus:border-orange-500/50 focus:outline-none placeholder-slate-400 font-mono uppercase"
+                className="w-64 px-3 py-1.5 text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded focus:border-zinc-500 focus:outline-none placeholder-slate-400 font-mono uppercase"
               />
               {addSuggestions.length > 0 && (
                 <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded shadow-xl z-20 overflow-hidden text-xs">
@@ -212,7 +212,7 @@ export default function WatchlistPage() {
               title="Perbarui Data"
               className="p-1.5 rounded border border-slate-200 dark:border-white/10 text-slate-400 hover:text-white hover:bg-white/5 transition"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-orange-400" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-zinc-200" : ""}`} />
             </button>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function WatchlistPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Saring emiten di watchlist..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded focus:outline-none focus:border-orange-500/50 text-xs placeholder-slate-400"
+              className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded focus:outline-none focus:border-zinc-500 text-xs placeholder-slate-400"
             />
           </div>
 
@@ -305,7 +305,7 @@ export default function WatchlistPage() {
                           <div className="flex items-center gap-2.5 min-w-0">
                             <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
                             <div className="min-w-0">
-                              <span className="font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                              <span className="font-bold text-slate-900 dark:text-slate-100 block group-hover:text-zinc-950 transition-colors">
                                 {item.symbol}
                               </span>
                               <span className="text-[11px] font-sans text-slate-500 truncate block max-w-[180px]">
@@ -400,7 +400,7 @@ export default function WatchlistPage() {
                             <Link
                               href={`/?symbol=${item.symbol}`}
                               title="Buka Terminal Telaah"
-                              className="p-1 rounded text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 transition"
+                              className="p-1 rounded text-slate-400 hover:text-zinc-950 hover:bg-zinc-500/10 transition"
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                             </Link>
@@ -422,7 +422,7 @@ export default function WatchlistPage() {
                     <td colSpan={10} className="py-12 text-center text-slate-400 font-sans">
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
-                          <RefreshCw className="w-4 h-4 animate-spin text-orange-400" />
+                          <RefreshCw className="w-4 h-4 animate-spin text-zinc-200" />
                           <span>Memuat metrik data bursa watchlist...</span>
                         </div>
                       ) : (

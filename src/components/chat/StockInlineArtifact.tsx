@@ -61,7 +61,7 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-black border border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:border-orange-500/50 hover:text-orange-400 transition"
+          className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-black border border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:border-zinc-500 hover:text-zinc-950 transition"
         >
           <span>{isExpanded ? "Sembunyikan Modul Rinci" : "Buka Modul Riset Lengkap"}</span>
           {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -77,11 +77,11 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
               onClick={() => setActiveTab("overview")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                 activeTab === "overview"
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold"
+                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
+              <LayoutDashboard className="w-3.5 h-3.5 text-zinc-200" />
               <span>Ringkasan & Finansial</span>
             </button>
 
@@ -89,11 +89,11 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
               onClick={() => setActiveTab("technical")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                 activeTab === "technical"
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold"
+                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <TrendingUp className="w-3.5 h-3.5 text-orange-400" />
+              <TrendingUp className="w-3.5 h-3.5 text-zinc-200" />
               <span>Terminal Teknikal</span>
             </button>
 
@@ -101,11 +101,11 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
               onClick={() => setActiveTab("insider")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                 activeTab === "insider"
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold"
+                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <Radar className="w-3.5 h-3.5 text-orange-400" />
+              <Radar className="w-3.5 h-3.5 text-zinc-200" />
               <span>Whale & Broker Flow</span>
             </button>
 
@@ -113,11 +113,11 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
               onClick={() => setActiveTab("all")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                 activeTab === "all"
-                  ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold"
+                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-orange-400" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-200" />
               <span>Semua Modul</span>
             </button>
           </div>

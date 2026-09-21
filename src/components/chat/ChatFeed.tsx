@@ -41,7 +41,7 @@ const STARTER_PROMPTS = [
     desc: "Cek akumulasi broker dan net foreign flow TLKM 5 hari terakhir.",
   },
   {
-    icon: <TrendingUp className="w-3.5 h-3.5 text-amber-500" />,
+    icon: <TrendingUp className="w-3.5 h-3.5 text-zinc-500" />,
     title: "Sensitivitas Komoditas ADRO",
     desc: "Telaah korelasi laba dan sensitivitas harga batu bara terhadap operasional ADRO.",
   },

@@ -31,9 +31,9 @@ const verdictConfig: Record<
     icon: XCircle,
   },
   "Perlu konteks": {
-    bg: "bg-amber-500/10",
-    text: "text-amber-700 dark:text-amber-400",
-    border: "border-amber-500/20",
+    bg: "bg-zinc-500/10",
+    text: "text-amber-700 dark:text-zinc-400",
+    border: "border-zinc-500/20",
     icon: AlertTriangle,
   },
   "Tidak dapat diverifikasi": {

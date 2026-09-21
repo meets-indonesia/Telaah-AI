@@ -30,7 +30,7 @@ export const RumorFactCheckerCard: React.FC<RumorFactCheckerCardProps> = ({
       case "medium":
         return {
           label: "PERLU HATI-HATI (SEBAGIAN VALID)",
-          bg: "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+          bg: "bg-amber-100 dark:bg-zinc-950/60 text-amber-700 dark:text-zinc-400 border-amber-200 dark:border-amber-800",
           icon: <AlertTriangle className="w-4 h-4 text-amber-600" />,
         };
       default:
@@ -47,10 +47,10 @@ export const RumorFactCheckerCard: React.FC<RumorFactCheckerCardProps> = ({
   return (
     <div className="mt-3 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0e1626] shadow-sm overflow-hidden transition-all hover:shadow-md">
       {/* Header */}
-      <div className="p-3.5 border-b border-slate-100 dark:border-slate-800/80 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-transparent dark:from-red-950/30 dark:via-amber-950/30 flex items-center justify-between gap-3">
+      <div className="p-3.5 border-b border-slate-100 dark:border-slate-800/80 bg-gradient-to-r from-red-500/10 via-zinc-500/10 to-transparent dark:from-red-950/30 dark:via-zinc-950/30 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white">
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <ShieldAlert className="w-4 h-4 text-zinc-400" />
           </div>
           <div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-white">
@@ -106,7 +106,7 @@ export const RumorFactCheckerCard: React.FC<RumorFactCheckerCardProps> = ({
                         ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
                         : isRefuted
                         ? "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400"
-                        : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+                        : "bg-amber-100 dark:bg-zinc-950/60 text-amber-700 dark:text-zinc-400"
                     }`}
                   >
                     {isSupported ? (
@@ -135,8 +135,8 @@ export const RumorFactCheckerCard: React.FC<RumorFactCheckerCardProps> = ({
         </div>
 
         {/* Warning Tips for Retail */}
-        <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
-          <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-zinc-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
+          <Info className="w-4 h-4 text-amber-600 dark:text-zinc-400 shrink-0 mt-0.5" />
           <p className="text-[11px] leading-relaxed">
             <strong>Tips Edukasi Ritel:</strong> Jangan pernah membeli saham hanya karena ajakan viral atau tangkapan layar keuntungan di media sosial sebelum memverifikasi laporan keuangan resmi dan pergerakan akumulasi broker di Telaah 360.
           </p>

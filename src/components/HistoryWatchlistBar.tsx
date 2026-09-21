@@ -97,7 +97,7 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
       {toastMessage && (
         <div className="bg-blue-600/20 border border-blue-500/40 text-blue-300 text-xs px-3.5 py-1.5 rounded-xl flex items-center justify-between animate-in fade-in duration-200">
           <span className="flex items-center gap-1.5 font-medium">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <Zap className="w-3.5 h-3.5 text-zinc-400" />
             {toastMessage}
           </span>
           <button
@@ -112,7 +112,7 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
       {/* Main Bar */}
       <div className="bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-lg p-2 shadow-sm flex items-center justify-between gap-3 overflow-hidden">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 shrink-0">
-          <History className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+          <History className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
           <span className="hidden sm:inline">Riwayat:</span>
         </div>
 
@@ -129,7 +129,7 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
                 onClick={() => handleRestore(item.symbol)}
                 className={`group flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs cursor-pointer shrink-0 transition select-none ${
                   isTarget
-                    ? "bg-orange-500/15 border-orange-500/40 text-orange-700 dark:text-orange-300"
+                    ? "bg-zinc-500/10 border-zinc-500/40 text-zinc-900 dark:text-zinc-200"
                     : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300"
                 }`}
                 title={`Buka arsip ${item.symbol} (${item.formattedDate})`}
@@ -139,11 +139,11 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
                   type="button"
                   onClick={(e) => handleToggleWatchlist(e, item.symbol)}
                   className={`p-0.5 rounded hover:bg-slate-800 transition ${
-                    isFav ? "text-amber-400" : "text-slate-600 hover:text-slate-400"
+                    isFav ? "text-zinc-400" : "text-slate-600 hover:text-slate-400"
                   }`}
                   title={isFav ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
                 >
-                  <Star className={`w-3 h-3 ${isFav ? "fill-amber-400" : ""}`} />
+                  <Star className={`w-3 h-3 ${isFav ? "fill-zinc-400" : ""}`} />
                 </button>
 
                 {/* Symbol & Price */}

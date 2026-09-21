@@ -145,7 +145,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
         <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <BarChart2 className="w-4 h-4 text-brand-500" />
+              <BarChart2 className="w-4 h-4 text-zinc-700" />
               <span>
                 {metricTab === "pe" && `Perbandingan P/E Ratio (x) — Rata-rata Peer: ${avgPE}x`}
                 {metricTab === "pb" && `Perbandingan P/B Ratio (x) — Rata-rata Peer: ${avgPB}x`}
@@ -153,8 +153,8 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
               </span>
             </span>
             <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1 text-brand-600 dark:text-brand-400 font-semibold">
-                <span className="w-2.5 h-2.5 rounded-xs bg-brand-600" /> Target ({symbol})
+              <span className="flex items-center gap-1 text-zinc-900 dark:text-zinc-300 font-semibold">
+                <span className="w-2.5 h-2.5 rounded-xs bg-zinc-900" /> Target ({symbol})
               </span>
               <span className="flex items-center gap-1 text-slate-500">
                 <span className="w-2.5 h-2.5 rounded-xs bg-slate-400 dark:bg-slate-600" /> Peer Emiten
@@ -298,7 +298,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
                     key={peer.symbol}
                     className={`transition ${
                       isTarget
-                        ? "bg-brand-500/10 dark:bg-blue-600/15 border-l-4 border-l-brand-600 font-semibold text-slate-900 dark:text-white"
+                        ? "bg-zinc-700/10 dark:bg-blue-600/15 border-l-4 border-l-zinc-900 font-semibold text-slate-900 dark:text-white"
                         : "hover:bg-slate-100/60 dark:hover:bg-slate-900/50"
                     }`}
                   >
@@ -308,7 +308,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
                         <span
                           className={`font-mono font-bold px-1.5 py-0.5 rounded text-xs ${
                             isTarget
-                              ? "bg-brand-600 text-white"
+                              ? "bg-zinc-900 text-white"
                               : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700"
                           }`}
                         >
@@ -318,7 +318,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
                           {peer.companyName}
                         </span>
                         {isTarget && (
-                          <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-400/20 text-brand-700 dark:text-blue-300 border border-brand-200 dark:border-blue-400/30 font-sans">
+                          <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-400/20 text-zinc-700 dark:text-blue-300 border border-zinc-200 dark:border-blue-400/30 font-sans">
                             Target
                           </span>
                         )}
