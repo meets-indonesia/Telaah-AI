@@ -3,28 +3,50 @@
 @tailwind utilities;
 
 :root {
-  --background: #f6f8fb;
-  --foreground: #172033;
-  --card-bg: #ffffff;
-  --card-border: #dfe5ee;
-  --muted: #667085;
-  --brand-soft: #eef4ff;
+  --background: #090a0f;
+  --foreground: #f1f5f9;
+  --card-bg: #0f1118;
+  --card-border: #1c202a;
+  --card-border-subtle: #141720;
+  --muted: #8492a6;
+  --brand-soft: #161a24;
+  --terminal-emerald: #10b981;
+  --terminal-rose: #f43f5e;
 }
 
-html.dark {
-  --background: #090d16;
+html.dark,
+html {
+  --background: #090a0f;
   --foreground: #f1f5f9;
-  --card-bg: #0f172a;
-  --card-border: #1e293b;
+  --card-bg: #0f1118;
+  --card-border: #1c202a;
+  --card-border-subtle: #141720;
+  --muted: #8492a6;
+  --brand-soft: #161a24;
+  --terminal-emerald: #10b981;
+  --terminal-rose: #f43f5e;
+}
+
+html.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-border-subtle: #f1f5f9;
+  --muted: #64748b;
+  --brand-soft: #f1f5f9;
+  --terminal-emerald: #10b981;
+  --terminal-rose: #f43f5e;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: "Segoe UI Variable", "Segoe UI", Aptos, system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100dvh;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -66,12 +88,23 @@ a {
 .surface {
   border: 1px solid var(--card-border);
   background: var(--card-bg);
-  border-radius: 1rem;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04);
+  border-radius: 0.75rem;
 }
 
 html.dark .surface {
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 12px 32px rgb(0 0 0 / 0.16);
+  border-color: var(--card-border);
+}
+
+.terminal-panel {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  border-radius: 0.5rem;
+}
+
+.terminal-metric {
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 /* Custom scrollbars */

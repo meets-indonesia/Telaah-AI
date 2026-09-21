@@ -116,14 +116,26 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
   );
 
   // Path data for SMA20
+  let isFirstSMA20 = true;
   const sma20Path = filteredData
-    .map((d, i) => (d.sma20 ? `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.sma20)}` : ""))
+    .map((d, i) => {
+      if (d.sma20 === undefined || d.sma20 === null) return "";
+      const cmd = isFirstSMA20 ? "M" : "L";
+      isFirstSMA20 = false;
+      return `${cmd} ${getX(i)} ${getY(d.sma20)}`;
+    })
     .filter(Boolean)
     .join(" ");
 
   // Path data for SMA50
+  let isFirstSMA50 = true;
   const sma50Path = filteredData
-    .map((d, i) => (d.sma50 ? `${i === 0 ? "M" : "L"} ${getX(i)} ${getY(d.sma50)}` : ""))
+    .map((d, i) => {
+      if (d.sma50 === undefined || d.sma50 === null) return "";
+      const cmd = isFirstSMA50 ? "M" : "L";
+      isFirstSMA50 = false;
+      return `${cmd} ${getX(i)} ${getY(d.sma50)}`;
+    })
     .filter(Boolean)
     .join(" ");
 

@@ -28,8 +28,8 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
 
   if (flowLens.status === "unavailable") {
     return (
-      <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-colors">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">FlowLens — Broker & Foreign Flow</h3>
+      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs transition-colors">
+        <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">FlowLens — Broker & Foreign Flow</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data agregat broker tidak tersedia atau tidak dipicu pada mode analisis ini.
         </p>
@@ -66,7 +66,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
   const maxSellerVal = Math.max(...flowLens.topSellers.map((s) => Math.abs(s.netValue)), 1);
 
   return (
-    <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-xl space-y-5 transition-colors">
+    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -110,13 +110,13 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
       </div>
 
       {/* Cohort Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-slate-50 dark:bg-slate-900/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Globe className="w-3 h-3 text-blue-500 dark:text-blue-400" /> Net Asing (Foreign)
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+          <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
+            <Globe className="w-3 h-3 text-indigo-500" /> Net Asing
           </span>
           <span
-            className={`text-xs sm:text-sm font-mono font-bold block mt-1 ${
+            className={`text-xs sm:text-sm font-mono font-bold block mt-0.5 tabular-nums ${
               flowLens.cohortSummary.foreignNetValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             }`}
           >
@@ -124,12 +124,12 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Building className="w-3 h-3 text-indigo-500 dark:text-indigo-400" /> Net Domestik
+        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+          <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
+            <Building className="w-3 h-3 text-slate-400" /> Net Domestik
           </span>
           <span
-            className={`text-xs sm:text-sm font-mono font-bold block mt-1 ${
+            className={`text-xs sm:text-sm font-mono font-bold block mt-0.5 tabular-nums ${
               flowLens.cohortSummary.domesticNetValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             }`}
           >
@@ -137,12 +137,12 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Users className="w-3 h-3 text-amber-500 dark:text-amber-400" /> Net Institusi
+        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+          <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
+            <Users className="w-3 h-3 text-slate-400" /> Net Institusi
           </span>
           <span
-            className={`text-xs sm:text-sm font-mono font-bold block mt-1 ${
+            className={`text-xs sm:text-sm font-mono font-bold block mt-0.5 tabular-nums ${
               flowLens.cohortSummary.institutionalNetValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             }`}
           >
@@ -150,12 +150,12 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-slate-900/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Users className="w-3 h-3 text-purple-500 dark:text-purple-400" /> Net Ritel
+        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+          <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
+            <Users className="w-3 h-3 text-slate-400" /> Net Ritel
           </span>
           <span
-            className={`text-xs sm:text-sm font-mono font-bold block mt-1 ${
+            className={`text-xs sm:text-sm font-mono font-bold block mt-0.5 tabular-nums ${
               flowLens.cohortSummary.retailNetValue >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             }`}
           >
@@ -358,9 +358,8 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
       </div>
 
       {/* Compliance & Limitation Warning Callout */}
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-700 dark:text-amber-300/90 leading-relaxed">
-        <AlertCircle className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-        <p>{flowLens.limitationDisclaimer}</p>
+      <div className="pt-2 text-[10px] text-slate-400 font-mono border-t border-slate-100 dark:border-slate-800/60">
+        Catatan Kepatuhan: {flowLens.limitationDisclaimer}
       </div>
     </div>
   );

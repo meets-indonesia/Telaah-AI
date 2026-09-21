@@ -8,6 +8,7 @@ import {
   ForeignFlowResponse,
   NewsItem,
   QuarterlyFinancialMetrics,
+  extractValuationMultiples,
 } from "../sectors/types";
 import { computeTechnicalIndicators, TechnicalAnalysisResult } from "../quant/indicators";
 import { analyzeFinancialHealth, FinancialHealthAnalysis } from "../quant/financials";
@@ -160,15 +161,16 @@ export async function executeEvidencePlan(
     intent === "news_event" ||
     claims.some((c) => c.claimType === "event" || c.claimType === "flow");
 
-  // Plan sections for company report
+  // Plan sections for company report - always include overview & valuation for terminal metrics
   const reportSections: Array<"overview" | "valuation" | "financials" | "peers" | "ownership" | "management"> = [
     "overview",
+    "valuation",
   ];
 
   if (mode === "full") {
-    reportSections.push("valuation", "financials", "peers", "ownership", "management");
+    reportSections.push("financials", "peers", "ownership", "management");
   } else {
-    if (needFinancials) reportSections.push("financials", "valuation");
+    if (needFinancials) reportSections.push("financials");
   }
 
   // Pre-load broker registry from cache (0 credits)
@@ -188,9 +190,14 @@ export async function executeEvidencePlan(
       return null;
     });
 
-  let dailyPromise: Promise<DailyTransaction[] | null> = needTechnical
-    ? client.getDailyTransactions(clean).catch(() => null)
-    : Promise.resolve(null);
+  // Always fetch up to 90 days of daily transactions (1 credit in Sectors v2) so SMA20, SMA50, MACD, and charts are fully populated
+  const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  let dailyPromise: Promise<DailyTransaction[] | null> = client
+    .getDailyTransactions(clean, ninetyDaysAgo)
+    .catch((err) => {
+      console.warn(`Daily transactions fetch failed for ${clean}:`, err.message);
+      return null;
+    });
 
   let brokerSummaryPromise: Promise<BrokerSummaryResponse | null> = needFlow
     ? client.getBrokerSummary(clean).catch(() => null)
@@ -375,27 +382,28 @@ export async function executeEvidencePlan(
     
     // Validate up to 5 comparable peers
     const validPeers = rawPeers
-      .filter((p) => p.symbol.toUpperCase().replace(".JK", "") !== clean)
+      .filter((p: any) => p.symbol.toUpperCase().replace(".JK", "") !== clean)
       .slice(0, 5)
-      .map((p) => ({
+      .map((p: any) => ({
         symbol: p.symbol.toUpperCase().replace(".JK", ""),
         companyName: p.company_name,
         marketCap: p.market_cap,
-        pe: p.pe ?? null,
-        pb: p.pb ?? null,
+        pe: p.pe_ttm ?? p.pe ?? null,
+        pb: p.pb_mrq ?? p.pb ?? null,
         dividendYield: p.dividend_yield ?? null,
         isTarget: false,
       }));
 
     if (validPeers.length > 0) {
       // Add target company to comparison list
+      const multiples = extractValuationMultiples(companyReport?.valuation);
       const targetCompanyItem = {
         symbol: clean,
         companyName,
         marketCap: companyReport.overview?.market_cap || 0,
-        pe: companyReport.valuation?.historical_valuation?.pe?.current ?? null,
-        pb: companyReport.valuation?.historical_valuation?.pb?.current ?? null,
-        dividendYield: companyReport.valuation?.historical_valuation?.dividend_yield ?? null,
+        pe: multiples.pe,
+        pb: multiples.pb,
+        dividendYield: null,
         isTarget: true,
       };
 
@@ -518,7 +526,10 @@ export async function executeEvidencePlan(
     symbol: clean,
     companyName,
     overview: companyReport?.overview,
-    valuation: companyReport?.valuation,
+    valuation: companyReport?.valuation ? {
+      ...companyReport.valuation,
+      ...extractValuationMultiples(companyReport.valuation),
+    } : undefined,
     financials,
     peerLens,
     flowLens,

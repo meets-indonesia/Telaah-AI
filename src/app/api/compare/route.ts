@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SectorsClient } from "@/lib/sectors/client";
 import { computeTechnicalIndicators } from "@/lib/quant/indicators";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 
 export interface StockCompareMetric {
   category: string;
@@ -50,13 +51,14 @@ export async function POST(req: NextRequest) {
     }
 
     const client = new SectorsClient();
+    const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
     // Fetch data in parallel for both tickers
     const [reportA, reportB, dailyA, dailyB, flowA, flowB] = await Promise.allSettled([
       client.getCompanyReport(symbolA, ["overview", "valuation", "financials", "peers"]),
       client.getCompanyReport(symbolB, ["overview", "valuation", "financials", "peers"]),
-      client.getDailyTransactions(symbolA),
-      client.getDailyTransactions(symbolB),
+      client.getDailyTransactions(symbolA, ninetyDaysAgo),
+      client.getDailyTransactions(symbolB, ninetyDaysAgo),
       client.getForeignFlow(symbolA),
       client.getForeignFlow(symbolB),
     ]);
@@ -71,15 +73,18 @@ export async function POST(req: NextRequest) {
     const techA = computeTechnicalIndicators(txA);
     const techB = computeTechnicalIndicators(txB);
 
+    const multA = extractValuationMultiples(repA?.valuation);
+    const multB = extractValuationMultiples(repB?.valuation);
+
     // Extract metrics
-    const priceA = techA.lastPrice || 0;
-    const priceB = techB.lastPrice || 0;
+    const priceA = techA.lastPrice || multA.lastClosePrice || 0;
+    const priceB = techB.lastPrice || multB.lastClosePrice || 0;
 
-    const peA = repA?.valuation?.historical_valuation?.pe?.current ?? null;
-    const peB = repB?.valuation?.historical_valuation?.pe?.current ?? null;
+    const peA = multA.pe;
+    const peB = multB.pe;
 
-    const pbA = repA?.valuation?.historical_valuation?.pb?.current ?? null;
-    const pbB = repB?.valuation?.historical_valuation?.pb?.current ?? null;
+    const pbA = multA.pb;
+    const pbB = multB.pb;
 
     // Foreign net flow (sum last 5 days)
     const flowItemsA = Array.isArray(fA) ? fA : Array.isArray((fA as any)?.data) ? (fA as any).data : [];
@@ -125,11 +130,11 @@ export async function POST(req: NextRequest) {
 
     const result: StockCompareResult = {
       symbolA,
-      nameA: repA?.overview?.company_name || symbolA,
+      nameA: repA?.company_name || repA?.overview?.company_name || symbolA,
       priceA,
       sectorA: repA?.overview?.sector || "IDX",
       symbolB,
-      nameB: repB?.overview?.company_name || symbolB,
+      nameB: repB?.company_name || repB?.overview?.company_name || symbolB,
       priceB,
       sectorB: repB?.overview?.sector || "IDX",
       metrics,

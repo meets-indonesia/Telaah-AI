@@ -30,8 +30,8 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
   if (financials.status === "unavailable" || !financials.latest) {
     return (
-      <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 transition-colors shadow-sm">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">Business & Financial Health</h3>
+      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors shadow-2xs">
+        <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">Business & Financial Health</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data laporan keuangan kuartalan tidak tersedia atau belum dipublikasikan untuk emiten ini.
         </p>
@@ -45,6 +45,11 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
     if (abs >= 1e12) return (val / 1e12).toFixed(2) + " T";
     if (abs >= 1e9) return (val / 1e9).toFixed(1) + " M";
     return val.toLocaleString("id-ID");
+  };
+
+  const formatPct = (val: number | null | undefined) => {
+    if (val === null || val === undefined) return "-";
+    return `${val >= 0 ? "+" : ""}${Number(val).toFixed(2)}%`;
   };
 
   const l = financials.latest;
@@ -76,7 +81,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
   });
 
   return (
-    <div className="bg-white dark:bg-[#0f172a]/95 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 md:p-6 shadow-sm dark:shadow-xl space-y-5 transition-colors">
+    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -94,29 +99,27 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         {/* Growth YoY / QoQ Pill */}
         <div className="flex items-center gap-2">
           {financials.yoyGrowth.netIncomePct !== null && (
-            <div className="bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Laba YoY</span>
+            <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+              <span className="text-[10px] font-mono text-slate-400 block">Laba YoY</span>
               <span
-                className={`font-mono font-bold flex items-center gap-1 ${
+                className={`font-mono font-bold tabular-nums text-xs ${
                   financials.yoyGrowth.netIncomePct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                 }`}
               >
-                {financials.yoyGrowth.netIncomePct >= 0 ? "+" : ""}
-                {financials.yoyGrowth.netIncomePct}%
+                {formatPct(financials.yoyGrowth.netIncomePct)}
               </span>
             </div>
           )}
 
           {financials.qoqGrowth.netIncomePct !== null && (
-            <div className="bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 block">Laba QoQ</span>
+            <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+              <span className="text-[10px] font-mono text-slate-400 block">Laba QoQ</span>
               <span
-                className={`font-mono font-bold flex items-center gap-1 ${
+                className={`font-mono font-bold tabular-nums text-xs ${
                   financials.qoqGrowth.netIncomePct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                 }`}
               >
-                {financials.qoqGrowth.netIncomePct >= 0 ? "+" : ""}
-                {financials.qoqGrowth.netIncomePct}%
+                {formatPct(financials.qoqGrowth.netIncomePct)}
               </span>
             </div>
           )}
@@ -124,58 +127,57 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
       </div>
 
       {/* Main Financial Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {/* Revenue */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Pendapatan (Revenue)</span>
-          <span className="text-base sm:text-lg font-mono font-bold text-slate-900 dark:text-white block">
+        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Pendapatan</span>
+          <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
             Rp {formatTrillion(l.revenue)}
           </span>
           {financials.yoyGrowth.revenuePct !== null && (
             <span
-              className={`text-[10px] font-mono font-semibold block mt-1 ${
+              className={`text-[10px] font-mono font-semibold block mt-1 tabular-nums truncate ${
                 financials.yoyGrowth.revenuePct >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
               }`}
             >
-              YoY: {financials.yoyGrowth.revenuePct >= 0 ? "+" : ""}
-              {financials.yoyGrowth.revenuePct}%
+              YoY: {formatPct(financials.yoyGrowth.revenuePct)}
             </span>
           )}
         </div>
 
         {/* Net Income */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Laba Bersih (Net Income)</span>
+        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Laba Bersih</span>
           <span
-            className={`text-base sm:text-lg font-mono font-bold block ${
+            className={`text-sm sm:text-base font-mono font-bold block tabular-nums truncate ${
               isNetPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
             }`}
           >
             Rp {formatTrillion(l.netIncome)}
           </span>
-          <span className="text-[10px] text-slate-500 block mt-1 font-mono">
-            NPM: {l.netMarginPct !== null ? `${l.netMarginPct}%` : "-"}
+          <span className="text-[10px] text-slate-500 block mt-1 font-mono tabular-nums truncate">
+            NPM: {l.netMarginPct !== null ? `${Number(l.netMarginPct).toFixed(1)}%` : "-"}
           </span>
         </div>
 
         {/* Operating Income */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Laba Usaha (Operating)</span>
-          <span className="text-base sm:text-lg font-mono font-bold text-slate-900 dark:text-white block">
+        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Laba Operasional</span>
+          <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
             Rp {formatTrillion(l.operatingIncome)}
           </span>
-          <span className="text-[10px] text-slate-500 block mt-1 font-mono">
-            OPM: {l.operatingMarginPct !== null ? `${l.operatingMarginPct}%` : "-"}
+          <span className="text-[10px] text-slate-500 block mt-1 font-mono tabular-nums truncate">
+            OPM: {l.operatingMarginPct !== null ? `${Number(l.operatingMarginPct).toFixed(1)}%` : "-"}
           </span>
         </div>
 
         {/* Solvency / Debt */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 block mb-1">Debt-to-Equity (DER)</span>
-          <span className="text-base sm:text-lg font-mono font-bold text-slate-900 dark:text-white block">
-            {l.debtToEquity !== null ? `${l.debtToEquity}x` : "-"}
+        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Debt-to-Equity</span>
+          <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
+            {l.debtToEquity !== null ? `${Number(l.debtToEquity).toFixed(2)}x` : "-"}
           </span>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-1 truncate" title={financials.solvencyHealth.description}>
+          <span className="text-[10px] text-slate-400 block mt-1 truncate" title={financials.solvencyHealth.description}>
             {financials.solvencyHealth.hasNetCash ? "Net Cash Position" : financials.solvencyHealth.description}
           </span>
         </div>

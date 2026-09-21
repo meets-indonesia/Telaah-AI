@@ -20,44 +20,44 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
   const safeLimitations = Array.isArray(limitations) ? limitations : [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Events Card */}
-      <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-5 md:p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
           <div>
-            <h3 className="text-base font-bold text-white">Events & Disclosure Timeline</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Events & Disclosure Timeline</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
               Kronologi aksi korporasi, keterbukaan informasi insider, dan berita resmi.
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-[#12151f] rounded border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
             <button
               onClick={() => setActiveTab("actions")}
-              className={`px-3 py-1 rounded-lg font-medium transition ${
+              className={`px-2 py-0.5 rounded transition ${
                 activeTab === "actions"
-                  ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
               }`}
             >
               Aksi Korporasi ({safeActions.length})
             </button>
             <button
               onClick={() => setActiveTab("filings")}
-              className={`px-3 py-1 rounded-lg font-medium transition ${
+              className={`px-2 py-0.5 rounded transition ${
                 activeTab === "filings"
-                  ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
               }`}
             >
               Filings ({safeFilings.length})
             </button>
             <button
               onClick={() => setActiveTab("news")}
-              className={`px-3 py-1 rounded-lg font-medium transition ${
+              className={`px-2 py-0.5 rounded transition ${
                 activeTab === "news"
-                  ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold shadow-2xs"
+                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-300"
               }`}
             >
               Berita ({safeNews.length})
@@ -173,35 +173,35 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
         </div>
       </div>
 
-      {/* Open Questions & Risk Limitations Box (PRD Section 7, Item 9) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Open Questions & Risk Limitations Box */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Open Questions */}
-        <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-5 shadow-xl">
-          <h4 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-            <HelpCircle className="w-4 h-4 text-blue-400" /> Open Questions / Catatan Kritis
+        <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
+          <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <HelpCircle className="w-3.5 h-3.5 text-indigo-500" /> Open Questions / Catatan Kritis
           </h4>
-          <ul className="space-y-2 text-xs text-slate-300">
+          <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
             {safeQuestions.map((q, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/60">
-                <span className="text-blue-400 font-bold">•</span>
+              <li key={idx} className="flex items-start gap-2 bg-slate-50 dark:bg-[#12151f] p-2 rounded border border-slate-100 dark:border-slate-800/60">
+                <span className="text-indigo-500 font-bold font-mono">•</span>
                 <span className="leading-relaxed">{q}</span>
               </li>
             ))}
             {safeQuestions.length === 0 && (
-              <li className="text-slate-500 text-xs">Tidak ada catatan terbuka khusus.</li>
+              <li className="text-slate-400 text-xs">Tidak ada catatan terbuka khusus.</li>
             )}
           </ul>
         </div>
 
         {/* Audit & Compliance Limitations */}
-        <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-5 shadow-xl">
-          <h4 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
-            <AlertCircle className="w-4 h-4 text-amber-400" /> Batasan Data & Disclaimer
+        <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
+          <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 text-slate-400" /> Batasan Data & Disclaimer
           </h4>
-          <ul className="space-y-2 text-xs text-slate-400">
+          <ul className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
             {safeLimitations.map((l, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/60">
-                <span className="text-amber-500 font-bold">•</span>
+              <li key={idx} className="flex items-start gap-2 bg-slate-50 dark:bg-[#12151f] p-2 rounded border border-slate-100 dark:border-slate-800/60">
+                <span className="text-slate-400 font-bold font-mono">•</span>
                 <span className="leading-relaxed">{l}</span>
               </li>
             ))}

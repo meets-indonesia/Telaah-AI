@@ -54,6 +54,13 @@ function calcGrowth(current: number | null | undefined, previous: number | null 
   return Number((((current - previous) / Math.abs(previous)) * 100).toFixed(2));
 }
 
+function normalizeGrowthRatio(val: number | null | undefined): number | null {
+  if (val === null || val === undefined) return null;
+  // If absolute value is small ratio (e.g. 0.0639 -> 6.39%)
+  const pct = Math.abs(val) <= 2 ? val * 100 : val;
+  return Number(pct.toFixed(2));
+}
+
 export function analyzeFinancialHealth(
   quarterlyData: QuarterlyFinancialMetrics[],
   companyReportFinancials?: FinancialsReportData
@@ -94,8 +101,8 @@ export function analyzeFinancialHealth(
           netIncomePct: prev ? calcGrowth(latest.net_income, prev.net_income) : null,
         },
         yoyGrowth: {
-          revenuePct: companyReportFinancials.yoy_quarter_revenue_growth ?? null,
-          netIncomePct: companyReportFinancials.yoy_quarter_earnings_growth ?? null,
+          revenuePct: normalizeGrowthRatio(companyReportFinancials.yoy_quarter_revenue_growth),
+          netIncomePct: normalizeGrowthRatio(companyReportFinancials.yoy_quarter_earnings_growth),
         },
         periods: [normLatest],
         solvencyHealth: {
@@ -171,10 +178,10 @@ export function analyzeFinancialHealth(
 
   const yoyRev = prevYoY
     ? calcGrowth(latest.revenue, prevYoY.revenue)
-    : companyReportFinancials?.yoy_quarter_revenue_growth ?? null;
+    : normalizeGrowthRatio(companyReportFinancials?.yoy_quarter_revenue_growth);
   const yoyNet = prevYoY
     ? calcGrowth(latest.netIncome, prevYoY.netIncome)
-    : companyReportFinancials?.yoy_quarter_earnings_growth ?? null;
+    : normalizeGrowthRatio(companyReportFinancials?.yoy_quarter_earnings_growth);
 
   let solvencyDesc = "Data solvabilitas belum lengkap.";
   let hasNetCash: boolean | null = null;
