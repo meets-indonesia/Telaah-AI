@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full px-3 lg:px-5 h-13 flex items-center justify-between gap-3 text-xs">
         {/* Brand & Section Nav */}
         <div className="flex items-center gap-4 shrink-0">
-          <Link href="/" className="flex items-center gap-2.5 group" aria-label="Telaah 360, Terminal">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="Telaah 360">
             {/* Custom Brand Logo */}
             <div className="h-7 w-auto flex items-center justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -74,8 +74,8 @@ export const Header: React.FC<HeaderProps> = ({
                 className="h-7 w-auto object-contain block dark:block"
               />
             </div>
-            <span className="hidden md:inline-block text-[9px] px-1.5 py-0.5 rounded border border-orange-500/30 text-orange-400 bg-orange-500/10 font-mono uppercase tracking-wider font-semibold">
-              Terminal
+            <span className="text-slate-300 font-medium tracking-tight text-xs">
+              Telaah
             </span>
           </Link>
 
@@ -159,18 +159,16 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onToggleCopilot}
-              title={`Toggle AI Copilot (${isCopilotOpen ? "Tutup" : "Buka"}) (⌘J)`}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-medium transition ${
+              title={`Toggle Copilot (${isCopilotOpen ? "Tutup" : "Buka"}) (⌘J)`}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition rounded ${
                 isCopilotOpen
-                  ? "bg-orange-500/15 border-orange-500/30 text-orange-400 font-semibold"
-                  : "bg-transparent border-white/10 text-slate-400 hover:text-white hover:border-white/20"
+                  ? "text-orange-400 hover:text-orange-300"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               {isCopilotOpen ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
               <span>Copilot</span>
-              <kbd className="hidden lg:inline-flex items-center text-[9px] font-mono px-1 py-0.2 bg-white/10 text-slate-300 rounded ml-0.5">
-                ⌘J
-              </kbd>
+              <kbd className="hidden lg:inline-flex items-center text-[9px] font-mono text-slate-500 ml-0.5">⌘J</kbd>
             </button>
           )}
 
