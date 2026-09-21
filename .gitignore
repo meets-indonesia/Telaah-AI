@@ -34,3 +34,7 @@ next.log
 *.tsbuildinfo
 next-env.d.ts
 dev.log
+
+# qdrant persistent storage
+data/qdrant_storage/
+

@@ -174,7 +174,13 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 Credits
               </span>
               <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-medium tabular-nums truncate block">
-                {report.creditsConsumed} cr
+                {report.fromVectorCache ? (
+                  <span className="text-emerald-400 font-bold flex items-center gap-1" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
+                    0 cr (Cache)
+                  </span>
+                ) : (
+                  `${report.creditsConsumed} cr`
+                )}
               </span>
             </div>
             <div className="flex items-center gap-1 shrink-0">
