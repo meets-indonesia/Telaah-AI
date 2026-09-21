@@ -643,43 +643,6 @@ export default function Home() {
           }}
         />
 
-        {/* View Switcher: Chat-Centric vs Full Terminal Workstation */}
-        <div className="px-4 py-1.5 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black flex items-center justify-between text-xs shrink-0">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setViewMode("chat")}
-              className={`px-3 py-1 rounded font-medium transition ${
-                viewMode === "chat"
-                  ? "bg-orange-500/15 text-orange-400 font-semibold"
-                  : "text-slate-500 dark:text-slate-400 hover:text-white"
-              }`}
-            >
-              💬 Percakapan Pintar
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("terminal")}
-              className={`px-3 py-1 rounded font-medium transition ${
-                viewMode === "terminal"
-                  ? "bg-orange-500/15 text-orange-400 font-semibold"
-                  : "text-slate-500 dark:text-slate-400 hover:text-white"
-              }`}
-            >
-              📈 Kanvas Data Lengkap (⌘J)
-            </button>
-          </div>
-
-          {report && (
-            <div className="flex items-center gap-2 font-mono text-[11px]">
-              <span className="text-slate-400">Aktif:</span>
-              <span className="font-bold text-orange-400">{report.symbol}</span>
-              <span className="text-slate-500">|</span>
-              <span className="text-slate-300">Rp {report.technical?.lastPrice?.toLocaleString("id-ID") || "-"}</span>
-            </div>
-          )}
-        </div>
-
         {/* Dynamic Center Stage */}
         {viewMode === "chat" ? (
           /* =========================================================================
@@ -808,135 +771,7 @@ export default function Home() {
             </button>
           </div>
 
-      {/* Quick Search Dialog Modal (⌘K) */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-          >
-            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
-              <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
-              <input
-                ref={modalSearchInputRef}
-                type="text"
-                value={modalSearchText}
-                onChange={(e) => setModalSearchText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && modalSearchText.trim()) {
-                    const searchResults = searchEmiten(modalSearchText.trim(), 1);
-                    if (searchResults.length > 0) {
-                      handleSelectEmitenDirect(searchResults[0].symbol);
-                    } else {
-                      setIsSearchOpen(false);
-                      handleSelectEmitenDirect(modalSearchText.trim());
-                    }
-                  }
-                }}
-                placeholder="Cari kode emiten (misal: BBCA) atau nama perusahaan (misal: Adaro, BCA)..."
-                className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
-              />
-              <kbd
-                onClick={() => setIsSearchOpen(false)}
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
-              >
-                ESC
-              </kbd>
-            </div>
-
-            {/* Live Search Results or Quick Suggestions */}
-            <div className="p-3 space-y-1.5 text-xs max-h-80 overflow-y-auto">
-              {modalSearchText.trim() ? (
-                <>
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
-                    Hasil Pencarian Emiten ({searchEmiten(modalSearchText.trim(), 8).length}):
-                  </span>
-                  {searchEmiten(modalSearchText.trim(), 8).length > 0 ? (
-                    <div className="space-y-1">
-                      {searchEmiten(modalSearchText.trim(), 8).map((item) => (
-                        <button
-                          key={item.symbol}
-                          type="button"
-                          onClick={() => handleSelectEmitenDirect(item.symbol)}
-                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
-                            <div className="min-w-0">
-                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
-                                {item.symbol}
-                              </span>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block max-w-[340px]">
-                                {item.name}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0 text-slate-400 group-hover:text-orange-400 transition-colors">
-                            <span className="text-[10px] font-mono">Buka Analisis</span>
-                            <span className="text-[10px] font-mono">↵</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center text-slate-400 space-y-2">
-                      <p>Tidak ditemukan emiten dengan kata kunci "{modalSearchText}".</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsSearchOpen(false);
-                          handleSelectEmitenDirect(modalSearchText.trim());
-                        }}
-                        className="px-3 py-1.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs hover:bg-orange-500/30 transition"
-                      >
-                        Tetap analisis kode "{modalSearchText.toUpperCase()}"
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
-                    Emiten Populer:
-                  </span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {[
-                      { sym: "BBCA", name: "Bank Central Asia" },
-                      { sym: "BBRI", name: "Bank Rakyat Indonesia" },
-                      { sym: "TLKM", name: "Telkom Indonesia" },
-                      { sym: "ADRO", name: "Alamtri Resources Indonesia" },
-                      { sym: "ANTM", name: "Aneka Tambang" },
-                      { sym: "ASII", name: "Astra International" },
-                    ].map((item) => (
-                      <button
-                        key={item.sym}
-                        type="button"
-                        onClick={() => handleSelectEmitenDirect(item.sym)}
-                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
-                          <div className="min-w-0">
-                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
-                              {item.sym}
-                            </span>
-                            <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
-                              {item.name}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-400 group-hover:text-orange-400">↵</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-          {/* Error Callout */}
+      {/* Error Callout */}
           {errorMessage && (
             <div className="p-3 rounded bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
@@ -1290,6 +1125,136 @@ export default function Home() {
           report={report}
         />
       )}
+    
+      {/* Quick Search Dialog Modal (⌘K) */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
+              <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
+              <input
+                ref={modalSearchInputRef}
+                type="text"
+                value={modalSearchText}
+                onChange={(e) => setModalSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && modalSearchText.trim()) {
+                    const searchResults = searchEmiten(modalSearchText.trim(), 1);
+                    if (searchResults.length > 0) {
+                      handleSelectEmitenDirect(searchResults[0].symbol);
+                    } else {
+                      setIsSearchOpen(false);
+                      handleSelectEmitenDirect(modalSearchText.trim());
+                    }
+                  }
+                }}
+                placeholder="Cari kode emiten (misal: BBCA) atau nama perusahaan (misal: Adaro, BCA)..."
+                className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
+              />
+              <kbd
+                onClick={() => setIsSearchOpen(false)}
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
+              >
+                ESC
+              </kbd>
+            </div>
+
+            {/* Live Search Results or Quick Suggestions */}
+            <div className="p-3 space-y-1.5 text-xs max-h-80 overflow-y-auto">
+              {modalSearchText.trim() ? (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Hasil Pencarian Emiten ({searchEmiten(modalSearchText.trim(), 8).length}):
+                  </span>
+                  {searchEmiten(modalSearchText.trim(), 8).length > 0 ? (
+                    <div className="space-y-1">
+                      {searchEmiten(modalSearchText.trim(), 8).map((item) => (
+                        <button
+                          key={item.symbol}
+                          type="button"
+                          onClick={() => handleSelectEmitenDirect(item.symbol)}
+                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
+                            <div className="min-w-0">
+                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                                {item.symbol}
+                              </span>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block max-w-[340px]">
+                                {item.name}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 text-slate-400 group-hover:text-orange-400 transition-colors">
+                            <span className="text-[10px] font-mono">Buka Analisis</span>
+                            <span className="text-[10px] font-mono">↵</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center text-slate-400 space-y-2">
+                      <p>Tidak ditemukan emiten dengan kata kunci "{modalSearchText}".</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          handleSelectEmitenDirect(modalSearchText.trim());
+                        }}
+                        className="px-3 py-1.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs hover:bg-orange-500/30 transition"
+                      >
+                        Tetap analisis kode "{modalSearchText.toUpperCase()}"
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Emiten Populer:
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { sym: "BBCA", name: "Bank Central Asia" },
+                      { sym: "BBRI", name: "Bank Rakyat Indonesia" },
+                      { sym: "TLKM", name: "Telkom Indonesia" },
+                      { sym: "ADRO", name: "Alamtri Resources Indonesia" },
+                      { sym: "ANTM", name: "Aneka Tambang" },
+                      { sym: "ASII", name: "Astra International" },
+                    ].map((item) => (
+                      <button
+                        key={item.sym}
+                        type="button"
+                        onClick={() => handleSelectEmitenDirect(item.sym)}
+                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
+                          <div className="min-w-0">
+                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                              {item.sym}
+                            </span>
+                            <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
+                              {item.name}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 group-hover:text-orange-400">↵</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+          
     </div>
   );
 }

@@ -72,7 +72,9 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
             <Link href="/" className="flex items-center gap-2.5 min-w-0">
               <div className="h-6 w-auto flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/dark-logo.png" alt="Telaah 360" className="h-6 w-auto object-contain" />
+                <img src="/brand/dark-logo.png" alt="Telaah 360" className="h-6 w-auto object-contain hidden dark:block" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/light-logo.png" alt="Telaah 360" className="h-6 w-auto object-contain block dark:hidden" />
               </div>
               <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-white truncate">
                 Telaah
@@ -80,7 +82,8 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
             </Link>
           ) : (
             <div className="mx-auto">
-              <img src="/brand/dark-logo.png" alt="Telaah" className="h-6 w-auto object-contain" />
+              <img src="/brand/dark-logo.png" alt="Telaah" className="h-6 w-auto object-contain hidden dark:block" />
+              <img src="/brand/light-logo.png" alt="Telaah" className="h-6 w-auto object-contain block dark:hidden" />
             </div>
           )}
 
