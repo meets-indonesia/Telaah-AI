@@ -26,11 +26,19 @@ import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 import { searchEmiten, IDXCompany } from "@/lib/sectors/companies";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { MinimalSidebar } from "@/components/chat/MinimalSidebar";
 import {
   detectComparisonIntent,
   detectNewTargetSymbol,
 } from "@/lib/agent/chat-router";
-import { saveReportToHistory, getHistory, getReportFromCache } from "@/lib/storage/history";
+import {
+  saveReportToHistory,
+  getHistory,
+  getReportFromCache,
+  clearHistory,
+  removeHistoryItem,
+  getWatchlistSymbols,
+} from "@/lib/storage/history";
 import {
   AlertCircle,
   HelpCircle,
@@ -97,6 +105,10 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [modalSearchText, setModalSearchText] = useState("");
   const modalSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Minimalist Left Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [viewMode, setViewMode] = useState<"chat" | "terminal">("chat");
 
   // Trigger from example pills
   const [promptValue, setPromptValue] = useState("");
@@ -595,23 +607,157 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
-      {/* Top Terminal Bar */}
-      <Header
-        marketIndices={marketIndices}
-        marketAsOfDate={marketAsOfDate}
-        isCopilotOpen={isCopilotOpen}
-        onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
-        onOpenJargon={() => setIsJargonOpen(true)}
-        onOpenDividend={() => setIsDividendOpen(true)}
-        onFocusSearch={() => {
-          setIsSearchOpen(true);
-          setTimeout(() => modalSearchInputRef.current?.focus(), 50);
+    <div className="min-h-[100dvh] flex bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
+      {/* 1. Left Minimalist Sidebar (ChatGPT / Linear style) */}
+      <MinimalSidebar
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen((prev) => !prev)}
+        onNewChat={handleNewChat}
+        historyItems={getHistory()}
+        watchlistSymbols={getWatchlistSymbols()}
+        currentSymbol={report?.symbol}
+        onSelectSymbol={(sym) => handleSelectEmitenDirect(sym)}
+        onRemoveHistory={(sym) => {
+          removeHistoryItem(sym);
+          if (report?.symbol === sym) setReport(null);
+        }}
+        onClearHistory={() => {
+          clearHistory();
+          setReport(null);
         }}
       />
 
-      {/* Unified Split-Pane Terminal Stage */}
-      <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
+      {/* 2. Main Work Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
+        {/* Top Minimal Navigation Bar */}
+        <Header
+          marketIndices={marketIndices}
+          marketAsOfDate={marketAsOfDate}
+          isCopilotOpen={isCopilotOpen}
+          onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
+          onOpenJargon={() => setIsJargonOpen(true)}
+          onOpenDividend={() => setIsDividendOpen(true)}
+          onFocusSearch={() => {
+            setIsSearchOpen(true);
+            setTimeout(() => modalSearchInputRef.current?.focus(), 50);
+          }}
+        />
+
+        {/* View Switcher: Chat-Centric vs Full Terminal Workstation */}
+        <div className="px-4 py-1.5 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-black flex items-center justify-between text-xs shrink-0">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setViewMode("chat")}
+              className={`px-3 py-1 rounded font-medium transition ${
+                viewMode === "chat"
+                  ? "bg-orange-500/15 text-orange-400 font-semibold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-white"
+              }`}
+            >
+              💬 Percakapan Pintar
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("terminal")}
+              className={`px-3 py-1 rounded font-medium transition ${
+                viewMode === "terminal"
+                  ? "bg-orange-500/15 text-orange-400 font-semibold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-white"
+              }`}
+            >
+              📈 Kanvas Data Lengkap
+            </button>
+          </div>
+
+          {report && (
+            <div className="flex items-center gap-2 font-mono text-[11px]">
+              <span className="text-slate-400">Aktif:</span>
+              <span className="font-bold text-orange-400">{report.symbol}</span>
+              <span className="text-slate-500">|</span>
+              <span className="text-slate-300">Rp {report.technical?.lastPrice?.toLocaleString("id-ID") || "-"}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Dynamic Center Stage */}
+        {viewMode === "chat" ? (
+          /* =========================================================================
+              CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-3xl)
+              ========================================================================= */
+          <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-black relative">
+            {/* Conversation Feed */}
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+              <div className="max-w-3xl mx-auto w-full">
+                <ChatFeed
+                  messages={messages}
+                  isLoading={isLoading || isWorkstationLoading}
+                  loadingStage={loadingStage || workstationLoadingStage}
+                  onSelectPrompt={(p) => handleChatSend(p, "quick")}
+                  onOpenDeepDive={(rep) => {
+                    setReport(rep);
+                    setViewMode("terminal");
+                  }}
+                  onOpenSymbolTerminal={(sym) => {
+                    handleSelectEmitenDirect(sym);
+                  }}
+                  onOpenShareCard={(rep) => {
+                    setReport(rep);
+                    setIsShareCardOpen(true);
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Quick Contextual Prompts Strip when report exists */}
+            {report && (
+              <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black/90 py-2 shrink-0">
+                <div className="max-w-3xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
+                  <span className="text-slate-500 text-[10px] uppercase font-bold shrink-0">Tanya Cepat:</span>
+                  <button
+                    onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
+                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  >
+                    Dividen Yield
+                  </button>
+                  <button
+                    onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
+                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  >
+                    Broker Flow 5H
+                  </button>
+                  <button
+                    onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
+                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                  >
+                    Risiko Utama
+                  </button>
+                  <button
+                    onClick={() => setViewMode("terminal")}
+                    className="px-2.5 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 font-semibold hover:bg-orange-500/20 shrink-0 transition"
+                  >
+                    Lihat Modul Lengkap ↗
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Centered Floating Prompt Input Bar */}
+            <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black shrink-0">
+              <div className="max-w-3xl mx-auto w-full">
+                <ChatInput
+                  onSend={handleChatSend}
+                  isLoading={isLoading || isWorkstationLoading}
+                  initialValue=""
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* =========================================================================
+              FULL TERMINAL WORKSTATION VIEW (Canvas & All Modul Lengkap)
+              ========================================================================= */
+          <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
         {/* =========================================================================
             LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
             ========================================================================= */}
@@ -1091,6 +1237,8 @@ export default function Home() {
           </>
         )}
       </main>
+        )}
+      </div>
 
       {/* Floating Copilot Toggle when collapsed */}
       {!isCopilotOpen && (

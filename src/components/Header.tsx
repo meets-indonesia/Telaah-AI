@@ -62,22 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full px-3 lg:px-5 h-13 flex items-center justify-between gap-3 text-xs">
         {/* Brand & Section Nav */}
         <div className="flex items-center gap-4 shrink-0">
-          <Link href="/" className="flex items-center gap-2 group" aria-label="Telaah 360">
-            {/* Custom Brand Logo */}
-            <div className="h-7 w-auto flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/dark-logo.png"
-                alt="Telaah 360 Logo"
-                className="h-7 w-auto object-contain block dark:block"
-              />
-            </div>
-            <span className="text-slate-300 font-medium tracking-tight text-xs">
-              Telaah
-            </span>
-          </Link>
-
-          <nav aria-label="Navigasi Utama" className="hidden sm:flex items-center gap-0.5 border-l border-white/10 pl-3">
+          <nav aria-label="Navigasi Utama" className="hidden sm:flex items-center gap-0.5">
             {navLinks.map((link) => {
               const active = pathname === link.href;
               return (
@@ -98,15 +83,16 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Global Search Hotkey Trigger */}
-        <div className="flex-1 max-w-sm mx-2 hidden md:block">
+        <div className="flex-1 max-w-sm mx-2">
           <button
             type="button"
             onClick={onFocusSearch}
-            className="w-full flex items-center justify-between px-2.5 py-1 rounded bg-black/50 border border-white/10 text-slate-400 hover:border-orange-500/50 hover:text-slate-200 transition text-xs"
+            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded bg-black/50 border border-white/10 text-slate-400 hover:border-orange-500/50 hover:text-slate-200 transition text-xs"
           >
             <span className="flex items-center gap-1.5">
-              <Search className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-400">Cari emiten (contoh: BBCA, ADRO)...</span>
+              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="hidden sm:inline text-slate-400">Cari emiten (contoh: BBCA, ADRO)...</span>
+              <span className="sm:hidden text-slate-400">Search...</span>
             </span>
             <kbd className="hidden lg:inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 bg-white/10 text-slate-300 rounded border border-white/10">
               <Command className="w-2.5 h-2.5" /> K

@@ -15,6 +15,7 @@ import { ChatMessage } from "./types";
 import { StockMiniCard } from "./StockMiniCard";
 import { StockCompareCard } from "./StockCompareCard";
 import { RumorFactCheckerCard } from "./RumorFactCheckerCard";
+import { StockInlineArtifact } from "./StockInlineArtifact";
 import { MarkdownText } from "./MarkdownText";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 
@@ -138,15 +139,25 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
                 <MarkdownText content={msg.text} isUser={isUser} />
               </div>
 
-              {/* Optional Stock Card Widget */}
-              {msg.stockCard && (
+              {/* Optional Stock Card Widget & Full Inline Artifact */}
+              {msg.stockCard?.report ? (
+                <StockInlineArtifact
+                  report={msg.stockCard.report}
+                  onOpenQA={() => {}}
+                  onShare={() => {
+                    if (onOpenShareCard && msg.stockCard?.report) {
+                      onOpenShareCard(msg.stockCard.report);
+                    }
+                  }}
+                />
+              ) : msg.stockCard ? (
                 <StockMiniCard
                   card={msg.stockCard}
                   onOpenDeepDive={onOpenDeepDive}
                   onQuickFollowUp={(q) => onSelectPrompt(q)}
                   onOpenShareCard={onOpenShareCard}
                 />
-              )}
+              ) : null}
 
               {/* Optional Head-to-Head Compare Card */}
               {msg.compareCard && (
