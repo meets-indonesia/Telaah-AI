@@ -718,10 +718,8 @@ export default function Home() {
               {(activeTab === "overview" || activeTab === "all") && (
                 <div className="space-y-3">
                   <ClaimCards claims={report.claims} onSelectEvidence={handleOpenEvidenceWithId} />
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                    <FlowLensModule flowLens={report.flowLens} />
-                    <FinancialModule financials={report.financials} />
-                  </div>
+                  <FlowLensModule flowLens={report.flowLens} />
+                  <FinancialModule financials={report.financials} />
                   <PeerLensModule peerLens={report.peerLens} valuation={report.valuation} symbol={report.symbol} />
                   <EventsModule events={report.events} openQuestions={report.openQuestions} limitations={report.limitations} />
                 </div>

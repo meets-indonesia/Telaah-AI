@@ -108,42 +108,42 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
         </div>
 
         {/* High-Density Key Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 pt-3">
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 pt-3">
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Market Cap
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums">
+            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
               {report.overview?.market_cap
                 ? `Rp ${(report.overview.market_cap / 1e12).toFixed(1)}T`
                 : "-"}
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               P/E (TTM)
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums">
+            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
               {peRatio ? `${peRatio.toFixed(1)}x` : "-"}
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               PBV
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums">
+            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
               {pbvRatio ? `${pbvRatio.toFixed(2)}x` : "-"}
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               RSI (14D)
             </span>
             <span
-              className={`text-xs font-mono font-bold tabular-nums ${
+              className={`text-xs font-mono font-bold tabular-nums truncate block ${
                 rsi && rsi > 70
                   ? "text-rose-600 dark:text-rose-400"
                   : rsi && rsi < 30
@@ -155,30 +155,30 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Foreign Flow
             </span>
-            <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 truncate block">
+            <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 truncate block tabular-nums">
               {foreignFlow || "Netral"}
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 col-span-2 sm:col-span-1 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
-                Credit & As Of
+          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 flex items-center justify-between">
+            <div className="min-w-0 pr-1 truncate">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
+                Credits
               </span>
-              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-medium">
+              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-medium tabular-nums truncate block">
                 {report.creditsConsumed} cr
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
                 onClick={onOpenEvidence}
                 title="Bukti Data"
-                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
               >
                 <Database className="w-3.5 h-3.5" />
               </button>
@@ -186,7 +186,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 type="button"
                 onClick={onOpenQA}
                 title="Tanya Laporan"
-                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
               </button>
@@ -194,7 +194,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 type="button"
                 onClick={onShare}
                 title="Bagikan"
-                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
               >
                 <Share2 className="w-3.5 h-3.5" />
               </button>
