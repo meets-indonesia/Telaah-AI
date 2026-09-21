@@ -387,13 +387,14 @@ export default function Home() {
     }
   };
 
-  // Main chat prompt submission handler
-  const handleChatSend = async (userText: string, mode: AnalysisMode = "quick") => {
+  // Main chat prompt submission handler (supports images & copy-paste)
+  const handleChatSend = async (userText: string, mode: AnalysisMode = "quick", images?: string[]) => {
     const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     const userMsg: ChatMessage = {
       id: "u_" + Date.now(),
       sender: "user",
-      text: userText,
+      text: userText || (images && images.length > 0 ? "Analisis gambar ini..." : ""),
+      images,
       timestamp: timeStr,
     };
 

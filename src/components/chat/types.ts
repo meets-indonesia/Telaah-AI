@@ -6,6 +6,7 @@ export interface ChatMessage {
   sender: "user" | "assistant";
   timestamp: string;
   text: string;
+  images?: string[];
   // Optional rich stock card payload
   stockCard?: {
     symbol: string;

@@ -130,12 +130,27 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
             <div
               className={`space-y-1.5 min-w-0 ${
                 isUser
-                  ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md px-3 py-2 text-xs max-w-[85%]"
-                  : "bg-transparent text-slate-800 dark:text-slate-200 text-xs w-full min-w-0"
+                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl px-3.5 py-2.5 text-xs max-w-[85%] shadow-xs"
+                  : "bg-transparent text-zinc-800 dark:text-zinc-200 text-xs w-full min-w-0"
               }`}
             >
+              {/* Optional user-attached images */}
+              {msg.images && msg.images.length > 0 && (
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  {msg.images.map((imgSrc, idx) => (
+                    <div
+                      key={idx}
+                      className="w-24 h-24 rounded-lg overflow-hidden border border-zinc-300 dark:border-white/20 bg-zinc-800 shrink-0 shadow-xs"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imgSrc} alt={`Attachment ${idx + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Message text with clean formatting */}
-              <div className={!isUser ? "bg-white dark:bg-black p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed overflow-hidden break-words" : ""}>
+              <div className={!isUser ? "bg-white dark:bg-[#18181b] p-3.5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 leading-relaxed overflow-hidden break-words shadow-xs" : ""}>
                 <MarkdownText content={msg.text} isUser={isUser} />
               </div>
 

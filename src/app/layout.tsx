@@ -39,7 +39,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${poppins.className} font-sans antialiased bg-white dark:bg-black text-slate-900 dark:text-slate-100 min-h-[100dvh] transition-colors duration-200 selection:bg-orange-500 selection:text-white`}>
+      <body className={`${poppins.className} font-sans antialiased bg-[#f7f7f8] dark:bg-[#121214] text-zinc-900 dark:text-zinc-100 min-h-[100dvh] transition-colors duration-200 selection:bg-zinc-800 dark:selection:bg-zinc-200 selection:text-white dark:selection:text-black`}>
         <a href="#main-content" className="skip-link">Lewati ke konten utama</a>
         {children}
       </body>
