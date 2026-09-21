@@ -24,6 +24,7 @@ interface ChatFeedProps {
   loadingStage?: string;
   onSelectPrompt: (prompt: string) => void;
   onOpenDeepDive: (report: CompanyIntelligenceReport) => void;
+  onOpenSymbolTerminal?: (symbol: string) => void;
   onOpenShareCard?: (report: CompanyIntelligenceReport) => void;
 }
 
@@ -51,6 +52,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
   loadingStage,
   onSelectPrompt,
   onOpenDeepDive,
+  onOpenSymbolTerminal,
   onOpenShareCard,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -150,7 +152,13 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
               {msg.compareCard && (
                 <StockCompareCard
                   comparison={msg.compareCard}
-                  onOpenDeepDive={(sym) => onSelectPrompt(`Bagaimana analisis saham ${sym}?`)}
+                  onOpenDeepDive={(sym) => {
+                    if (onOpenSymbolTerminal) {
+                      onOpenSymbolTerminal(sym);
+                    } else {
+                      onSelectPrompt(`Bagaimana analisis saham ${sym}?`);
+                    }
+                  }}
                 />
               )}
 

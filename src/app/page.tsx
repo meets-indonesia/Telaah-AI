@@ -225,17 +225,22 @@ export default function Home() {
     executeAnalysis(prompt, mode);
   };
 
-  const handleQuickEmiten = (symbol: string, promptText: string) => {
-    const cached = getReportFromCache(symbol);
+  const handleQuickEmiten = async (symbol: string, promptText: string) => {
+    const clean = symbol.toUpperCase().trim();
+
+    // 1. Check local storage cache
+    const cached = getReportFromCache(clean);
     if (cached) {
       setReport(cached);
       setErrorMessage(null);
       setNeedsConfirmation(false);
       return;
     }
+
+    // 2. Query server (which checks Qdrant vector semantic cache before calling Sectors API)
     setPromptValue(promptText);
     setModeValue("full");
-    executeAnalysis(promptText, "full", symbol);
+    await executeAnalysis(promptText, "full", clean);
   };
 
   // Main chat prompt submission handler
@@ -919,6 +924,9 @@ export default function Home() {
                 onSelectPrompt={(p) => handleChatSend(p, "quick")}
                 onOpenDeepDive={(rep) => {
                   setReport(rep);
+                }}
+                onOpenSymbolTerminal={(sym) => {
+                  handleQuickEmiten(sym, `Bagaimana analisis saham ${sym}?`);
                 }}
                 onOpenShareCard={(rep) => {
                   setReport(rep);
