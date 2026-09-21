@@ -432,7 +432,10 @@ export default function Home() {
         const verdict: "bullish" | "neutral" = isBullish ? "bullish" : "neutral";
         const verdictText = isBullish ? "AKUMULASI / POSITIF" : "NETRAL / WAIT & SEE";
 
-        const botMsgText = `**Hasil Telaah: ${rep.symbol} (${rep.companyName})**\n\n- **Intisari:** ${rep.directAnswer}\n- **Kondisi Keuangan:** ${rep.financials?.solvencyHealth?.description || "Kondisi keuangan terpantau stabil."}\n- **Arus Bandar / Asing:** ${rep.flowLens?.foreignFlow?.recentTrend || "Flow normal"}\n- **Valuasi Saham:** PER ${peStr} | PBV ${pbStr}.`;
+        const botMsgText = `**${rep.symbol} — ${rep.companyName}**\n\n${rep.directAnswer}\n\n` +
+          `• **Valuasi**: PER ${peStr} | PBV ${pbStr}\n` +
+          `• **Kondisi Finansial**: ${rep.financials?.solvencyHealth?.description || "Kondisi keuangan terpantau stabil."}\n` +
+          `• **Arus Broker**: ${rep.flowLens?.foreignFlow?.recentTrend || "Flow normal"}`;
 
         const botReply: ChatMessage = {
           id: "b_" + Date.now(),
