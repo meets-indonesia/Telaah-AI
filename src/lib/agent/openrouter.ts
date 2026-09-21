@@ -164,8 +164,8 @@ export async function callOpenRouter<T = any>({
   maxTokens?: number;
 }): Promise<T> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  const primaryModel = model || process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
-  const fallbackModel = "inclusionai/ling-3.0-flash-fin";
+  const primaryModel = model || process.env.OPENROUTER_MODEL || "inclusionai/ling-3.0-flash-fin";
+  const fallbackModel = "openai/gpt-4o-mini";
 
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY tidak ditemukan di environment.");
@@ -177,8 +177,11 @@ export async function callOpenRouter<T = any>({
 
     const payload: any = {
       model: modelToUse,
-      temperature,
+      temperature: isReasoningModel ? 0.3 : temperature,
       max_tokens: maxTokens,
+      // Apply frequency & presence penalty on Ling model to prevent repetitive token degeneration loops
+      frequency_penalty: isReasoningModel ? 0.4 : undefined,
+      presence_penalty: isReasoningModel ? 0.2 : undefined,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
