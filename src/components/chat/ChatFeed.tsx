@@ -60,7 +60,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
   }, [messages, isLoading, loadingStage]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 text-xs font-sans" aria-live="polite">
+    <div className="flex-1 overflow-y-auto pl-3 sm:pl-4 pr-4 sm:pr-5 py-3.5 space-y-3.5 text-xs font-sans" aria-live="polite">
       {/* Empty State / Terminal Starter */}
       {messages.length === 0 && (
         <div className="my-auto py-6 space-y-4">
@@ -125,14 +125,14 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
             )}
 
             <div
-              className={`space-y-1.5 ${
+              className={`space-y-1.5 min-w-0 ${
                 isUser
                   ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-md px-3 py-2 text-xs max-w-[85%]"
-                  : "bg-transparent text-slate-800 dark:text-slate-200 text-xs w-full max-w-full"
+                  : "bg-transparent text-slate-800 dark:text-slate-200 text-xs w-full min-w-0"
               }`}
             >
               {/* Message text with clean formatting */}
-              <div className={!isUser ? "bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed" : ""}>
+              <div className={!isUser ? "bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed overflow-hidden break-words" : ""}>
                 <MarkdownText content={msg.text} isUser={isUser} />
               </div>
 

@@ -38,6 +38,7 @@ import {
   PanelRightOpen,
   Plus,
   Terminal,
+  Search,
 } from "lucide-react";
 
 type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
@@ -75,8 +76,10 @@ export default function Home() {
   const [isShareCardOpen, setIsShareCardOpen] = useState(false);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
 
-  // Search input ref for hotkey focus
-  const searchInputRef = useRef<HTMLTextAreaElement>(null);
+  // Quick Command Search Dialog state (⌘K)
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [modalSearchText, setModalSearchText] = useState("");
+  const modalSearchInputRef = useRef<HTMLInputElement>(null);
 
   // Trigger from example pills
   const [promptValue, setPromptValue] = useState("");
@@ -118,13 +121,15 @@ export default function Home() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+        setTimeout(() => modalSearchInputRef.current?.focus(), 50);
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setIsCopilotOpen((prev) => !prev);
       }
       if (e.key === "Escape") {
+        setIsSearchOpen(false);
         setIsEvidenceOpen(false);
         setIsQAOpen(false);
         setIsShareOpen(false);
@@ -516,7 +521,10 @@ export default function Home() {
         onOpenCompare={() => handleChatSend("Bandingkan BBCA vs BBRI", "quick")}
         onOpenJargon={() => setIsJargonOpen(true)}
         onOpenDividend={() => setIsDividendOpen(true)}
-        onFocusSearch={() => searchInputRef.current?.focus()}
+        onFocusSearch={() => {
+          setIsSearchOpen(true);
+          setTimeout(() => modalSearchInputRef.current?.focus(), 50);
+        }}
       />
 
       {/* Unified Split-Pane Terminal Stage */}
@@ -573,15 +581,76 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Terminal Command Search Bar */}
-          <InputStation
-            inputRef={searchInputRef}
-            onAnalyze={executeAnalysis}
-            isLoading={isLoading}
-            loadingStage={loadingStage}
-            initialPrompt={promptValue}
-            initialMode={modeValue}
-          />
+      {/* Quick Search Dialog Modal (⌘K) */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          >
+            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
+              <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
+              <input
+                ref={modalSearchInputRef}
+                type="text"
+                value={modalSearchText}
+                onChange={(e) => setModalSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && modalSearchText.trim()) {
+                    setIsSearchOpen(false);
+                    executeAnalysis(modalSearchText.trim(), "full");
+                  }
+                }}
+                placeholder="Ketik kode emiten (BBCA, TLKM, ADRO) atau pertanyaan..."
+                className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
+              />
+              <kbd
+                onClick={() => setIsSearchOpen(false)}
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
+              >
+                ESC
+              </kbd>
+            </div>
+
+            {/* Quick Suggestions */}
+            <div className="p-3 space-y-1.5 text-xs">
+              <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                Emiten Populer:
+              </span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { sym: "BBCA", name: "Bank Central Asia" },
+                  { sym: "BBRI", name: "Bank Rakyat Indonesia" },
+                  { sym: "TLKM", name: "Telkom Indonesia" },
+                  { sym: "ADRO", name: "Adaro Energy" },
+                  { sym: "ANTM", name: "Aneka Tambang" },
+                  { sym: "ASII", name: "Astra International" },
+                ].map((item) => (
+                  <button
+                    key={item.sym}
+                    type="button"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      handleQuickEmiten(item.sym, `Bagaimana prospek dan valuasi ${item.sym}?`);
+                    }}
+                    className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition"
+                  >
+                    <div>
+                      <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">
+                        {item.sym}
+                      </span>
+                      <span className="text-[10px] text-slate-500 truncate block">
+                        {item.name}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400">↵</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
           {/* Error Callout */}
           {errorMessage && (
@@ -775,7 +844,7 @@ export default function Home() {
               onClick={() => setIsCopilotOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-30"
             />
-            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[88vw] sm:w-[380px] lg:w-[360px] xl:w-[390px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
+            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
             {/* Copilot Header */}
             <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-2 bg-slate-50/70 dark:bg-[#0f1118]">
               <div className="flex items-center gap-2">
@@ -811,7 +880,7 @@ export default function Home() {
             </div>
 
             {/* Chat Feed */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <ChatFeed
                 messages={messages}
                 isLoading={isLoading}
