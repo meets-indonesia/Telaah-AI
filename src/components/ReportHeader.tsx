@@ -102,22 +102,22 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           </div>
 
           {/* Pricing & Performance */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0 sm:self-auto self-end">
+          <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 w-full sm:w-auto">
             <button
               type="button"
               onClick={handleToggleWatchlist}
               title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition shrink-0 ${
                 inWatchlist
                   ? "bg-amber-500/15 border-amber-500/30 text-amber-400 font-semibold"
                   : "border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
-              <Star className={`w-3.5 h-3.5 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span className="hidden sm:inline">{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
+              <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="inline">{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
             </button>
 
-            <div className="text-right">
+            <div className="text-right shrink-0">
               <div className="flex items-baseline gap-2 justify-end">
                 <span className="text-xl sm:text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   {lastPrice ? `Rp ${lastPrice.toLocaleString("id-ID")}` : "-"}
