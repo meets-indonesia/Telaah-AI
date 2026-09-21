@@ -50,31 +50,28 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
   const simulatedEbitdaImpact = Number((priceShock * baseMultiplier).toFixed(1));
 
   return (
-    <div className="bg-[#0f172a]/95 rounded-2xl border border-slate-800 p-5 md:p-6 shadow-xl space-y-6 relative overflow-hidden">
-      {/* Glow Accent */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-4 transition-colors">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-              <Pickaxe className="w-4 h-4" />
+            <div className="w-6 h-6 rounded bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center">
+              <Pickaxe className="w-3.5 h-3.5" />
             </div>
-            <h3 className="text-base font-bold text-white">Commodity & Mining Lens</h3>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Commodity & Mining Lens</h3>
+            <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               {sectorBadge}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Analisis korelasi harga acuan komoditas global, cadangan tambang, dan sensitivitas EBITDA {companyName}.
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Korelasi harga komoditas acuan, cadangan, dan sensitivitas EBITDA {companyName}.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 text-xs">
-            <span className="text-[10px] text-slate-500 block">Komoditas Inti</span>
-            <span className="font-bold text-amber-400">{primaryCommodity}</span>
+          <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+            <span className="text-[10px] font-mono text-slate-400 block">Komoditas Inti</span>
+            <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-xs">{primaryCommodity}</span>
           </div>
         </div>
       </div>

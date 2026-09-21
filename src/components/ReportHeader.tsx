@@ -47,25 +47,25 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
     <div className="space-y-2.5">
       {/* Institutional Emiten Strip */}
       <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
           {/* Company ID */}
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center text-slate-900 dark:text-slate-100 font-mono font-bold text-lg tracking-tight">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center text-slate-900 dark:text-slate-100 font-mono font-bold text-lg tracking-tight shrink-0">
               {report.symbol}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none truncate max-w-[200px] sm:max-w-md">
                   {report.companyName}
                 </h2>
-                <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <span className="text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
                   IDX:{report.symbol}
                 </span>
-                <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800">
+                <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 shrink-0">
                   {report.overview?.listing_board || "Papan Utama"}
                 </span>
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 flex-wrap">
                 <span>{report.overview?.sector || "Sektor"}</span>
                 <span>•</span>
                 <span>{report.overview?.sub_sector || "Subsektor"}</span>
@@ -82,10 +82,10 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           </div>
 
           {/* Pricing & Performance */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0 sm:self-auto self-end">
             <div className="text-right">
               <div className="flex items-baseline gap-2 justify-end">
-                <span className="text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                <span className="text-xl sm:text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   {lastPrice ? `Rp ${lastPrice.toLocaleString("id-ID")}` : "-"}
                 </span>
                 <span
@@ -100,8 +100,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                   {dailyReturn.toFixed(2)}%
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono">
-                Terakhir update: {report.dataAsOf}
+              <span className="text-[10px] text-slate-400 font-mono block">
+                Terakhir: {report.dataAsOf}
               </span>
             </div>
           </div>

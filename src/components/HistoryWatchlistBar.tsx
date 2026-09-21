@@ -110,16 +110,14 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
       )}
 
       {/* Main Bar */}
-      <div className="bg-[#0b101b]/95 border border-slate-800/90 rounded-xl p-2.5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3 overflow-x-auto">
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-            <History className="w-3.5 h-3.5 text-blue-400" />
-            <span className="hidden sm:inline">Riwayat & Watchlist:</span>
-          </div>
+      <div className="bg-[#0b101b]/95 border border-slate-800/90 rounded-xl p-2.5 shadow-md flex items-center justify-between gap-3 overflow-hidden">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 shrink-0">
+          <History className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          <span className="hidden sm:inline">Riwayat:</span>
         </div>
 
         {/* Horizontal Scrollable Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 min-w-0">
           {historyItems.map((item) => {
             const isTarget = currentSymbol === item.symbol;
             const isFav = watchlistSymbols.includes(item.symbol);

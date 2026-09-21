@@ -177,6 +177,26 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
+      {/* Mobile Nav Links Row */}
+      <nav aria-label="Navigasi Seluler" className="sm:hidden flex items-center gap-1 overflow-x-auto px-3 py-1 border-t border-slate-100 dark:border-slate-800/60 no-scrollbar text-xs bg-slate-50/50 dark:bg-[#0c0e15]">
+        {navLinks.map((link) => {
+          const active = pathname === link.href;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-colors shrink-0 ${
+                active
+                  ? "bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-200"
+              }`}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* Global Macro Ticker Tape Strip */}
       {marketIndices && marketIndices.length > 0 && (
         <div className="border-t border-terminal-border bg-slate-50 dark:bg-[#07090e] px-3 py-1 flex items-center text-[11px] font-mono overflow-hidden">
