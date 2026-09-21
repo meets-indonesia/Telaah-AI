@@ -230,10 +230,15 @@ export default function Home() {
     setCopilotLoadingStage(`Menganalisis data ${report.symbol}...`);
 
     try {
+      const historyPayload = copilotMessages.slice(-6).map((m) => ({
+        role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
+        text: m.text,
+      }));
+
       const qaRes = await fetch("/api/qa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: userText, report }),
+        body: JSON.stringify({ question: userText, report, history: historyPayload }),
       });
       const qaData = await qaRes.json();
       const botReply: ChatMessage = {
@@ -270,12 +275,14 @@ export default function Home() {
       title: "Obrolan Baru",
       date: new Date().toLocaleDateString("id-ID"),
       messages: [],
-      report: report,
+      report: null, // Obrolan baru bersih tanpa terikat emiten sebelumnya
     };
     const updated = [newSession, ...sessions];
     persistSessions(updated);
     setActiveSessionId(newSessionId);
     setMessages([]);
+    setReport(null); // Reset konteks emiten global
+    setViewMode("chat");
   };
 
   const handleSelectSession = (sessionId: string) => {
