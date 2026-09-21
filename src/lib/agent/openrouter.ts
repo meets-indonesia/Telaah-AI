@@ -164,8 +164,8 @@ export async function callOpenRouter<T = any>({
   maxTokens?: number;
 }): Promise<T> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  // Gunakan qwen/qwen-2.5-72b-instruct sebagai default: cepat (~6-9 detik), stabil, akurat finansial, dan format JSON valid
-  const primaryModel = model || process.env.OPENROUTER_MODEL || "qwen/qwen-2.5-72b-instruct";
+  // Model Qwen 3.5 397B dengan deepthink (reasoning) dimatikan: menghasilkan output instan (3-5 detik) tanpa token bloat
+  const primaryModel = model || process.env.OPENROUTER_MODEL || "qwen/qwen3.5-397b-a17b";
   const fallbackModel = "openai/gpt-4o-mini";
 
   if (!apiKey) {
@@ -174,12 +174,14 @@ export async function callOpenRouter<T = any>({
 
   // Helper internal untuk memanggil OpenRouter dengan model tertentu
   async function makeRequest(modelToUse: string): Promise<T> {
-    const isReasoningModel = modelToUse.includes("r1") || modelToUse.includes("397b");
+    const isReasoningModel = modelToUse.includes("r1");
 
     const payload: any = {
       model: modelToUse,
       temperature,
       max_tokens: maxTokens,
+      // Matikan deepthink/reasoning khusus Qwen 3.5 agar respon secepat kilat (3-5 detik)
+      reasoning: { effort: "none" },
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
