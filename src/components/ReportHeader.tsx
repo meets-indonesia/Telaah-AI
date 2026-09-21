@@ -203,22 +203,28 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
         </div>
       </div>
 
-      {/* Direct Answer & Core Thesis (Clean Editorial Box) */}
-      <div className="bg-slate-50 dark:bg-[#0c0e14] rounded-lg border-l-4 border-l-indigo-500 dark:border-l-indigo-400 border-y border-r border-slate-200 dark:border-slate-800/80 p-3.5">
-        <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400">
-            Intisari Riset
-          </span>
-          <span className="text-[10px] font-mono text-slate-400">
-            Mode: {report.mode.toUpperCase()}
+      {/* Executive Thesis & Direct Answer Strip */}
+      <div className="bg-[#0f1118] rounded-md border border-slate-800/80 p-3.5 space-y-2">
+        <div className="flex items-center justify-between border-b border-slate-800/60 pb-1.5 text-[10px] font-mono">
+          <div className="flex items-center gap-1.5 text-slate-300 uppercase tracking-wider font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+            <span>Executive Brief</span>
+          </div>
+          <span className="text-slate-500 uppercase tracking-widest text-[9px]">
+            Mode: {report.mode}
           </span>
         </div>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug mb-1">
-          {report.directAnswer}
-        </h3>
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-          {report.executiveSummary}
-        </p>
+
+        <div className="text-xs text-slate-200 leading-relaxed space-y-1.5">
+          <p className="font-semibold text-slate-100 text-xs sm:text-[13px] leading-snug">
+            {report.directAnswer}
+          </p>
+          {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
+            <p className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-slate-800/40">
+              {report.executiveSummary}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -12,25 +12,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className="dark" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
                 const savedTheme = localStorage.getItem('telaah_theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                  document.documentElement.classList.add('dark');
-                } else {
+                if (savedTheme === 'light') {
                   document.documentElement.classList.remove('dark');
+                  document.documentElement.classList.add('light');
+                } else {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
                 }
               } catch (e) {}
             `,
           }}
         />
       </head>
-      <body className="antialiased bg-[#f6f8fb] dark:bg-[#090d16] text-slate-900 dark:text-slate-100 min-h-[100dvh] transition-colors duration-200 selection:bg-brand-500 selection:text-white">
+      <body className="antialiased bg-[#090a0f] text-slate-100 min-h-[100dvh] transition-colors duration-200 selection:bg-emerald-500 selection:text-white">
         <a href="#main-content" className="skip-link">Lewati ke konten utama</a>
         {children}
       </body>

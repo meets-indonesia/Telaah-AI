@@ -18,9 +18,11 @@ export function ThemeToggle() {
     setIsDark(nextDark);
     if (nextDark) {
       document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
       localStorage.setItem("telaah_theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
       localStorage.setItem("telaah_theme", "light");
     }
   };
