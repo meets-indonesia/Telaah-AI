@@ -24,6 +24,7 @@ import { ShareAlphaCardModal } from "@/components/retail/ShareAlphaCardModal";
 import { ChatMessage, ChatSession } from "@/components/chat/types";
 import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import { searchEmiten, IDXCompany } from "@/lib/sectors/companies";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import {
   detectComparisonIntent,
@@ -49,6 +50,14 @@ import {
 type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
 
 export default function Home() {
+  const [symbolParam, setSymbolParam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setSymbolParam(params.get("symbol"));
+    }
+  }, []);
   // Split pane: Copilot dock visibility
   const [isCopilotOpen, setIsCopilotOpen] = useState(true);
 
@@ -61,6 +70,9 @@ export default function Home() {
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
+  const [isWorkstationLoading, setIsWorkstationLoading] = useState(false);
+  const [workstationLoadingStage, setWorkstationLoadingStage] = useState("");
+  const [loadingEmitenSymbol, setLoadingEmitenSymbol] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Dashboard Active Tab
@@ -173,6 +185,13 @@ export default function Home() {
     }
   }, []);
 
+  // Handle URL ?symbol= query parameter (e.g. redirected from Watchlist)
+  useEffect(() => {
+    if (symbolParam) {
+      handleSelectEmitenDirect(symbolParam);
+    }
+  }, [symbolParam]);
+
   // Sync sessions to localStorage
   const persistSessions = (updatedSessions: ChatSession[]) => {
     setSessions(updatedSessions);
@@ -225,10 +244,12 @@ export default function Home() {
     executeAnalysis(prompt, mode);
   };
 
-  const handleQuickEmiten = async (symbol: string, promptText: string) => {
+  const handleSelectEmitenDirect = async (symbol: string) => {
     const clean = symbol.toUpperCase().trim();
+    setIsSearchOpen(false);
+    setModalSearchText("");
 
-    // 1. Check local storage cache
+    // 1. Cek local storage cache terlebih dahulu
     const cached = getReportFromCache(clean);
     if (cached) {
       setReport(cached);
@@ -237,10 +258,40 @@ export default function Home() {
       return;
     }
 
-    // 2. Query server (which checks Qdrant vector semantic cache before calling Sectors API)
-    setPromptValue(promptText);
-    setModeValue("full");
-    await executeAnalysis(promptText, "full", clean);
+    // 2. Loading eksklusif di kanvas Workstation emiten (Copilot Chat tidak terganggu)
+    setIsWorkstationLoading(true);
+    setLoadingEmitenSymbol(clean);
+    setErrorMessage(null);
+    setNeedsConfirmation(false);
+    setWorkstationLoadingStage(`Mengambil laporan keuangan, valuasi peer & broker flow ${clean}...`);
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Analisis komprehensif emiten ${clean}`,
+          mode: "full",
+          confirmedSymbol: clean,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal memuat telaah emiten.");
+      }
+
+      if (data.report) {
+        setReport(data.report);
+        saveReportToHistory(data.report);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Terjadi kesalahan saat memuat data.");
+    } finally {
+      setIsWorkstationLoading(false);
+      setWorkstationLoadingStage("");
+      setLoadingEmitenSymbol("");
+    }
   };
 
   // Main chat prompt submission handler
@@ -551,7 +602,6 @@ export default function Home() {
         marketAsOfDate={marketAsOfDate}
         isCopilotOpen={isCopilotOpen}
         onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
-        onOpenCompare={() => handleChatSend("Bandingkan BBCA vs BBRI", "quick")}
         onOpenJargon={() => setIsJargonOpen(true)}
         onOpenDividend={() => setIsDividendOpen(true)}
         onFocusSearch={() => {
@@ -572,9 +622,7 @@ export default function Home() {
           <HistoryWatchlistBar
             currentSymbol={report?.symbol}
             onRestoreReport={handleRestoreReport}
-            onSelectSymbolPrompt={(sym) =>
-              executeAnalysis(`Bagaimana kondisi fundamental, flow, dan evaluasi terkini ${sym}?`, "full", sym)
-            }
+            onSelectSymbolPrompt={(sym) => handleSelectEmitenDirect(sym)}
           />
 
           {/* Quick Emiten Shortcuts Strip */}
@@ -583,31 +631,31 @@ export default function Home() {
               Quick:
             </span>
             <button
-              onClick={() => handleQuickEmiten("BBCA", "Bagaimana aksi akumulasi direksi dan kinerja laba BBCA terkini?")}
+              onClick={() => handleSelectEmitenDirect("BBCA")}
               className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBCA • Cluster Direksi
             </button>
             <button
-              onClick={() => handleQuickEmiten("ADRO", "Bagaimana dampak harga batu bara acuan terhadap laba dan cadangan ADRO?")}
+              onClick={() => handleSelectEmitenDirect("ADRO")}
               className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ADRO • Batu Bara
             </button>
             <button
-              onClick={() => handleQuickEmiten("ANTM", "Cek sensitivitas laba ANTM terhadap harga emas dan nikel LME")}
+              onClick={() => handleSelectEmitenDirect("ANTM")}
               className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ANTM • Nikel & Emas
             </button>
             <button
-              onClick={() => handleQuickEmiten("BBRI", "Telaah fundamental, foreign flow dan dividen yield BBRI")}
+              onClick={() => handleSelectEmitenDirect("BBRI")}
               className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBRI • Foreign Flow
             </button>
             <button
-              onClick={() => handleQuickEmiten("TLKM", "Cek evaluasi klaim margin laba dan foreign flow TLKM")}
+              onClick={() => handleSelectEmitenDirect("TLKM")}
               className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               TLKM • Telko
@@ -630,11 +678,16 @@ export default function Home() {
                 onChange={(e) => setModalSearchText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && modalSearchText.trim()) {
-                    setIsSearchOpen(false);
-                    executeAnalysis(modalSearchText.trim(), "full");
+                    const searchResults = searchEmiten(modalSearchText.trim(), 1);
+                    if (searchResults.length > 0) {
+                      handleSelectEmitenDirect(searchResults[0].symbol);
+                    } else {
+                      setIsSearchOpen(false);
+                      handleSelectEmitenDirect(modalSearchText.trim());
+                    }
                   }
                 }}
-                placeholder="Ketik kode emiten (BBCA, TLKM, ADRO) atau pertanyaan..."
+                placeholder="Cari kode emiten (misal: BBCA) atau nama perusahaan (misal: Adaro, BCA)..."
                 className="w-full py-3 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none font-sans"
               />
               <kbd
@@ -645,44 +698,93 @@ export default function Home() {
               </kbd>
             </div>
 
-            {/* Quick Suggestions */}
-            <div className="p-3 space-y-1.5 text-xs">
-              <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
-                Emiten Populer:
-              </span>
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { sym: "BBCA", name: "Bank Central Asia" },
-                  { sym: "BBRI", name: "Bank Rakyat Indonesia" },
-                  { sym: "TLKM", name: "Telkom Indonesia" },
-                  { sym: "ADRO", name: "Adaro Energy" },
-                  { sym: "ANTM", name: "Aneka Tambang" },
-                  { sym: "ASII", name: "Astra International" },
-                ].map((item) => (
-                  <button
-                    key={item.sym}
-                    type="button"
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      handleQuickEmiten(item.sym, `Bagaimana prospek dan valuasi ${item.sym}?`);
-                    }}
-                    className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
-                      <div className="min-w-0">
-                        <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">
-                          {item.sym}
-                        </span>
-                        <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
-                          {item.name}
-                        </span>
-                      </div>
+            {/* Live Search Results or Quick Suggestions */}
+            <div className="p-3 space-y-1.5 text-xs max-h-80 overflow-y-auto">
+              {modalSearchText.trim() ? (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Hasil Pencarian Emiten ({searchEmiten(modalSearchText.trim(), 8).length}):
+                  </span>
+                  {searchEmiten(modalSearchText.trim(), 8).length > 0 ? (
+                    <div className="space-y-1">
+                      {searchEmiten(modalSearchText.trim(), 8).map((item) => (
+                        <button
+                          key={item.symbol}
+                          type="button"
+                          onClick={() => handleSelectEmitenDirect(item.symbol)}
+                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
+                            <div className="min-w-0">
+                              <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                                {item.symbol}
+                              </span>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block max-w-[340px]">
+                                {item.name}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0 text-slate-400 group-hover:text-orange-400 transition-colors">
+                            <span className="text-[10px] font-mono">Buka Analisis</span>
+                            <span className="text-[10px] font-mono">↵</span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400">↵</span>
-                  </button>
-                ))}
-              </div>
+                  ) : (
+                    <div className="py-6 text-center text-slate-400 space-y-2">
+                      <p>Tidak ditemukan emiten dengan kata kunci "{modalSearchText}".</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          handleSelectEmitenDirect(modalSearchText.trim());
+                        }}
+                        className="px-3 py-1.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs hover:bg-orange-500/30 transition"
+                      >
+                        Tetap analisis kode "{modalSearchText.toUpperCase()}"
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">
+                    Emiten Populer:
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { sym: "BBCA", name: "Bank Central Asia" },
+                      { sym: "BBRI", name: "Bank Rakyat Indonesia" },
+                      { sym: "TLKM", name: "Telkom Indonesia" },
+                      { sym: "ADRO", name: "Alamtri Resources Indonesia" },
+                      { sym: "ANTM", name: "Aneka Tambang" },
+                      { sym: "ASII", name: "Astra International" },
+                    ].map((item) => (
+                      <button
+                        key={item.sym}
+                        type="button"
+                        onClick={() => handleSelectEmitenDirect(item.sym)}
+                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />
+                          <div className="min-w-0">
+                            <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block group-hover:text-orange-400 transition-colors">
+                              {item.sym}
+                            </span>
+                            <span className="text-[10px] text-slate-500 truncate block max-w-[130px]">
+                              {item.name}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 group-hover:text-orange-400">↵</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -732,6 +834,26 @@ export default function Home() {
                   Lanjutkan Telaah
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Emiten Workstation Exclusive Loading Banner */}
+          {isWorkstationLoading && (
+            <div className="p-4 rounded-xl border border-orange-500/30 bg-orange-500/10 backdrop-blur-md text-xs space-y-3 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="font-mono font-bold text-orange-400 text-sm">
+                    MEMUAT KANVAS EMITEN: {loadingEmitenSymbol}
+                  </span>
+                </div>
+                <span className="font-mono text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded">
+                  Sectors v2 Engine
+                </span>
+              </div>
+              <p className="text-slate-300 text-xs pl-7.5">
+                {workstationLoadingStage || "Menghubungkan data resmi bursa..."}
+              </p>
             </div>
           )}
 
@@ -926,7 +1048,7 @@ export default function Home() {
                   setReport(rep);
                 }}
                 onOpenSymbolTerminal={(sym) => {
-                  handleQuickEmiten(sym, `Bagaimana analisis saham ${sym}?`);
+                  handleSelectEmitenDirect(sym);
                 }}
                 onOpenShareCard={(rep) => {
                   setReport(rep);
