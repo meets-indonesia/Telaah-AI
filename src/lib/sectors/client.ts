@@ -281,11 +281,17 @@ export class SectorsClient {
   /**
    * Keterbukaan informasi kepemilikan saham & insider filings
    */
-  public async getFilings(symbol: string): Promise<{ results: FilingItem[] }> {
-    const clean = this.normalizeSymbol(symbol);
+  public async getFilings(
+    symbol?: string,
+    additionalParams: Record<string, string | number | undefined> = {}
+  ): Promise<{ results: FilingItem[] }> {
+    const params: Record<string, string | number | undefined> = { ...additionalParams };
+    if (symbol) {
+      params.symbol = this.normalizeSymbol(symbol);
+    }
     return this.fetchEndpoint<{ results: FilingItem[] }>(
       "/v2/filings/",
-      { symbol: clean },
+      params,
       1,
       900
     );
