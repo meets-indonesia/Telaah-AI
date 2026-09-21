@@ -110,9 +110,9 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
       )}
 
       {/* Main Bar */}
-      <div className="bg-[#0b101b]/95 border border-slate-800/90 rounded-xl p-2.5 shadow-md flex items-center justify-between gap-3 overflow-hidden">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 shrink-0">
-          <History className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+      <div className="bg-white dark:bg-black border border-slate-200 dark:border-white/10 rounded-lg p-2 shadow-sm flex items-center justify-between gap-3 overflow-hidden">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 shrink-0">
+          <History className="w-3.5 h-3.5 text-orange-500 shrink-0" />
           <span className="hidden sm:inline">Riwayat:</span>
         </div>
 
@@ -127,10 +127,10 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
               <div
                 key={item.id}
                 onClick={() => handleRestore(item.symbol)}
-                className={`group flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs cursor-pointer shrink-0 transition select-none ${
+                className={`group flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs cursor-pointer shrink-0 transition select-none ${
                   isTarget
-                    ? "bg-blue-600/25 border-blue-500/50 text-white shadow-sm"
-                    : "bg-slate-900/80 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white"
+                    ? "bg-orange-500/15 border-orange-500/40 text-orange-700 dark:text-orange-300"
+                    : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-700 dark:text-slate-300"
                 }`}
                 title={`Buka arsip ${item.symbol} (${item.formattedDate})`}
               >

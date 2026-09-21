@@ -102,22 +102,21 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           </div>
 
           {/* Pricing & Performance */}
-          <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={handleToggleWatchlist}
-              title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition shrink-0 ${
-                inWatchlist
-                  ? "bg-amber-500/15 border-amber-500/30 text-amber-400 font-semibold"
-                  : "border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
-              }`}
-            >
-              <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span className="inline">{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
-            </button>
-
+          <div className="flex items-start justify-between sm:justify-end gap-2.5 sm:gap-4 shrink-0 w-full sm:w-auto">
             <div className="text-right shrink-0">
+              <button
+                type="button"
+                onClick={handleToggleWatchlist}
+                title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 mb-1 text-xs rounded border transition shrink-0 ${
+                  inWatchlist
+                    ? "bg-amber-500/15 border-amber-500/30 text-amber-500 dark:text-amber-400 font-semibold"
+                    : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-amber-400 text-amber-400" : ""}`} />
+                <span>{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
+              </button>
               <div className="flex items-baseline gap-2 justify-end">
                 <span className="text-xl sm:text-2xl font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                   {lastPrice ? `Rp ${lastPrice.toLocaleString("id-ID")}` : "-"}
@@ -198,46 +197,50 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 flex items-center justify-between">
-            <div className="min-w-0 pr-1 truncate">
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-                Credits
-              </span>
-              <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-medium tabular-nums truncate block">
-                {report.fromVectorCache ? (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
-                    0 cr (Cache)
-                  </span>
-                ) : (
-                  `${report.creditsConsumed} cr`
-                )}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={onOpenEvidence}
-                title="Bukti Data"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <Database className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={onOpenQA}
-                title="Tanya Laporan"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={onShare}
-                title="Bagikan"
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-              </button>
+          <div className="sm:col-span-3 xl:col-span-1 p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 space-y-2">
+            <div className="flex items-center justify-between gap-2 min-w-0">
+              <div className="min-w-0">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
+                  Biaya Analisis
+                </span>
+                <span className="text-[11px] font-mono font-semibold tabular-nums block whitespace-nowrap">
+                  {report.fromVectorCache ? (
+                    <span className="text-emerald-600 dark:text-emerald-400" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
+                      0 kredit · Cache lokal
+                    </span>
+                  ) : (
+                    <span className="text-amber-600 dark:text-amber-400">
+                      {report.creditsConsumed} kredit API
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={onOpenEvidence}
+                  title="Lihat Bukti Data"
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                >
+                  <Database className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenQA}
+                  title="Tanya Laporan"
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onShare}
+                  title="Bagikan Laporan"
+                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
