@@ -143,7 +143,11 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
               {msg.stockCard?.report ? (
                 <StockInlineArtifact
                   report={msg.stockCard.report}
-                  onOpenQA={() => {}}
+                  onToggleCopilot={() => {
+                    if (onOpenDeepDive && msg.stockCard?.report) {
+                      onOpenDeepDive(msg.stockCard.report);
+                    }
+                  }}
                   onShare={() => {
                     if (onOpenShareCard && msg.stockCard?.report) {
                       onOpenShareCard(msg.stockCard.report);

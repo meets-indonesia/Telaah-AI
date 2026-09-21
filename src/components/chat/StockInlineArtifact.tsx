@@ -25,14 +25,14 @@ import { ReportHeader } from "@/components/ReportHeader";
 interface StockInlineArtifactProps {
   report: CompanyIntelligenceReport;
   onOpenEvidence?: () => void;
-  onOpenQA?: () => void;
+  onToggleCopilot?: () => void;
   onShare?: () => void;
 }
 
 export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
   report,
   onOpenEvidence = () => {},
-  onOpenQA = () => {},
+  onToggleCopilot = () => {},
   onShare = () => {},
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -46,7 +46,7 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
       <ReportHeader
         report={report}
         onOpenEvidence={onOpenEvidence}
-        onOpenQA={onOpenQA}
+        onToggleCopilot={onToggleCopilot}
         onShare={onShare}
       />
 

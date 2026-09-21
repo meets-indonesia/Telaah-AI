@@ -14,7 +14,6 @@ import { InsiderWhaleRadar } from "@/components/InsiderWhaleRadar";
 import { CommodityLensModule } from "@/components/CommodityLensModule";
 import { HistoryWatchlistBar } from "@/components/HistoryWatchlistBar";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
-import { ReportQADrawer } from "@/components/ReportQADrawer";
 import { ShareModal } from "@/components/ShareModal";
 import { ChatFeed } from "@/components/chat/ChatFeed";
 import { ChatInput } from "@/components/chat/ChatInput";
@@ -101,7 +100,6 @@ export default function Home() {
 
   // Drawers & Modals
   const [isEvidenceOpen, setIsEvidenceOpen] = useState(false);
-  const [isQAOpen, setIsQAOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isJargonOpen, setIsJargonOpen] = useState(false);
   const [isDividendOpen, setIsDividendOpen] = useState(false);
@@ -168,7 +166,6 @@ export default function Home() {
       if (e.key === "Escape") {
         setIsSearchOpen(false);
         setIsEvidenceOpen(false);
-        setIsQAOpen(false);
         setIsShareOpen(false);
         setIsJargonOpen(false);
         setIsDividendOpen(false);
@@ -713,10 +710,6 @@ export default function Home() {
         <Header
           marketIndices={marketIndices}
           marketAsOfDate={marketAsOfDate}
-          viewMode={viewMode}
-          onToggleViewMode={() => setViewMode((prev) => (prev === "terminal" ? "chat" : "terminal"))}
-          isCopilotOpen={isCopilotOpen}
-          onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
           onOpenJargon={() => setIsJargonOpen(true)}
           onOpenDividend={() => setIsDividendOpen(true)}
           onFocusSearch={() => {
@@ -931,7 +924,7 @@ export default function Home() {
                   setSelectedEvidenceId(null);
                   setIsEvidenceOpen(true);
                 }}
-                onOpenQA={() => setIsQAOpen(true)}
+                onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
                 onShare={() => setIsShareOpen(true)}
               />
 
@@ -1176,12 +1169,6 @@ export default function Home() {
             evidenceRecords={report.evidenceRecords}
             toolCallTrace={report.toolCallTrace}
             selectedEvidenceId={selectedEvidenceId}
-          />
-
-          <ReportQADrawer
-            isOpen={isQAOpen}
-            onClose={() => setIsQAOpen(false)}
-            report={report}
           />
 
           <ShareModal

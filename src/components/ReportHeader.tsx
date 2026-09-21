@@ -20,14 +20,14 @@ import { CompanyLogo } from "./CompanyLogo";
 interface ReportHeaderProps {
   report: CompanyIntelligenceReport;
   onOpenEvidence: () => void;
-  onOpenQA: () => void;
+  onToggleCopilot?: () => void;
   onShare: () => void;
 }
 
 export const ReportHeader: React.FC<ReportHeaderProps> = ({
   report,
   onOpenEvidence,
-  onOpenQA,
+  onToggleCopilot,
   onShare,
 }) => {
   const [inWatchlist, setInWatchlist] = useState(false);
@@ -224,14 +224,17 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 >
                   <Database className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={onOpenQA}
-                  title="Tanya Laporan"
-                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                </button>
+                {onToggleCopilot && (
+                  <button
+                    type="button"
+                    onClick={onToggleCopilot}
+                    title="Buka Copilot Emiten Ini"
+                    className="flex items-center gap-1 px-2 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 text-xs font-semibold transition"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>Copilot</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={onShare}
