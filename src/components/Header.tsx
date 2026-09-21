@@ -91,8 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <span className="flex items-center gap-1.5">
               <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="hidden sm:inline text-slate-400">Cari emiten (contoh: BBCA, ADRO)...</span>
-              <span className="sm:hidden text-slate-400">Search...</span>
+              <span className="text-slate-400">Cari emiten</span>
             </span>
             <kbd className="hidden lg:inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 bg-white/10 text-slate-300 rounded border border-white/10">
               <Command className="w-2.5 h-2.5" /> K
@@ -131,7 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onToggleCopilot}
-              title={`Toggle Copilot (${isCopilotOpen ? "Tutup" : "Buka"}) (⌘J)`}
+              title={`Buka Kanvas Lengkap (⌘J)`}
               className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition rounded ${
                 isCopilotOpen
                   ? "text-orange-400 hover:text-orange-300"
@@ -139,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               {isCopilotOpen ? <PanelRightClose className="w-3.5 h-3.5" /> : <PanelRightOpen className="w-3.5 h-3.5" />}
-              <span>Copilot</span>
+              <span>Kanvas</span>
               <kbd className="hidden lg:inline-flex items-center text-[9px] font-mono text-slate-500 ml-0.5">⌘J</kbd>
             </button>
           )}
