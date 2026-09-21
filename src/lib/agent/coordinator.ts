@@ -381,14 +381,14 @@ export async function executeEvidencePlan(
     
     // Validate up to 5 comparable peers
     const validPeers = rawPeers
-      .filter((p) => p.symbol.toUpperCase().replace(".JK", "") !== clean)
+      .filter((p: any) => p.symbol.toUpperCase().replace(".JK", "") !== clean)
       .slice(0, 5)
-      .map((p) => ({
+      .map((p: any) => ({
         symbol: p.symbol.toUpperCase().replace(".JK", ""),
         companyName: p.company_name,
         marketCap: p.market_cap,
-        pe: p.pe ?? null,
-        pb: p.pb ?? null,
+        pe: p.pe_ttm ?? p.pe ?? null,
+        pb: p.pb_mrq ?? p.pb ?? null,
         dividendYield: p.dividend_yield ?? null,
         isTarget: false,
       }));

@@ -128,7 +128,9 @@ export interface PeerCompany {
   company_name: string;
   market_cap: number;
   pe?: number;
+  pe_ttm?: number;
   pb?: number;
+  pb_mrq?: number;
   ps?: number;
   dividend_yield?: number;
   close?: number;
