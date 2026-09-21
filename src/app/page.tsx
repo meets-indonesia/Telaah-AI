@@ -225,17 +225,22 @@ export default function Home() {
     executeAnalysis(prompt, mode);
   };
 
-  const handleQuickEmiten = (symbol: string, promptText: string) => {
-    const cached = getReportFromCache(symbol);
+  const handleQuickEmiten = async (symbol: string, promptText: string) => {
+    const clean = symbol.toUpperCase().trim();
+
+    // 1. Check local storage cache
+    const cached = getReportFromCache(clean);
     if (cached) {
       setReport(cached);
       setErrorMessage(null);
       setNeedsConfirmation(false);
       return;
     }
+
+    // 2. Query server (which checks Qdrant vector semantic cache before calling Sectors API)
     setPromptValue(promptText);
     setModeValue("full");
-    executeAnalysis(promptText, "full", symbol);
+    await executeAnalysis(promptText, "full", clean);
   };
 
   // Main chat prompt submission handler
@@ -751,11 +756,11 @@ export default function Home() {
                     onClick={() => setActiveTab("overview")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "overview"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5" />
+                    <LayoutDashboard className="w-3.5 h-3.5 text-orange-400" />
                     <span>Ringkasan 360°</span>
                   </button>
 
@@ -763,11 +768,11 @@ export default function Home() {
                     onClick={() => setActiveTab("technical")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "technical"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <CandleIcon className="w-3.5 h-3.5" />
+                    <CandleIcon className="w-3.5 h-3.5 text-orange-400" />
                     <span>Terminal Teknikal</span>
                   </button>
 
@@ -775,11 +780,11 @@ export default function Home() {
                     onClick={() => setActiveTab("insider")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "insider"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <Radar className="w-3.5 h-3.5" />
+                    <Radar className="w-3.5 h-3.5 text-orange-400" />
                     <span>Whale & Broker Flow</span>
                     {report.insiderRadar?.clusterBuyDetected && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -791,8 +796,8 @@ export default function Home() {
                       onClick={() => setActiveTab("commodity")}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                         activeTab === "commodity"
-                          ? "bg-amber-600 text-white font-semibold shadow-2xs"
-                          : "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                          ? "bg-amber-600/30 text-amber-400 border border-amber-500/40 font-semibold shadow-2xs"
+                          : "text-amber-500 hover:bg-amber-950/40"
                       }`}
                     >
                       <Pickaxe className="w-3.5 h-3.5" />
@@ -804,11 +809,11 @@ export default function Home() {
                     onClick={() => setActiveTab("all")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
                       activeTab === "all"
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-semibold shadow-2xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "bg-orange-500/20 text-orange-400 border border-orange-500/30 font-semibold shadow-2xs"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-orange-400" />
                     <span>Semua Modul</span>
                   </button>
                 </div>
@@ -877,14 +882,14 @@ export default function Home() {
             />
             <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
             {/* Copilot Header */}
-            <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-2 bg-slate-50/70 dark:bg-[#0f1118]">
+            <div className="px-3.5 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-black/80">
               <div className="flex items-center gap-2">
-                <Bot className="w-4 h-4 text-emerald-500" />
-                <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                <Bot className="w-4 h-4 text-orange-400" />
+                <span className="font-mono text-xs font-bold text-slate-100 uppercase tracking-wider">
                   RESEARCH COPILOT
                 </span>
                 {report && (
-                  <span className="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 text-[10px] font-mono font-bold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                  <span className="px-1.5 py-0.2 rounded bg-orange-500/15 text-[10px] font-mono font-bold text-orange-400 border border-orange-500/30">
                     {report.symbol}
                   </span>
                 )}
@@ -920,6 +925,9 @@ export default function Home() {
                 onOpenDeepDive={(rep) => {
                   setReport(rep);
                 }}
+                onOpenSymbolTerminal={(sym) => {
+                  handleQuickEmiten(sym, `Bagaimana analisis saham ${sym}?`);
+                }}
                 onOpenShareCard={(rep) => {
                   setReport(rep);
                   setIsShareCardOpen(true);
@@ -929,22 +937,22 @@ export default function Home() {
 
             {/* Quick Contextual Prompts Strip */}
             {report && (
-              <div className="px-3 py-1.5 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-[#0e1017] flex items-center gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
+              <div className="px-3 py-1.5 border-t border-white/10 bg-black/70 flex items-center gap-1.5 overflow-x-auto text-[10px] font-mono no-scrollbar">
                 <button
                   onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Dividen Yield
                 </button>
                 <button
                   onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Broker Flow 5H
                 </button>
                 <button
                   onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
-                  className="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0 transition"
+                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
                 >
                   Risiko Utama
                 </button>

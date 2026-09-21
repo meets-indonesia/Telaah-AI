@@ -56,6 +56,12 @@ function sanitizeJsonControlChars(raw: string): string {
   return out;
 }
 
+function cleanRepetitiveLoops(text: string): string {
+  if (!text) return "";
+  // Detect word repetition loops like "bersih bersih bersih bersih..."
+  return text.replace(/(\b[\w\-\/]+\b)(?:\s+\1){4,}/gi, "$1");
+}
+
 function cleanAndParseJson<T = any>(rawContent: string, selectedModel: string): T {
   // 1. Ekstrak dari blok markdown ```json ... ``` bila ada (ambil yang terakhir)
   const regex = /```(?:json)?\s*([\s\S]*?)\s*```/g;
@@ -92,7 +98,16 @@ function cleanAndParseJson<T = any>(rawContent: string, selectedModel: string): 
 
   // Coba parse
   try {
-    return JSON.parse(text) as T;
+    const parsed = JSON.parse(text) as any;
+    if (parsed && typeof parsed === "object") {
+      if (typeof parsed.directAnswer === "string") {
+        parsed.directAnswer = cleanRepetitiveLoops(parsed.directAnswer);
+      }
+      if (typeof parsed.executiveSummary === "string") {
+        parsed.executiveSummary = cleanRepetitiveLoops(parsed.executiveSummary);
+      }
+    }
+    return parsed as T;
   } catch (err1) {
     // 7. Jika masih ada unclosed braces atau quotes, seimbangkan
     let s = text;
@@ -149,7 +164,7 @@ export async function callOpenRouter<T = any>({
   maxTokens?: number;
 }): Promise<T> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  const primaryModel = model || process.env.OPENROUTER_MODEL || "inclusionai/ling-3.0-flash-fin";
+  const primaryModel = model || process.env.OPENROUTER_MODEL || "qwen/qwen3.5-397b-a17b";
   const fallbackModel = "openai/gpt-4o-mini";
 
   if (!apiKey) {
@@ -158,7 +173,7 @@ export async function callOpenRouter<T = any>({
 
   // Helper internal untuk memanggil OpenRouter dengan model tertentu
   async function makeRequest(modelToUse: string): Promise<T> {
-    const isReasoningModel = modelToUse.includes("ling") || modelToUse.includes("r1");
+    const isReasoningModel = modelToUse.includes("ling") || modelToUse.includes("r1") || modelToUse.includes("qwen");
 
     const payload: any = {
       model: modelToUse,

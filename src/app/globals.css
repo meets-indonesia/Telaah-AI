@@ -3,28 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --background: #090a0f;
-  --foreground: #f1f5f9;
-  --card-bg: #0f1118;
-  --card-border: #1c202a;
-  --card-border-subtle: #141720;
-  --muted: #8492a6;
-  --brand-soft: #161a24;
+  --background: rgba(10, 10, 12, 0.75);
+  --foreground: #f8fafc;
+  --card-bg: rgba(18, 18, 24, 0.75);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-border-subtle: rgba(255, 255, 255, 0.05);
+  --muted: #94a3b8;
+  --brand-soft: rgba(249, 115, 22, 0.12);
   --terminal-emerald: #10b981;
   --terminal-rose: #f43f5e;
+  --color-primary: rgba(0, 0, 0, 0.75);
+  --color-secondary: #f97316;
 }
 
 html.dark,
 html {
-  --background: #090a0f;
-  --foreground: #f1f5f9;
-  --card-bg: #0f1118;
-  --card-border: #1c202a;
-  --card-border-subtle: #141720;
-  --muted: #8492a6;
-  --brand-soft: #161a24;
+  --background: rgba(10, 10, 12, 0.75);
+  --foreground: #f8fafc;
+  --card-bg: rgba(18, 18, 24, 0.75);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-border-subtle: rgba(255, 255, 255, 0.05);
+  --muted: #94a3b8;
+  --brand-soft: rgba(249, 115, 22, 0.12);
   --terminal-emerald: #10b981;
   --terminal-rose: #f43f5e;
+  --color-primary: rgba(0, 0, 0, 0.75);
+  --color-secondary: #f97316;
 }
 
 html.light {
@@ -34,9 +38,11 @@ html.light {
   --card-border: #e2e8f0;
   --card-border-subtle: #f1f5f9;
   --muted: #64748b;
-  --brand-soft: #f1f5f9;
+  --brand-soft: rgba(249, 115, 22, 0.08);
   --terminal-emerald: #10b981;
   --terminal-rose: #f43f5e;
+  --color-primary: rgba(0, 0, 0, 0.75);
+  --color-secondary: #f97316;
 }
 
 body {

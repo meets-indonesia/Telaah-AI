@@ -10,7 +10,6 @@ interface MarkdownTextProps {
 
 // Parses inline markdown: **bold**, *italic*, `code`
 function renderInline(text: string, isUser: boolean): React.ReactNode[] {
-  // Regex matches **bold**, *italic*, `code`
   const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
   const parts = text.split(regex);
 
@@ -19,8 +18,9 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
       return (
         <strong
           key={index}
-          className={`font-bold ${isUser ? "text-white font-extrabold" : "text-slate-900 dark:text-white"
-            }`}
+          className={`font-bold ${
+            isUser ? "text-white font-extrabold" : "text-slate-900 dark:text-white"
+          }`}
         >
           {part.slice(2, -2)}
         </strong>
@@ -30,8 +30,9 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
       return (
         <em
           key={index}
-          className={`italic ${isUser ? "text-brand-100" : "text-slate-700 dark:text-slate-300"
-            }`}
+          className={`italic ${
+            isUser ? "text-slate-200" : "text-slate-700 dark:text-slate-300"
+          }`}
         >
           {part.slice(1, -1)}
         </em>
@@ -41,10 +42,11 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
       return (
         <code
           key={index}
-          className={`font-mono text-xs px-1.5 py-0.5 rounded ${isUser
-              ? "bg-brand-700 text-white"
-              : "bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400 border border-slate-200 dark:border-slate-700"
-            }`}
+          className={`font-mono text-xs px-1 py-0.5 rounded ${
+            isUser
+              ? "bg-slate-800 text-white"
+              : "bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700"
+          }`}
         >
           {part.slice(1, -1)}
         </code>
@@ -52,6 +54,60 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
     }
     return part;
   });
+}
+
+function parseMarkdownTable(lines: string[]): React.ReactNode | null {
+  if (lines.length < 2) return null;
+
+  // Header line
+  const headerLine = lines[0].trim();
+  const separatorLine = lines[1].trim();
+
+  if (!headerLine.includes("|") || !separatorLine.includes("|") || !separatorLine.includes("-")) {
+    return null;
+  }
+
+  const headers = headerLine
+    .split("|")
+    .map((c) => c.trim())
+    .filter((c, i, arr) => (i === 0 && c === "" ? false : i === arr.length - 1 && c === "" ? false : true));
+
+  const bodyLines = lines.slice(2);
+  const rows = bodyLines
+    .filter((l) => l.trim().includes("|"))
+    .map((l) =>
+      l
+        .split("|")
+        .map((c) => c.trim())
+        .filter((c, i, arr) => (i === 0 && c === "" ? false : i === arr.length - 1 && c === "" ? false : true))
+    );
+
+  return (
+    <div className="overflow-x-auto my-2 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#11141e]">
+      <table className="w-full text-left text-xs divide-y divide-slate-200 dark:divide-slate-800 font-sans">
+        <thead className="bg-slate-50 dark:bg-[#151926] text-[10px] font-mono uppercase text-slate-500 font-semibold">
+          <tr>
+            {headers.map((h, hIdx) => (
+              <th key={hIdx} className="py-2 px-2.5 font-bold">
+                {renderInline(h, false)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-sans text-xs">
+          {rows.map((r, rIdx) => (
+            <tr key={rIdx} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+              {r.map((cell, cIdx) => (
+                <td key={cIdx} className="py-2 px-2.5 text-slate-800 dark:text-slate-200 leading-snug">
+                  {renderInline(cell, false)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export const MarkdownText: React.FC<MarkdownTextProps> = ({
@@ -81,6 +137,17 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
       {blocks.map((block, bIdx) => {
         const lines = block.split("\n");
 
+        // Check if markdown table (contains | and header separator ---)
+        if (lines.length >= 2 && lines[0].includes("|") && lines[1].includes("|") && lines[1].includes("-")) {
+          const tableNode = parseMarkdownTable(lines);
+          if (tableNode) return <React.Fragment key={bIdx}>{tableNode}</React.Fragment>;
+        }
+
+        // Check if block is a horizontal rule (--- or ***)
+        if (/^[-*_]{3,}$/.test(block.trim())) {
+          return <hr key={bIdx} className="border-slate-200 dark:border-slate-800 my-2" />;
+        }
+
         // Check if block is a bullet list (lines start with •, -, or *)
         const isList = lines.some((l) => /^[•\-*]\s+/.test(l.trim()));
 
@@ -92,8 +159,8 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
                 const bulletMatch = trimmed.match(/^[•\-*]\s+(.*)/);
                 if (bulletMatch) {
                   return (
-                    <li key={lIdx} className="flex items-start gap-2.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-500 shrink-0 mt-2" />
+                    <li key={lIdx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
                       <div className="flex-1 leading-relaxed">
                         {renderInline(bulletMatch[1], false)}
                       </div>
@@ -101,7 +168,7 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
                   );
                 }
                 return (
-                  <p key={lIdx} className="pl-4">
+                  <p key={lIdx} className="pl-3.5">
                     {renderInline(trimmed, false)}
                   </p>
                 );
@@ -110,39 +177,15 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
           );
         }
 
-        // Check if callout box (starts with 💡 or ⚠️ or 📌)
-        const isCallout =
-          block.trim().startsWith("💡") ||
-          block.trim().startsWith("⚠️") ||
-          block.trim().startsWith("📌");
-
-        if (isCallout) {
-          return (
-            <div
-              key={bIdx}
-              className="p-2.5 rounded-xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/20 text-slate-800 dark:text-amber-200/95 text-xs my-2 leading-relaxed"
-            >
-              {lines.map((l, lIdx) => (
-                <div key={lIdx}>{renderInline(l, false)}</div>
-              ))}
-            </div>
-          );
-        }
-
         // Heading detection
         const trimmedFirst = lines[0].trim();
-        const isHeading =
-          trimmedFirst.startsWith("✨") ||
-          trimmedFirst.startsWith("###") ||
-          trimmedFirst.startsWith("##");
-
-        if (isHeading && lines.length === 1) {
+        if (trimmedFirst.startsWith("###") || trimmedFirst.startsWith("##") || trimmedFirst.startsWith("#")) {
           return (
             <div
               key={bIdx}
-              className="font-bold text-slate-900 dark:text-white text-sm sm:text-[14px] pb-0.5 tracking-tight"
+              className="font-bold text-slate-900 dark:text-white text-sm pb-0.5 tracking-tight"
             >
-              {renderInline(trimmedFirst.replace(/^###\s+|^##\s+/, ""), false)}
+              {renderInline(trimmedFirst.replace(/^#+\s+/, ""), false)}
             </div>
           );
         }

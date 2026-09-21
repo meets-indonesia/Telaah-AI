@@ -214,10 +214,10 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       </div>
 
       {/* Executive Thesis & Direct Answer Strip */}
-      <div className="bg-[#0f1118] rounded-md border border-slate-800/80 p-3.5 space-y-2">
-        <div className="flex items-center justify-between border-b border-slate-800/60 pb-1.5 text-[10px] font-mono">
-          <div className="flex items-center gap-1.5 text-slate-300 uppercase tracking-wider font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+      <div className="bg-black/75 rounded-md border border-white/10 p-3.5 space-y-2">
+        <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-mono">
+          <div className="flex items-center gap-1.5 text-orange-400 uppercase tracking-wider font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
             <span>Executive Brief</span>
           </div>
           <span className="text-slate-500 uppercase tracking-widest text-[9px]">
@@ -230,7 +230,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             {report.directAnswer}
           </p>
           {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
-            <p className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-slate-800/40">
+            <p className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-white/5">
               {report.executiveSummary}
             </p>
           )}
