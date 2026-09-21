@@ -164,7 +164,8 @@ export async function callOpenRouter<T = any>({
   maxTokens?: number;
 }): Promise<T> {
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  const primaryModel = model || process.env.OPENROUTER_MODEL || "qwen/qwen3.5-397b-a17b";
+  // Gunakan qwen/qwen-2.5-72b-instruct sebagai default: cepat (~6-9 detik), stabil, akurat finansial, dan format JSON valid
+  const primaryModel = model || process.env.OPENROUTER_MODEL || "qwen/qwen-2.5-72b-instruct";
   const fallbackModel = "openai/gpt-4o-mini";
 
   if (!apiKey) {
@@ -173,7 +174,7 @@ export async function callOpenRouter<T = any>({
 
   // Helper internal untuk memanggil OpenRouter dengan model tertentu
   async function makeRequest(modelToUse: string): Promise<T> {
-    const isReasoningModel = modelToUse.includes("ling") || modelToUse.includes("r1") || modelToUse.includes("qwen");
+    const isReasoningModel = modelToUse.includes("r1") || modelToUse.includes("397b");
 
     const payload: any = {
       model: modelToUse,

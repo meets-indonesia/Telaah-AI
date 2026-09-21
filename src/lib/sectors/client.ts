@@ -92,6 +92,7 @@ export class SectorsClient {
         Authorization: key,
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(10000), // Max 10 detik timeout agar tidak hang
     });
 
     if (!res.ok) {

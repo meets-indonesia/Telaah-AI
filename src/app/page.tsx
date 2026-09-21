@@ -62,6 +62,9 @@ export default function Home() {
   const [report, setReport] = useState<CompanyIntelligenceReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState("");
+  const [isWorkstationLoading, setIsWorkstationLoading] = useState(false);
+  const [workstationLoadingStage, setWorkstationLoadingStage] = useState("");
+  const [loadingEmitenSymbol, setLoadingEmitenSymbol] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Dashboard Active Tab
@@ -240,11 +243,12 @@ export default function Home() {
       return;
     }
 
-    // 2. Fetch telaah lengkap langsung ke workstation tanpa melalui copilot chat
-    setIsLoading(true);
+    // 2. Loading eksklusif di kanvas Workstation emiten (Copilot Chat tidak terganggu)
+    setIsWorkstationLoading(true);
+    setLoadingEmitenSymbol(clean);
     setErrorMessage(null);
     setNeedsConfirmation(false);
-    setLoadingStage(`Memuat data intelijen & finansial lengkap ${clean}...`);
+    setWorkstationLoadingStage(`Mengambil laporan keuangan, valuasi peer & broker flow ${clean}...`);
 
     try {
       const res = await fetch("/api/analyze", {
@@ -269,8 +273,9 @@ export default function Home() {
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan saat memuat data.");
     } finally {
-      setIsLoading(false);
-      setLoadingStage("");
+      setIsWorkstationLoading(false);
+      setWorkstationLoadingStage("");
+      setLoadingEmitenSymbol("");
     }
   };
 
@@ -815,6 +820,26 @@ export default function Home() {
                   Lanjutkan Telaah
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Emiten Workstation Exclusive Loading Banner */}
+          {isWorkstationLoading && (
+            <div className="p-4 rounded-xl border border-orange-500/30 bg-orange-500/10 backdrop-blur-md text-xs space-y-3 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                  <span className="font-mono font-bold text-orange-400 text-sm">
+                    MEMUAT KANVAS EMITEN: {loadingEmitenSymbol}
+                  </span>
+                </div>
+                <span className="font-mono text-[10px] text-orange-300 bg-orange-500/20 px-2 py-0.5 rounded">
+                  Sectors v2 Engine
+                </span>
+              </div>
+              <p className="text-slate-300 text-xs pl-7.5">
+                {workstationLoadingStage || "Menghubungkan data resmi bursa..."}
+              </p>
             </div>
           )}
 

@@ -42,7 +42,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 1: Input Classification & Claim Extraction
-    const classification = await classifyInputAndExtractClaims(prompt);
+    // Fast-path: Jika confirmedSymbol sudah valid dan prompt hanya berupa lookup emiten standar, bypass LLM classifier
+    let classification: any;
+    const isDirectLookup = confirmedSymbol && /^[A-Z]{4}$/.test(confirmedSymbol) && 
+      (prompt.includes("Analisis komprehensif emiten") || prompt.trim() === confirmedSymbol);
+
+    if (isDirectLookup) {
+      classification = {
+        symbol: confirmedSymbol,
+        intent: "company_overview",
+        isAmbiguous: false,
+        claims: [],
+        explanation: `Direct lookup for ${confirmedSymbol}`,
+      };
+    } else {
+      classification = await classifyInputAndExtractClaims(prompt);
+    }
 
     const targetSymbol = confirmedSymbol || classification.symbol;
 
