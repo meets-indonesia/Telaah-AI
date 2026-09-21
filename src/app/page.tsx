@@ -602,7 +602,6 @@ export default function Home() {
         marketAsOfDate={marketAsOfDate}
         isCopilotOpen={isCopilotOpen}
         onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
-        onOpenCompare={() => handleChatSend("Bandingkan BBCA vs BBRI", "quick")}
         onOpenJargon={() => setIsJargonOpen(true)}
         onOpenDividend={() => setIsDividendOpen(true)}
         onFocusSearch={() => {

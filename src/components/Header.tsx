@@ -7,7 +7,6 @@ import {
   Activity,
   Calculator,
   BookOpen,
-  Scale,
   PanelRightClose,
   PanelRightOpen,
   Search,
@@ -33,7 +32,6 @@ interface HeaderProps {
   marketAsOfDate?: string;
   isCopilotOpen?: boolean;
   onToggleCopilot?: () => void;
-  onOpenCompare?: () => void;
   onOpenJargon?: () => void;
   onOpenDividend?: () => void;
   onFocusSearch?: () => void;
@@ -44,7 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   marketAsOfDate = "2026-09-11",
   isCopilotOpen = true,
   onToggleCopilot,
-  onOpenCompare,
   onOpenJargon,
   onOpenDividend,
   onFocusSearch,
@@ -119,18 +116,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Tools & Toggles */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {onOpenCompare && (
-            <button
-              type="button"
-              onClick={onOpenCompare}
-              title="Bandingkan 2 Saham"
-              className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded hover:bg-white/5 text-slate-400 hover:text-white text-xs transition"
-            >
-              <Scale className="w-3.5 h-3.5 text-orange-400" />
-              <span className="hidden xl:inline">Compare</span>
-            </button>
-          )}
-
           {onOpenDividend && (
             <button
               type="button"
