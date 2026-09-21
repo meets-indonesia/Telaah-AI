@@ -28,7 +28,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
 
   if (flowLens.status === "unavailable") {
     return (
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs transition-colors">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs transition-colors">
         <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">FlowLens — Broker & Foreign Flow</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data agregat broker tidak tersedia atau tidak dipicu pada mode analisis ini.
@@ -66,7 +66,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
   const maxSellerVal = Math.max(...flowLens.topSellers.map((s) => Math.abs(s.netValue)), 1);
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -83,7 +83,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
         </div>
 
         {/* Foreign Flow Badge */}
-        <div className="bg-slate-50 dark:bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3">
+        <div className="bg-white dark:bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3">
           <div>
             <span className="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Arus Asing 5 Hari</span>
             <span
@@ -111,7 +111,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
 
       {/* Cohort Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
             <Globe className="w-3 h-3 text-indigo-500" /> Net Asing
           </span>
@@ -124,7 +124,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
             <Building className="w-3 h-3 text-slate-400" /> Net Domestik
           </span>
@@ -137,7 +137,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
             <Users className="w-3 h-3 text-slate-400" /> Net Institusi
           </span>
@@ -150,7 +150,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
             <Users className="w-3 h-3 text-slate-400" /> Net Ritel
           </span>
@@ -166,7 +166,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
 
       {/* Foreign Flow Bar Chart */}
       {series.length > 0 && (
-        <div className="bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-3">
+        <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
             <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <BarChart2 className="w-4 h-4 text-blue-500" />
@@ -245,7 +245,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
       {/* Top Buyers vs Top Sellers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top 5 Buyers */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+        <div className="bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> Top 5 Net Buyers (Akumulator)
@@ -301,7 +301,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
         </div>
 
         {/* Top 5 Sellers */}
-        <div className="bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+        <div className="bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-rose-500" /> Top 5 Net Sellers (Distributor)

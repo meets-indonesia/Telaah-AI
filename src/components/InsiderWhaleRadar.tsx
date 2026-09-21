@@ -26,7 +26,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
 
   if (!insiderRadar || insiderRadar.status === "unavailable") {
     return (
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4">
         <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">
           Whale & Insider Cluster Watch
         </h3>
@@ -63,7 +63,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
   });
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
 
       {/* Metrics Summary Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">
             Total Saham Dibeli
           </span>
@@ -135,7 +135,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">
             Total Saham Dijual
           </span>
@@ -147,7 +147,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">
             Akumulasi Bersih (Net)
           </span>
@@ -164,7 +164,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
           </span>
         </div>
 
-        <div className="bg-slate-50 dark:bg-[#12151f] p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
+        <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">
             Eksekutif Terlibat
           </span>
@@ -187,7 +187,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
             {insiderActors.map((actor, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50 dark:bg-[#12151f] p-2 rounded border border-slate-100 dark:border-slate-800/60 text-xs flex items-center justify-between"
+                className="bg-white dark:bg-black p-2 rounded border border-slate-100 dark:border-slate-800/60 text-xs flex items-center justify-between"
               >
                 <div className="min-w-0 pr-2">
                   <span className="font-semibold text-slate-900 dark:text-slate-100 block truncate text-xs">
@@ -256,7 +256,7 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
           {filteredTransactions.map((tx, idx) => (
             <div
               key={idx}
-              className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 text-xs flex items-center justify-between gap-2"
+              className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 text-xs flex items-center justify-between gap-2"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span

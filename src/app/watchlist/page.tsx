@@ -151,7 +151,7 @@ export default function WatchlistPage() {
   }, [items, searchQuery, sortKey, sortAsc]);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
       <Header />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-5">
@@ -185,7 +185,7 @@ export default function WatchlistPage() {
                 className="w-64 px-3 py-1.5 text-xs bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded focus:border-orange-500/50 focus:outline-none placeholder-slate-400 font-mono uppercase"
               />
               {addSuggestions.length > 0 && (
-                <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 rounded shadow-xl z-20 overflow-hidden text-xs">
+                <div className="absolute left-0 top-full mt-1 w-full bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded shadow-xl z-20 overflow-hidden text-xs">
                   {addSuggestions.map((s) => (
                     <button
                       key={s.symbol}
@@ -236,11 +236,11 @@ export default function WatchlistPage() {
         </div>
 
         {/* High-Density Watchlist Matrix Table */}
-        <div className="bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black/40 text-slate-500 dark:text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-black/40 text-slate-500 dark:text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                   <th className="py-2.5 px-3">
                     <button onClick={() => handleSort("symbol")} className="flex items-center gap-1 hover:text-slate-200">
                       Emiten <ArrowUpDown className="w-3 h-3" />
@@ -298,7 +298,7 @@ export default function WatchlistPage() {
                       <tr
                         key={item.symbol}
                         onClick={() => router.push(`/?symbol=${item.symbol}`)}
-                        className="hover:bg-slate-50 dark:hover:bg-white/5 transition cursor-pointer group"
+                        className="hover:bg-white dark:hover:bg-white/5 transition cursor-pointer group"
                       >
                         {/* Company / Symbol */}
                         <td className="py-3 px-3">
@@ -387,7 +387,7 @@ export default function WatchlistPage() {
                                 ? "bg-emerald-500/15 text-emerald-400"
                                 : item.trend.toLowerCase().includes("bearish")
                                 ? "bg-rose-500/15 text-rose-400"
-                                : "bg-slate-500/15 text-slate-400"
+                                : "bg-white0/15 text-slate-400"
                             }`}
                           >
                             {item.trend}

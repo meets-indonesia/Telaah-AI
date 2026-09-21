@@ -100,12 +100,12 @@ export default function TechnicalPage() {
   });
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#090a0f] text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-black text-slate-100 transition-colors">
       <Header />
 
       <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-4 space-y-4">
         {/* Page Top Banner Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0f1118] border border-slate-800/80 p-3.5 rounded-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black border border-slate-800/80 p-3.5 rounded-lg">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
               <CandleIcon className="w-4 h-4" />
@@ -136,7 +136,7 @@ export default function TechnicalPage() {
         {/* 2-Column Institutional Workstation */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left / Screener Matrix: 5 cols */}
-          <div className="lg:col-span-5 bg-[#0f1118] rounded-lg border border-slate-800/80 p-3.5 space-y-3 flex flex-col">
+          <div className="lg:col-span-5 bg-black rounded-lg border border-slate-800/80 p-3.5 space-y-3 flex flex-col">
             <div className="flex items-center justify-between gap-2 border-b border-slate-800/60 pb-2.5">
               <div className="flex items-center gap-1.5">
                 <Filter className="w-3.5 h-3.5 text-indigo-400" />
@@ -277,7 +277,7 @@ export default function TechnicalPage() {
           {/* Right / Terminal Chart & Indicators: 7 cols */}
           <div className="lg:col-span-7 space-y-4">
             {isLoading ? (
-              <div className="bg-[#0f1118] rounded-lg border border-slate-800/80 p-16 text-center space-y-3">
+              <div className="bg-black rounded-lg border border-slate-800/80 p-16 text-center space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mx-auto" />
                 <p className="text-xs font-mono text-slate-400">
                   Memuat data transaksi 90 hari {selectedSymbol} dari Sectors API v2...

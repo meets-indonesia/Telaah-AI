@@ -48,7 +48,7 @@ export const InputStation: React.FC<InputStationProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
       <form onSubmit={handleSubmit} className="space-y-2.5">
         {/* Input Bar */}
         <div className="relative">
@@ -59,14 +59,14 @@ export const InputStation: React.FC<InputStationProps> = ({
             onKeyDown={handleKeyDown}
             placeholder="Cari analisis emiten atau ketik pertanyaan (contoh: 'Bagaimana prospek valuasi dan akumulasi broker BBCA?' atau 'ADRO')..."
             rows={2}
-            className="w-full px-3 py-2 bg-slate-50 dark:bg-[#131622] rounded-md border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600 text-xs sm:text-sm font-sans resize-none transition"
+            className="w-full px-3 py-2 bg-white dark:bg-[#131622] rounded-md border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-slate-400 dark:focus:border-slate-600 text-xs sm:text-sm font-sans resize-none transition"
             disabled={isLoading}
           />
         </div>
 
         {/* Optional Manual Symbol Override */}
         {showOverride && (
-          <div className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 dark:bg-[#12151f] rounded border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white dark:bg-black rounded border border-slate-200 dark:border-slate-800 text-xs">
             <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">
               Simbol Manual:
             </span>

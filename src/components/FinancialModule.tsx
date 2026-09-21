@@ -30,7 +30,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
   if (financials.status === "unavailable" || !financials.latest) {
     return (
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors shadow-2xs">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors shadow-2xs">
         <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">Business & Financial Health</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data laporan keuangan kuartalan tidak tersedia atau belum dipublikasikan untuk emiten ini.
@@ -81,7 +81,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
   });
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 shadow-2xs space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
@@ -99,7 +99,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         {/* Growth YoY / QoQ Pill */}
         <div className="flex items-center gap-2">
           {financials.yoyGrowth.netIncomePct !== null && (
-            <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+            <div className="bg-white dark:bg-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
               <span className="text-[10px] font-mono text-slate-400 block">Laba YoY</span>
               <span
                 className={`font-mono font-bold tabular-nums text-xs ${
@@ -112,7 +112,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
           )}
 
           {financials.qoqGrowth.netIncomePct !== null && (
-            <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+            <div className="bg-white dark:bg-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
               <span className="text-[10px] font-mono text-slate-400 block">Laba QoQ</span>
               <span
                 className={`font-mono font-bold tabular-nums text-xs ${
@@ -129,7 +129,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
       {/* Main Financial Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {/* Revenue */}
-        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+        <div className="bg-white dark:bg-black p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Pendapatan</span>
           <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
             Rp {formatTrillion(l.revenue)}
@@ -146,7 +146,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         </div>
 
         {/* Net Income */}
-        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+        <div className="bg-white dark:bg-black p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Laba Bersih</span>
           <span
             className={`text-sm sm:text-base font-mono font-bold block tabular-nums truncate ${
@@ -161,7 +161,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         </div>
 
         {/* Operating Income */}
-        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+        <div className="bg-white dark:bg-black p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Laba Operasional</span>
           <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
             Rp {formatTrillion(l.operatingIncome)}
@@ -172,7 +172,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         </div>
 
         {/* Solvency / Debt */}
-        <div className="bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+        <div className="bg-white dark:bg-black p-3 rounded-md border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
           <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5 truncate">Debt-to-Equity</span>
           <span className="text-sm sm:text-base font-mono font-bold text-slate-900 dark:text-slate-100 block tabular-nums truncate">
             {l.debtToEquity !== null ? `${Number(l.debtToEquity).toFixed(2)}x` : "-"}
@@ -230,7 +230,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
       {/* View 1: Nominal Bar Chart */}
       {activeView === "chart-nominal" && (
-        <div className="bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4">
+        <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4">
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-semibold text-slate-700 dark:text-slate-300">
               Historis Pendapatan vs Laba Bersih Kuartalan (Rp Triliun)
@@ -317,7 +317,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
       {/* View 2: Margin Bar Chart */}
       {activeView === "chart-margin" && (
-        <div className="bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4">
+        <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4">
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-semibold text-slate-700 dark:text-slate-300">
               Historis Margin Keuntungan Kuartalan (%)
@@ -397,7 +397,7 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
 
       {/* View 3: Historical Quarters Table */}
       {activeView === "table" && financials.periods.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/40">
           <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
             <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-[11px] uppercase text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
               <tr>

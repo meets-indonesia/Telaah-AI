@@ -37,7 +37,7 @@ const verdictConfig: Record<
     icon: AlertTriangle,
   },
   "Tidak dapat diverifikasi": {
-    bg: "bg-slate-500/10",
+    bg: "bg-white0/10",
     text: "text-slate-700 dark:text-slate-400",
     border: "border-slate-500/20",
     icon: HelpCircle,
@@ -56,7 +56,7 @@ export const ClaimCards: React.FC<ClaimCardsProps> = ({ claims, onSelectEvidence
   }
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors">
       <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -76,7 +76,7 @@ export const ClaimCards: React.FC<ClaimCardsProps> = ({ claims, onSelectEvidence
           return (
             <div
               key={claim.claimId || idx}
-              className="p-3 rounded-md bg-slate-50 dark:bg-[#131622] border border-slate-200/80 dark:border-slate-800/80 transition"
+              className="p-3 rounded-md bg-white dark:bg-[#131622] border border-slate-200/80 dark:border-slate-800/80 transition"
             >
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">

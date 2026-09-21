@@ -595,7 +595,7 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f8fafc] dark:bg-[#090a0f] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
       {/* Top Terminal Bar */}
       <Header
         marketIndices={marketIndices}
@@ -632,31 +632,31 @@ export default function Home() {
             </span>
             <button
               onClick={() => handleSelectEmitenDirect("BBCA")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBCA • Cluster Direksi
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("ADRO")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ADRO • Batu Bara
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("ANTM")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               ANTM • Nikel & Emas
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("BBRI")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               BBRI • Foreign Flow
             </button>
             <button
               onClick={() => handleSelectEmitenDirect("TLKM")}
-              className="px-2 py-0.5 rounded bg-white dark:bg-[#12151f] hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
+              className="px-2 py-0.5 rounded bg-white dark:bg-black hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition shrink-0 font-mono text-[11px]"
             >
               TLKM • Telko
             </button>
@@ -667,7 +667,7 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-lg bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           >
             <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
               <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
@@ -872,7 +872,7 @@ export default function Home() {
               />
 
               {/* Workstation Tab Bar */}
-              <div className="bg-white dark:bg-[#0f1118] border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
+              <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
                 <div className="flex items-center gap-1 flex-1 min-w-max font-medium">
                   <button
                     onClick={() => setActiveTab("overview")}
@@ -1002,9 +1002,9 @@ export default function Home() {
               onClick={() => setIsCopilotOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-30"
             />
-            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c0e15] flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
+            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-white/10 bg-white dark:bg-black flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
             {/* Copilot Header */}
-            <div className="px-3.5 py-2.5 border-b border-white/10 flex items-center justify-between gap-2 bg-black/80">
+            <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 bg-white dark:bg-black">
               <div className="flex items-center gap-2">
                 <Bot className="w-4 h-4 text-orange-400" />
                 <span className="font-mono text-xs font-bold text-slate-100 uppercase tracking-wider">

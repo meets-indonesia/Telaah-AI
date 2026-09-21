@@ -164,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Mobile Nav Links Row */}
-      <nav aria-label="Navigasi Seluler" className="sm:hidden flex items-center gap-1 overflow-x-auto px-3 py-1 border-t border-slate-100 dark:border-slate-800/60 no-scrollbar text-xs bg-slate-50/50 dark:bg-[#0c0e15]">
+      <nav aria-label="Navigasi Seluler" className="sm:hidden flex items-center gap-1 overflow-x-auto px-3 py-1 border-t border-slate-100 dark:border-white/10 no-scrollbar text-xs bg-white dark:bg-black">
         {navLinks.map((link) => {
           const active = pathname === link.href;
           return (

@@ -100,12 +100,12 @@ export default function CommodityPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#090a0f] text-slate-100 transition-colors">
+    <div className="min-h-[100dvh] flex flex-col bg-black text-slate-100 transition-colors">
       <Header />
 
       <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 py-4 space-y-4">
         {/* Top Overview Banner Strip */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0f1118] border border-slate-800/80 p-3.5 rounded-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black border border-slate-800/80 p-3.5 rounded-lg">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
               <Pickaxe className="w-4 h-4" />
@@ -146,12 +146,12 @@ export default function CommodityPage() {
         {/* Global Commodities 4-Metric Grid (Live Sectors Mining API) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {isLoadingCommodities ? (
-            <div className="col-span-4 bg-[#0f1118] p-6 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-400">
+            <div className="col-span-4 bg-black p-6 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin text-amber-500 mx-auto mb-2" />
               Memuat harga acuan komoditas global...
             </div>
           ) : commodities.length === 0 ? (
-            <div className="col-span-4 bg-[#0f1118] p-4 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-500">
+            <div className="col-span-4 bg-black p-4 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-500">
               Data harga komoditas acuan sedang diperbarui.
             </div>
           ) : (
@@ -160,7 +160,7 @@ export default function CommodityPage() {
               return (
                 <div
                   key={c.code}
-                  className="bg-[#0f1118] p-3 rounded-lg border border-slate-800/80 space-y-1.5"
+                  className="bg-black p-3 rounded-lg border border-slate-800/80 space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-semibold text-slate-200 text-xs">{c.name}</span>
@@ -191,7 +191,7 @@ export default function CommodityPage() {
         {/* 2-Column Workstation */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left: Mining Universe Comparison (4 cols) */}
-          <div className="lg:col-span-4 bg-[#0f1118] rounded-lg border border-slate-800/80 p-3.5 space-y-3 flex flex-col">
+          <div className="lg:col-span-4 bg-black rounded-lg border border-slate-800/80 p-3.5 space-y-3 flex flex-col">
             <div className="border-b border-slate-800/60 pb-2 flex items-center justify-between">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-amber-400" /> Mining Universe Matrix
@@ -240,7 +240,7 @@ export default function CommodityPage() {
           {/* Right: Active Commodity Lens & Sensitivity Simulator (8 cols) */}
           <div className="lg:col-span-8 space-y-4">
             {isLoading ? (
-              <div className="bg-[#0f1118] rounded-lg border border-slate-800/80 p-16 text-center space-y-3">
+              <div className="bg-black rounded-lg border border-slate-800/80 p-16 text-center space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto" />
                 <p className="text-xs font-mono text-slate-400">
                   Memuat data cadangan tambang & model sensitivitas {symbol}...
@@ -253,7 +253,7 @@ export default function CommodityPage() {
                 companyName={report.companyName}
               />
             ) : (
-              <div className="bg-[#0f1118] p-12 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-500">
+              <div className="bg-black p-12 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-500">
                 Pilih salah satu emiten tambang di sisi kiri untuk melihat simulator sensitivitas.
               </div>
             )}

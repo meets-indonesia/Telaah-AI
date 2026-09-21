@@ -57,7 +57,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
   return (
     <div className="space-y-3">
       {/* Events Card */}
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
           <div>
             <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
             </p>
           </div>
 
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-[#12151f] rounded border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-black rounded border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
             <button
               onClick={() => handleTabChange("actions")}
               className={`px-2 py-0.5 rounded transition ${
@@ -119,7 +119,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                 paginatedList.map((act: any, idx: number) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
+                    className="p-2.5 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
                   >
                     <div className="w-7 h-7 rounded bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/20">
                       <Calendar className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                 paginatedList.map((fil: any, idx: number) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
+                    className="p-2.5 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
                   >
                     <div className="w-7 h-7 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
                       <FileText className="w-3.5 h-3.5" />
@@ -206,7 +206,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                 paginatedList.map((n: any, idx: number) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
+                    className="p-2.5 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 text-xs flex items-start gap-2.5 transition"
                   >
                     <div className="w-7 h-7 rounded bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
                       <Newspaper className="w-3.5 h-3.5" />
@@ -252,7 +252,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1 rounded bg-slate-100 dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-800 transition"
+                className="p-1 rounded bg-slate-100 dark:bg-black border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-800 transition"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
@@ -265,7 +265,7 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
                 type="button"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-1 rounded bg-slate-100 dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-800 transition"
+                className="p-1 rounded bg-slate-100 dark:bg-black border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-200 dark:hover:bg-slate-800 transition"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -277,13 +277,13 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
       {/* Open Questions & Risk Limitations Box */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {/* Open Questions */}
-        <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
+        <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
           <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
             <HelpCircle className="w-3.5 h-3.5 text-indigo-500" /> Open Questions / Catatan Kritis
           </h4>
           <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
             {safeQuestions.map((q, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-slate-50 dark:bg-[#12151f] p-2 rounded border border-slate-100 dark:border-slate-800/60">
+              <li key={idx} className="flex items-start gap-2 bg-white dark:bg-black p-2 rounded border border-slate-100 dark:border-slate-800/60">
                 <span className="text-indigo-500 font-bold font-mono">•</span>
                 <span className="leading-relaxed">{q}</span>
               </li>
@@ -295,13 +295,13 @@ export const EventsModule: React.FC<EventsModuleProps> = ({ events, openQuestion
         </div>
 
         {/* Audit & Compliance Limitations */}
-        <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
+        <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 space-y-2">
           <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
             <AlertCircle className="w-3.5 h-3.5 text-slate-400" /> Batasan Data & Disclaimer
           </h4>
           <ul className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
             {safeLimitations.map((l, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-slate-50 dark:bg-[#12151f] p-2 rounded border border-slate-100 dark:border-slate-800/60">
+              <li key={idx} className="flex items-start gap-2 bg-white dark:bg-black p-2 rounded border border-slate-100 dark:border-slate-800/60">
                 <span className="text-slate-400 font-bold font-mono">•</span>
                 <span className="leading-relaxed">{l}</span>
               </li>

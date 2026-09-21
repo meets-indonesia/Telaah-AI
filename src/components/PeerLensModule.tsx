@@ -34,7 +34,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
   const safePeers = Array.isArray(peerLens?.peers) ? peerLens.peers : [];
   if (!peerLens || peerLens.status === "unavailable" || safePeers.length === 0) {
     return (
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 transition-colors">
         <h3 className="text-xs font-mono uppercase tracking-wider font-bold text-slate-900 dark:text-slate-100 mb-1">Valuation & Peer Lens</h3>
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Data perbandingan rekan sejenis (peer universe) tidak tersedia pada mode analisis ini atau emiten belum memiliki pembanding langsung yang seimbang.
@@ -76,7 +76,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
   const avgPB = validPBs.length > 0 ? Number((validPBs.reduce((a, b) => a + b, 0) / validPBs.length).toFixed(2)) : 0;
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-3 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div>
@@ -92,7 +92,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
         </div>
 
         {/* View Switcher Pills */}
-        <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-[#12151f] rounded border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-black rounded border border-slate-200 dark:border-slate-800 text-[11px] font-mono">
           <button
             onClick={() => setMetricTab("pe")}
             type="button"
@@ -142,7 +142,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
 
       {/* Bar Chart Section */}
       {metricTab !== "table" && (
-        <div className="bg-slate-50/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-2">
+        <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <BarChart2 className="w-4 h-4 text-brand-500" />
@@ -279,7 +279,7 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
       )}
 
       {/* Comparison Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/40">
           <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
             <thead className="bg-slate-100/90 dark:bg-slate-900/90 text-[11px] uppercase text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
               <tr>

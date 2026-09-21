@@ -50,7 +50,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
   const simulatedEbitdaImpact = Number((priceShock * baseMultiplier).toFixed(1));
 
   return (
-    <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-4 transition-colors">
+    <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-4 space-y-4 transition-colors">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800/60">
         <div>
@@ -69,7 +69,7 @@ export const CommodityLensModule: React.FC<CommodityLensModuleProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="bg-slate-50 dark:bg-[#12151f] px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="bg-white dark:bg-black px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800 text-xs">
             <span className="text-[10px] font-mono text-slate-400 block">Komoditas Inti</span>
             <span className="font-bold text-amber-600 dark:text-amber-400 font-mono text-xs">{primaryCommodity}</span>
           </div>

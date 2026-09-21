@@ -63,7 +63,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   return (
     <div className="space-y-2.5">
       {/* Institutional Emiten Strip */}
-      <div className="bg-white dark:bg-[#0f1118] rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
+      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
           {/* Company ID & Logo */}
           <div className="flex items-center gap-3 min-w-0">
@@ -143,7 +143,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
         {/* High-Density Key Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 pt-3">
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Market Cap
             </span>
@@ -154,7 +154,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               P/E (TTM)
             </span>
@@ -163,7 +163,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               PBV
             </span>
@@ -172,7 +172,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               RSI (14D)
             </span>
@@ -189,7 +189,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
               Foreign Flow
             </span>
@@ -198,7 +198,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </span>
           </div>
 
-          <div className="p-2 rounded bg-slate-50 dark:bg-[#12151f] border border-slate-100 dark:border-slate-800/60 min-w-0 flex items-center justify-between">
+          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 flex items-center justify-between">
             <div className="min-w-0 pr-1 truncate">
               <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
                 Credits

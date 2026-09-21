@@ -87,7 +87,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
                 key={i}
                 type="button"
                 onClick={() => onSelectPrompt(starter.desc)}
-                className="w-full p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-[#12151f] hover:border-slate-300 dark:hover:border-slate-700 transition text-left group flex items-center justify-between gap-2"
+                className="w-full p-2.5 rounded-md border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-black hover:border-slate-300 dark:hover:border-slate-700 transition text-left group flex items-center justify-between gap-2"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="p-1 rounded bg-white dark:bg-slate-800 shrink-0">
@@ -134,7 +134,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
               }`}
             >
               {/* Message text with clean formatting */}
-              <div className={!isUser ? "bg-slate-50 dark:bg-[#12151f] p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed overflow-hidden break-words" : ""}>
+              <div className={!isUser ? "bg-white dark:bg-black p-3 rounded-md border border-slate-200 dark:border-slate-800/80 space-y-2 leading-relaxed overflow-hidden break-words" : ""}>
                 <MarkdownText content={msg.text} isUser={isUser} />
               </div>
 
@@ -193,7 +193,7 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
 
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="flex items-center gap-2 p-2.5 rounded-md bg-slate-50 dark:bg-[#12151f] border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 font-mono">
+        <div className="flex items-center gap-2 p-2.5 rounded-md bg-white dark:bg-black border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 font-mono">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-500" />
           <span>{loadingStage || "Memproses query data Sectors API v2..."}</span>
         </div>
