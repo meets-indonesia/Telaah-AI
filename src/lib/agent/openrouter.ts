@@ -58,8 +58,21 @@ function sanitizeJsonControlChars(raw: string): string {
 
 function cleanRepetitiveLoops(text: string): string {
   if (!text) return "";
-  // Detect word repetition loops like "bersih bersih bersih bersih..."
-  return text.replace(/(\b[\w\-\/]+\b)(?:\s+\1){4,}/gi, "$1");
+  // 1. Potong jika ada pengulangan kata/token apa pun (termasuk karakter unicode/vietnam/simbol) lebih dari 3x berurutan
+  // Contoh: "bersih bersih bersih..." atau "bất bất bất..." atau token aneh
+  let cleaned = text.replace(/([^\s]+)(?:\s+\1){3,}/gu, "$1");
+
+  // 2. Jika di akhir string terdapat pola stutter berulang, potong tuntas
+  cleaned = cleaned.replace(/(?:\s+[^\s]+){10,}$/u, (tail) => {
+    const words = tail.trim().split(/\s+/);
+    const unique = new Set(words);
+    if (unique.size <= 2 && words.length >= 6) {
+      return "";
+    }
+    return tail;
+  });
+
+  return cleaned.trim();
 }
 
 function cleanAndParseJson<T = any>(rawContent: string, selectedModel: string): T {
@@ -182,6 +195,9 @@ export async function callOpenRouter<T = any>({
       max_tokens: maxTokens,
       // Matikan deepthink/reasoning khusus Qwen 3.5 agar respon secepat kilat (3-5 detik)
       reasoning: { effort: "none" },
+      // Mencegah degenerate repetition loop di level sampling tokenizer
+      frequency_penalty: 0.3,
+      presence_penalty: 0.2,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
