@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   SquarePen,
   ChevronLeft,
@@ -11,9 +10,6 @@ import {
   Pin,
   Trash2,
   Star,
-  LayoutDashboard,
-  Compass,
-  Zap,
 } from "lucide-react";
 import { ChatSession } from "@/components/chat/types";
 import { CompanyLogo } from "@/components/CompanyLogo";
@@ -45,7 +41,6 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
   onSelectSymbol,
   onClearAllSessions,
 }) => {
-  const pathname = usePathname();
   const [activeSubTab, setActiveSubTab] = useState<"chats" | "watchlist">("chats");
 
   // Sort sessions: pinned first, then chronological
@@ -116,46 +111,18 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
           </button>
         </div>
 
-        {/* Navigation Stations */}
-        <div className="px-2 space-y-0.5 shrink-0 text-xs font-medium">
-          {[
-            { href: "/", label: "Percakapan Pintar", icon: LayoutDashboard },
-            { href: "/watchlist", label: "Watchlist Matriks", icon: Star },
-            { href: "/technical", label: "Screener Teknikal", icon: Compass },
-            { href: "/insider", label: "Insider Whales", icon: Zap },
-          ].map((item) => {
-            const active = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={item.label}
-                className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md transition ${
-                  active
-                    ? "bg-zinc-500/10 text-zinc-200 font-semibold"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
-                } ${!isOpen ? "justify-center px-0" : ""}`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {isOpen && <span className="truncate">{item.label}</span>}
-              </Link>
-            );
-          })}
-        </div>
-
         {/* Middle Content: Riwayat Chat & Watchlist */}
         {isOpen ? (
-          <div className="flex-1 flex flex-col min-h-0 mt-3 border-t border-slate-200 dark:border-white/10">
+          <div className="flex-1 flex flex-col min-h-0 border-t border-slate-200 dark:border-white/10">
             {/* Sub Tabs */}
             <div className="flex items-center px-3 pt-2.5 gap-2 text-xs border-b border-slate-100 dark:border-white/5">
               <button
                 type="button"
                 onClick={() => setActiveSubTab("chats")}
-                className={`pb-1.5 flex items-center gap-1.5 text-[11px] font-medium transition border-b-2 ${
+                className={`pb-1.5 flex items-center gap-1.5 text-[11px] transition border-b-2 ${
                   activeSubTab === "chats"
-                    ? "border-zinc-500 text-zinc-200 font-semibold"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
+                    ? "border-zinc-950 dark:border-white text-zinc-950 dark:text-white font-semibold"
+                    : "border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white font-medium"
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
@@ -165,10 +132,10 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveSubTab("watchlist")}
-                className={`pb-1.5 flex items-center gap-1.5 text-[11px] font-medium transition border-b-2 ${
+                className={`pb-1.5 flex items-center gap-1.5 text-[11px] transition border-b-2 ${
                   activeSubTab === "watchlist"
-                    ? "border-zinc-500 text-zinc-200 font-semibold"
-                    : "border-transparent text-slate-400 hover:text-slate-200"
+                    ? "border-zinc-950 dark:border-white text-zinc-950 dark:text-white font-semibold"
+                    : "border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white font-medium"
                 }`}
               >
                 <Star className="w-3.5 h-3.5" />
@@ -188,8 +155,8 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                         onClick={() => onSelectSession(session.id)}
                         className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${
                           isSelected
-                            ? "bg-zinc-500/10 text-zinc-200 border border-zinc-500/25"
-                            : "hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300"
+                            ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-white border border-zinc-300 dark:border-zinc-700"
+                            : "hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-700 dark:text-zinc-300"
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0 flex-1">

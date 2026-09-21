@@ -108,13 +108,13 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 type="button"
                 onClick={handleToggleWatchlist}
                 title={inWatchlist ? "Hapus dari Watchlist" : "Simpan ke Watchlist"}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 mb-1 text-xs rounded border transition shrink-0 ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 mb-2 text-xs rounded border transition shrink-0 ${
                   inWatchlist
-                    ? "bg-zinc-500/15 border-zinc-500/30 text-zinc-500 dark:text-zinc-400 font-semibold"
-                    : "border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    ? "bg-yellow-400/15 border-yellow-500/40 text-yellow-700 dark:text-yellow-400 font-semibold"
+                    : "border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 }`}
               >
-                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-zinc-400 text-zinc-400" : ""}`} />
+                <Star className={`w-3.5 h-3.5 shrink-0 ${inWatchlist ? "fill-yellow-400 text-yellow-500 dark:text-yellow-400" : ""}`} />
                 <span>{inWatchlist ? "Tersimpan" : "Watchlist"}</span>
               </button>
               <div className="flex items-baseline gap-2 justify-end">
@@ -209,8 +209,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                       0 kredit · Cache lokal
                     </span>
                   ) : (
-                    <span className="text-amber-600 dark:text-zinc-400">
-                      {report.creditsConsumed} kredit API
+                    <span className="text-zinc-700 dark:text-zinc-300">
+                      {report.creditsConsumed} kredit
                     </span>
                   )}
                 </span>
@@ -250,7 +250,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       </div>
 
       {/* Executive Thesis & Direct Answer Strip */}
-      <div className="bg-black/75 rounded-md border border-white/10 p-3.5 space-y-2">
+      <div className="bg-[#111113] rounded-md border border-black/20 dark:border-white/10 p-3.5 space-y-2 text-white">
         <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-mono">
           <div className="flex items-center gap-1.5 text-zinc-200 uppercase tracking-wider font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />

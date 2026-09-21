@@ -689,24 +689,7 @@ export default function Home() {
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
   return (
-    <div className="min-h-[100dvh] flex bg-white dark:bg-black text-slate-900 dark:text-slate-100 transition-colors">
-      {/* 1. Left Minimalist Sidebar (ChatGPT / Linear style) */}
-      <MinimalSidebar
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen((prev) => !prev)}
-        onNewChat={handleNewChat}
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onSelectSession={handleSelectSession}
-        onTogglePinSession={handleTogglePinSession}
-        onDeleteSession={handleDeleteSession}
-        watchlistSymbols={sidebarWatchlist}
-        onSelectSymbol={(sym) => handleSelectEmitenDirect(sym)}
-        onClearAllSessions={handleClearAllSessions}
-      />
-
-      {/* 2. Main Work Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
+    <div className="flex flex-col min-w-0 h-[100dvh] overflow-hidden bg-[#f7f7f8] dark:bg-[#121214] text-zinc-900 dark:text-zinc-100 transition-colors">
         {/* Top Minimal Navigation Bar */}
         <Header
           marketIndices={marketIndices}
@@ -1156,7 +1139,6 @@ export default function Home() {
       </main>
         )}
         </div>
-      </div>
 
       {/* Drawers and Modals */}
       {report && (
