@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-black/75 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 dark:supports-[backdrop-filter]:bg-black/75">
+    <header className="shrink-0 z-30 border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-black/75 backdrop-blur-md supports-[backdrop-filter]:bg-white/90 dark:supports-[backdrop-filter]:bg-black/75">
       {/* Top Main Navigation Bar */}
       <div className="w-full px-3 lg:px-5 py-2.5 min-h-[50px] flex items-center justify-between gap-3 text-xs">
         {/* Brand & Section Nav */}

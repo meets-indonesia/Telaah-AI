@@ -720,89 +720,90 @@ export default function Home() {
         />
 
         {/* Dynamic Center Stage */}
-        {viewMode === "chat" ? (
-          /* =========================================================================
-              CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-3xl)
-              ========================================================================= */
-          <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-black relative">
-            {/* Conversation Feed */}
-            <div className="flex-1 overflow-y-auto px-4 py-6">
-              <div className="max-w-3xl mx-auto w-full">
-                <ChatFeed
-                  messages={messages}
-                  isLoading={isLoading || isWorkstationLoading}
-                  loadingStage={loadingStage || workstationLoadingStage}
-                  onSelectPrompt={(p) => handleChatSend(p, "quick")}
-                  onOpenDeepDive={(rep) => {
-                    setReport(rep);
-                    setViewMode("terminal");
-                  }}
-                  onOpenSymbolTerminal={(sym) => {
-                    handleSelectEmitenDirect(sym);
-                  }}
-                  onOpenShareCard={(rep) => {
-                    setReport(rep);
-                    setIsShareCardOpen(true);
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Quick Contextual Prompts Strip when report exists */}
-            {report && (
-              <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black/90 py-2 shrink-0">
-                <div className="max-w-3xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
-                  <span className="text-slate-500 text-[10px] uppercase font-bold shrink-0">Tanya Cepat:</span>
-                  <button
-                    onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
-                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
-                  >
-                    Dividen Yield
-                  </button>
-                  <button
-                    onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
-                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
-                  >
-                    Broker Flow 5H
-                  </button>
-                  <button
-                    onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
-                    className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
-                  >
-                    Risiko Utama
-                  </button>
-                  <button
-                    onClick={() => setViewMode("terminal")}
-                    className="px-2.5 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 font-semibold hover:bg-orange-500/20 shrink-0 transition"
-                  >
-                    Lihat Modul Lengkap ↗
-                  </button>
+        <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
+          {viewMode === "chat" ? (
+            /* =========================================================================
+                CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-3xl)
+                ========================================================================= */
+            <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-black relative">
+              {/* Conversation Feed */}
+              <div className="flex-1 overflow-y-auto px-4 py-6">
+                <div className="max-w-3xl mx-auto w-full">
+                  <ChatFeed
+                    messages={messages}
+                    isLoading={isLoading || isWorkstationLoading}
+                    loadingStage={loadingStage || workstationLoadingStage}
+                    onSelectPrompt={(p) => handleChatSend(p, "quick")}
+                    onOpenDeepDive={(rep) => {
+                      setReport(rep);
+                      setViewMode("terminal");
+                    }}
+                    onOpenSymbolTerminal={(sym) => {
+                      handleSelectEmitenDirect(sym);
+                    }}
+                    onOpenShareCard={(rep) => {
+                      setReport(rep);
+                      setIsShareCardOpen(true);
+                    }}
+                  />
                 </div>
               </div>
-            )}
 
-            {/* Centered Floating Prompt Input Bar */}
-            <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black shrink-0">
-              <div className="max-w-3xl mx-auto w-full">
-                <ChatInput
-                  onSend={handleChatSend}
-                  isLoading={isLoading || isWorkstationLoading}
-                  initialValue=""
-                />
+              {/* Quick Contextual Prompts Strip when report exists */}
+              {report && (
+                <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black/90 py-2 shrink-0">
+                  <div className="max-w-3xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
+                    <span className="text-slate-500 text-[10px] uppercase font-bold shrink-0">Tanya Cepat:</span>
+                    <button
+                      onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                    >
+                      Dividen Yield
+                    </button>
+                    <button
+                      onClick={() => handleChatSend(`Analisis broker summary dan akumulasi asing 5 hari ${report.symbol}`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                    >
+                      Broker Flow 5H
+                    </button>
+                    <button
+                      onClick={() => handleChatSend(`Apa risiko utama dan catatan kritis untuk ${report.symbol}?`, "quick")}
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-orange-400 hover:border-orange-500/40 shrink-0 transition"
+                    >
+                      Risiko Utama
+                    </button>
+                    <button
+                      onClick={() => setViewMode("terminal")}
+                      className="px-2.5 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 font-semibold hover:bg-orange-500/20 shrink-0 transition"
+                    >
+                      Lihat Modul Lengkap ↗
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Centered Floating Prompt Input Bar */}
+              <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black shrink-0">
+                <div className="max-w-3xl mx-auto w-full">
+                  <ChatInput
+                    onSend={handleChatSend}
+                    isLoading={isLoading || isWorkstationLoading}
+                    initialValue=""
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          /* =========================================================================
-              FULL TERMINAL WORKSTATION VIEW (Canvas & All Modul Lengkap)
-              ========================================================================= */
-          <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 overflow-hidden relative">
-        {/* =========================================================================
-            LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
-            ========================================================================= */}
-        <div
-          className={`flex-1 min-w-0 h-[calc(100dvh-5rem)] overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200`}
-        >
+          ) : (
+            /* =========================================================================
+                FULL TERMINAL WORKSTATION VIEW (Canvas & All Modul Lengkap)
+                ========================================================================= */
+            <main id="main-content" className="flex-1 flex flex-col lg:flex-row min-w-0 min-h-0 overflow-hidden relative">
+          {/* =========================================================================
+              LEFT STAGE: FINANCIAL WORKSTATION & ANALYTICS
+              ========================================================================= */}
+          <div
+            className={`flex-1 min-w-0 h-full overflow-y-auto px-3 sm:px-5 py-3.5 space-y-3 transition-all duration-200`}
+          >
           {/* Watchlist & Search History Ribbon */}
           <HistoryWatchlistBar
             currentSymbol={report?.symbol}
@@ -1059,7 +1060,7 @@ export default function Home() {
               onClick={() => setIsCopilotOpen(false)}
               className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-xs z-30"
             />
-            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-white/10 bg-white dark:bg-black flex flex-col h-full lg:h-[calc(100dvh-5rem)] shadow-xl lg:shadow-none">
+            <aside className="fixed lg:static inset-y-0 right-0 z-40 w-[90vw] sm:w-[400px] lg:w-[360px] xl:w-[28vw] min-w-[320px] shrink-0 border-l border-slate-200 dark:border-white/10 bg-white dark:bg-black flex flex-col h-full shadow-xl lg:shadow-none">
             {/* Copilot Header */}
             <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 bg-white dark:bg-black">
               <div className="flex items-center gap-2">
@@ -1154,6 +1155,7 @@ export default function Home() {
         )}
       </main>
         )}
+        </div>
       </div>
 
       {/* Drawers and Modals */}
