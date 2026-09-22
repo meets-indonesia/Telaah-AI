@@ -757,7 +757,7 @@ export default function Home() {
                     </button>
                     <button
                       onClick={() => setViewMode("terminal")}
-                      className="px-2.5 py-1 rounded bg-zinc-500/10 border border-zinc-500/30 text-zinc-200 font-semibold hover:bg-zinc-500/15 shrink-0 transition"
+                      className="px-2.5 py-1 rounded bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-zinc-950 dark:hover:text-white hover:border-zinc-500/40 shrink-0 transition"
                     >
                       Lihat Modul Lengkap ↗
                     </button>
