@@ -927,41 +927,35 @@ export default function Home() {
               />
 
               {/* Workstation Tab Bar */}
-              <div className="bg-white dark:bg-black border border-slate-200 dark:border-slate-800/80 p-1 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
-                <div className="flex items-center gap-1 flex-1 min-w-max font-medium">
+              <div className="bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-white/10 px-2 rounded-md flex items-center justify-between gap-1 overflow-x-auto text-xs">
+                <div className="flex items-center gap-1 flex-1 min-w-max">
                   <button
                     onClick={() => setActiveTab("overview")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                      activeTab === "overview"
-                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "overview" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-zinc-200" />
+                    <LayoutDashboard className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
                     <span>Ringkasan 360°</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("technical")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                      activeTab === "technical"
-                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "technical" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <CandleIcon className="w-3.5 h-3.5 text-zinc-200" />
+                    <CandleIcon className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
                     <span>Terminal Teknikal</span>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("insider")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                      activeTab === "insider"
-                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "insider" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <Radar className="w-3.5 h-3.5 text-zinc-200" />
+                    <Radar className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
                     <span>Whale & Broker Flow</span>
                     {report.insiderRadar?.clusterBuyDetected && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -971,26 +965,22 @@ export default function Home() {
                   {isCommodity && (
                     <button
                       onClick={() => setActiveTab("commodity")}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                        activeTab === "commodity"
-                          ? "bg-amber-600/30 text-zinc-400 border border-zinc-500/40 font-semibold shadow-2xs"
-                          : "text-zinc-500 hover:bg-zinc-950/40"
+                      className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                        activeTab === "commodity" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                       }`}
                     >
-                      <Pickaxe className="w-3.5 h-3.5" />
+                      <Pickaxe className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
                       <span>Commodity Lens</span>
                     </button>
                   )}
 
                   <button
                     onClick={() => setActiveTab("all")}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                      activeTab === "all"
-                        ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold shadow-2xs"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "all" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-200" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
                     <span>Semua Modul</span>
                   </button>
                 </div>
