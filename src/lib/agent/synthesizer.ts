@@ -230,6 +230,8 @@ Jawab HANYA dalam format JSON valid berikut:
     ownership: evidence.ownership,
     insiderRadar: evidence.insiderRadar,
     commodityLens: evidence.commodityLens,
+    integrity: evidence.integrity,
+    tradingPlan: evidence.tradingPlan,
     segments: evidence.segments,
     openQuestions: Array.isArray(response.openQuestions) && response.openQuestions.length > 0
       ? response.openQuestions

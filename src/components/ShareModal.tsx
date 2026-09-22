@@ -20,23 +20,23 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, report 
     .map((c, i) => `${i + 1}. [${c.verdict.toUpperCase()}] "${c.originalText}" -> ${c.reasoning}`)
     .join("\n");
 
-  const shareText = `📊 TELAAH 360 REPORT: ${report.symbol} (${report.companyName})
-🗓️ Per Tanggal: ${report.dataAsOf}
+  const shareText = `[TELAAH 360 REPORT: ${report.symbol} - ${report.companyName}]
+Data per: ${report.dataAsOf}
 
-💡 KESIMPULAN UTAMA:
+KESIMPULAN UTAMA:
 ${report.directAnswer}
 
-🔍 AUDIT KLAIM PASAR:
+AUDIT KLAIM PASAR:
 ${claimsSummary || "Tidak ada klaim spesifik."}
 
-📈 DATA RINGKAS:
+DATA RINGKAS:
 • Harga: Rp ${report.technical?.lastPrice?.toLocaleString("id-ID") || "-"} (${(report.technical?.dailyReturnPct || 0) >= 0 ? "+" : ""}${report.technical?.dailyReturnPct || 0}%)
 • Trend Teknikal: ${report.technical?.trendAssessment || "-"}
 • Arus Asing (5 Hari): Rp ${(report.flowLens?.foreignFlow?.cumulative5d / 1e9).toFixed(1)}M (${report.flowLens?.foreignFlow?.recentTrend})
 • Top Net Buyer: ${report.flowLens?.topBuyers?.[0]?.code || "-"}
 • Top Net Seller: ${report.flowLens?.topSellers?.[0]?.code || "-"}
 
-⚠️ Catatan: Data bersumber dari Sectors API v2. Edukasi/Riset, bukan rekomendasi investasi. Dihasilkan via Telaah 360.`;
+Catatan: Data bersumber dari Sectors API v2. Edukasi/Riset, bukan rekomendasi investasi. Dihasilkan via Telaah 360.`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareText);

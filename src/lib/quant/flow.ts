@@ -16,6 +16,15 @@ export interface BrokerParticipantMetric {
   frequency: number;
 }
 
+export interface BandarmologySummary {
+  phase: "Akumulasi Kuat" | "Akumulasi Halus" | "Distribusi Aktif" | "Distribusi Halus" | "Netral / Tarik Tambang";
+  topBuyersAvgPrice: number;
+  topSellersAvgPrice: number;
+  topBuyersSharePct: number;
+  controllingCohort: "Asing / Institusi" | "Ritel Domestik" | "Campuran Seimbang";
+  humanNarrative: string;
+}
+
 export interface FlowLensAnalysis {
   status: "available" | "partial" | "unavailable";
   startDate: string;
@@ -36,6 +45,7 @@ export interface FlowLensAnalysis {
     recentTrend: "Net Inflow" | "Net Outflow" | "Netral";
     series: Array<{ date: string; netInflow: number }>;
   };
+  bandarmologySummary?: BandarmologySummary;
   limitationDisclaimer: string;
 }
 
@@ -200,6 +210,60 @@ export function analyzeFlowLens(
   if (cum5d > 5_000_000_000) recentTrend = "Net Inflow";
   else if (cum5d < -5_000_000_000) recentTrend = "Net Outflow";
 
+  // Hitung Bandarmology Human Decoder
+  const top3Buyers = topBuyers.slice(0, 3);
+  const top3Sellers = topSellers.slice(0, 3);
+
+  const top3BuyValue = top3Buyers.reduce((acc, b) => acc + b.buyValue, 0);
+  const top3BuyLot = top3Buyers.reduce((acc, b) => acc + b.buyLot, 0);
+  const top3BuyAvg = top3BuyLot > 0 ? Math.round(top3BuyValue / (top3BuyLot * 100)) : 0;
+
+  const top3SellValue = top3Sellers.reduce((acc, s) => acc + s.sellValue, 0);
+  const top3SellLot = top3Sellers.reduce((acc, s) => acc + s.sellLot, 0);
+  const top3SellAvg = top3SellLot > 0 ? Math.round(top3SellValue / (top3SellLot * 100)) : 0;
+
+  const top3NetBuyVal = top3Buyers.reduce((acc, b) => acc + b.netValue, 0);
+  const topBuyersSharePct = totalTurnover > 0 ? Number(((top3BuyValue / totalTurnover) * 100).toFixed(1)) : 0;
+
+  let controllingCohort: "Asing / Institusi" | "Ritel Domestik" | "Campuran Seimbang" = "Campuran Seimbang";
+  if (foreignNet > 5_000_000_000 || instNet > 10_000_000_000) {
+    controllingCohort = "Asing / Institusi";
+  } else if (retailNet > 5_000_000_000) {
+    controllingCohort = "Ritel Domestik";
+  }
+
+  let phase: "Akumulasi Kuat" | "Akumulasi Halus" | "Distribusi Aktif" | "Distribusi Halus" | "Netral / Tarik Tambang" = "Netral / Tarik Tambang";
+  let humanNarrative = "";
+
+  const buyerCodes = top3Buyers.map((b) => b.code).join(", ");
+  const sellerCodes = top3Sellers.map((s) => s.code).join(", ");
+
+  if (top3NetBuyVal > 20_000_000_000 && controllingCohort === "Asing / Institusi") {
+    phase = "Akumulasi Kuat";
+    humanNarrative = `Top broker (${buyerCodes || "Institusi"}) melakukan akumulasi masif senilai Rp ${(top3NetBuyVal / 1e9).toFixed(1)} Miliar dengan rata-rata harga borongan di kisaran Rp ${top3BuyAvg.toLocaleString("id-ID")}. Arus didominasi modal besar/asing.`;
+  } else if (top3NetBuyVal > 5_000_000_000) {
+    phase = "Akumulasi Halus";
+    humanNarrative = `Terpantau akumulasi bertahap dari ${buyerCodes || "beberapa broker"} dengan rata-rata harga Rp ${top3BuyAvg.toLocaleString("id-ID")}. Barang mulai terkonsentrasi ke tangan partisipan besar.`;
+  } else if (top3NetBuyVal < -20_000_000_000 || (foreignNet < -20_000_000_000 && retailNet > 10_000_000_000)) {
+    phase = "Distribusi Aktif";
+    humanNarrative = `Waspada distribusi agresif dari ${sellerCodes || "broker institusi"} sementara broker ritel banyak menampung barang. Rata-rata buang barang di kisaran Rp ${top3SellAvg.toLocaleString("id-ID")}.`;
+  } else if (top3NetBuyVal < -5_000_000_000) {
+    phase = "Distribusi Halus";
+    humanNarrative = `Terdapat indikasi pelepasan muatan secara bertahap oleh ${sellerCodes || "broker utama"} di area Rp ${top3SellAvg.toLocaleString("id-ID")}.`;
+  } else {
+    phase = "Netral / Tarik Tambang";
+    humanNarrative = `Kekuatan beli dan jual relatif seimbang antar broker, belum ada konsentrasi akumulasi atau distribusi searah yang dominan.`;
+  }
+
+  const bandarmologySummary: BandarmologySummary = {
+    phase,
+    topBuyersAvgPrice: top3BuyAvg,
+    topSellersAvgPrice: top3SellAvg,
+    topBuyersSharePct,
+    controllingCohort,
+    humanNarrative,
+  };
+
   return {
     status: "available",
     startDate,
@@ -220,6 +284,7 @@ export function analyzeFlowLens(
       recentTrend,
       series: ffSeries.slice(-20), // last 20 trading days
     },
+    bandarmologySummary,
     limitationDisclaimer,
   };
 }

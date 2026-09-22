@@ -7,36 +7,36 @@
     {
       "name": "IHSG",
       "code": "IHSG",
-      "price": "6.441,16",
-      "change": "-0.33%",
+      "price": "6.436,85",
+      "change": "-0.38%",
       "isPositive": false
     },
     {
       "name": "LQ45",
       "code": "LQ45",
-      "price": "640,25",
-      "change": "-1.25%",
+      "price": "634,29",
+      "change": "-0.93%",
       "isPositive": false
     },
     {
       "name": "IDX30",
       "code": "IDX30",
-      "price": "356,17",
-      "change": "-1.11%",
+      "price": "352,8",
+      "change": "-0.95%",
       "isPositive": false
     },
     {
       "name": "USD/IDR",
       "code": "USDIDR",
-      "price": "Rp 17.790",
+      "price": "Rp 17.700",
       "change": "",
       "isPositive": false
     },
     {
       "name": "COMEX Gold",
       "code": "GOLD",
-      "price": "$4,389.39",
-      "change": "-0.21%",
+      "price": "$4,363.11",
+      "change": "-0.81%",
       "isPositive": false,
       "unit": "/oz"
     },

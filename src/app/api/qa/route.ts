@@ -67,11 +67,11 @@ ATURAN ISOLASI KONTEKS & GROUNDING:
       });
     } else {
       // Fallback ringkasan edukatif berbasis data laporan langsung
-      answer = `📌 **Berdasarkan data resmi Sectors API untuk ${report.symbol} (${report.companyName})**:\n\n` +
+      answer = `**Berdasarkan data resmi Sectors API untuk ${report.symbol} (${report.companyName})**:\n\n` +
         `• **Ringkasan:** ${report.directAnswer}\n` +
         `• **Harga & Tren:** Rp ${report.technical.lastPrice.toLocaleString("id-ID")} (${report.technical.trendAssessment})\n` +
         `• **Foreign Flow (Asing):** ${report.flowLens.foreignFlow.recentTrend}\n\n` +
-        `💡 *Catatan Ritel:* Gunakan menu Studio 360° jika ingin melihat grafik candlestick dan broker summary detail.`;
+        `*Catatan:* Gunakan menu Studio 360° jika ingin melihat grafik candlestick dan broker summary detail.`;
     }
 
     return NextResponse.json({ success: true, answer });

@@ -126,6 +126,44 @@ export const FinancialModule: React.FC<FinancialModuleProps> = ({ financials }) 
         </div>
       </div>
 
+      {/* Diagnosa Kesehatan Finansial Ritel Banner */}
+      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Diagnosa Kesehatan Fundamental:</span>
+          </span>
+          <span className="text-[11px] text-slate-500">{financials.solvencyHealth.description}</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-1">
+          <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+            <span className="text-[10px] text-slate-400 block">Pertumbuhan Tahunan (YoY)</span>
+            <span className={`font-bold mt-0.5 block ${
+              financials.yoyGrowth.netIncomePct && financials.yoyGrowth.netIncomePct > 0
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-rose-600 dark:text-rose-400"
+            }`}>
+              {financials.yoyGrowth.netIncomePct && financials.yoyGrowth.netIncomePct > 0 ? "Bisnis Bertumbuh" : "Pertumbuhan Melambat"} ({formatPct(financials.yoyGrowth.netIncomePct)})
+            </span>
+          </div>
+
+          <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+            <span className="text-[10px] text-slate-400 block">Margin Laba Bersih (NPM)</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
+              {l.netMarginPct !== null ? `${l.netMarginPct}% Margin` : "-"} ({l.netMarginPct && l.netMarginPct > 15 ? "Sangat Menguntungkan" : "Marjinal Standar"})
+            </span>
+          </div>
+
+          <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+            <span className="text-[10px] text-slate-400 block">Struktur Modal & Solvabilitas</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
+              DER: {l.debtToEquity !== null ? `${l.debtToEquity}x` : "-"} ({financials.solvencyHealth.hasNetCash ? "Posisi Net Cash" : "Utang Terkendali"})
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Main Financial Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {/* Revenue */}

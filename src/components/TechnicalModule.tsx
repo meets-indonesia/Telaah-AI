@@ -75,6 +75,21 @@ export const TechnicalModule: React.FC<TechnicalModuleProps> = ({
         </div>
       </div>
 
+      {/* Diagnosa Tren & Momentum Ritel */}
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-900 dark:text-white">Diagnosa Tren:</span>
+          <span className="text-slate-600 dark:text-slate-300">
+            {technical.lastPrice > (technical.sma20 || 0)
+              ? "Harga berada di atas rata-rata 20 hari (SMA20), tren jangka pendek menguat."
+              : "Harga terkoreksi di bawah rata-rata 20 hari (SMA20), waspada support teruji."}
+          </span>
+        </div>
+        <div className="text-[11px] font-mono text-slate-500 shrink-0">
+          Status RSI: <strong className={rsiColor}>{rsiStatus}</strong>
+        </div>
+      </div>
+
       {/* Indicators Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">

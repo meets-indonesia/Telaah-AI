@@ -28,6 +28,8 @@ import {
 } from "../sectors/types";
 import { analyzeInsiderCluster } from "../quant/insider";
 import { analyzeCommodityLens } from "../quant/commodity";
+import { calculateIntegrityScore, RedFlagAnalysisResult } from "../quant/integrity";
+import { calculateTradingPlan, TradingPlanResult } from "../quant/tradingPlan";
 
 function normalizeCorporateActions(raw: any): CorporateActionItem[] {
   if (!raw) return [];
@@ -119,6 +121,8 @@ export interface EvidenceCollectionResult {
   ownership?: any;
   insiderRadar: InsiderClusterAnalysis;
   commodityLens: CommodityLensData;
+  integrity?: RedFlagAnalysisResult;
+  tradingPlan?: TradingPlanResult;
   segments?: any;
   providerError?: string;
   evidenceRecords: EvidenceRecord[];
@@ -522,14 +526,56 @@ export async function executeEvidencePlan(
     }
   }
 
+  // 10. Process Deterministic Integrity & Red Flag Radar
+  const finalValuation = companyReport?.valuation ? {
+    ...companyReport.valuation,
+    ...extractValuationMultiples(companyReport.valuation),
+  } : undefined;
+
+  const integrity = calculateIntegrityScore({
+    financials,
+    flow: flowLens,
+    technical,
+    valuation: finalValuation,
+    insiderRadar,
+    currentPrice: technical.lastPrice,
+  });
+
+  evidenceRecords.push({
+    id: "ev_integrity_01",
+    module: "overview",
+    sourceEndpoint: "Telaah Deterministic Integrity & Red Flag Engine",
+    asOfDate: retrievedAt.split("T")[0],
+    retrievedAt,
+    summary: `Integritas Emiten: Skor ${integrity.score}/100 (${integrity.verdict}). ${integrity.headline}. Bahaya: ${integrity.riskCount.danger}, Peringatan: ${integrity.riskCount.warning}, Lolos: ${integrity.riskCount.pass}.`,
+    rawData: integrity,
+  });
+
+  // 11. Process Multi-Horizon Trading & Risk Plan
+  const tradingPlan = calculateTradingPlan({
+    symbol: clean,
+    technical,
+    flow: flowLens,
+    financials,
+    valuation: finalValuation,
+    integrity,
+  });
+
+  evidenceRecords.push({
+    id: "ev_tradingplan_01",
+    module: "technical",
+    sourceEndpoint: "Telaah Multi-Horizon Quantitative Trading & Risk Engine",
+    asOfDate: retrievedAt.split("T")[0],
+    retrievedAt,
+    summary: `Trading Plan: Rekomendasi Horizon ${tradingPlan.horizons[tradingPlan.bestFitHorizon].label} (RRR ${tradingPlan.horizons[tradingPlan.bestFitHorizon].rrr}x). Support S1: Rp ${tradingPlan.supports.s1}, Resistance R1: Rp ${tradingPlan.resistances.r1}.`,
+    rawData: tradingPlan,
+  });
+
   return {
     symbol: clean,
     companyName,
     overview: companyReport?.overview,
-    valuation: companyReport?.valuation ? {
-      ...companyReport.valuation,
-      ...extractValuationMultiples(companyReport.valuation),
-    } : undefined,
+    valuation: finalValuation,
     financials,
     peerLens,
     flowLens,
@@ -538,6 +584,8 @@ export async function executeEvidencePlan(
     ownership: companyReport?.ownership,
     insiderRadar,
     commodityLens,
+    integrity,
+    tradingPlan,
     segments: segmentsData,
     providerError: providerErrors,
     evidenceRecords,

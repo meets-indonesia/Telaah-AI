@@ -32,18 +32,23 @@ interface ChatFeedProps {
 const STARTER_PROMPTS = [
   {
     icon: <Scale className="w-3.5 h-3.5 text-indigo-500" />,
-    title: "Komparasi: BBCA vs BBRI",
-    desc: "Bandingkan valuasi PER, PBV, dan akumulasi foreign flow BBCA vs BBRI.",
+    title: "Head-to-Head: BBCA vs BBRI",
+    desc: "Bandingkan valuasi PER, PBV, dividend yield, dan akumulasi foreign flow BBCA vs BBRI.",
   },
   {
     icon: <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />,
-    title: "Verifikasi Arus Asing TLKM",
-    desc: "Cek akumulasi broker dan net foreign flow TLKM 5 hari terakhir.",
+    title: "Bandarmology & Asing TLKM",
+    desc: "Bongkar siapa top buyer broker TLKM 5 hari terakhir dan berapa rata-rata harga borongan mereka.",
   },
   {
-    icon: <TrendingUp className="w-3.5 h-3.5 text-zinc-500" />,
+    icon: <TrendingUp className="w-3.5 h-3.5 text-amber-500" />,
     title: "Sensitivitas Komoditas ADRO",
-    desc: "Telaah korelasi laba dan sensitivitas harga batu bara terhadap operasional ADRO.",
+    desc: "Telaah korelasi laba dan sensitivitas harga batu bara terhadap operasional emiten ADRO.",
+  },
+  {
+    icon: <Coins className="w-3.5 h-3.5 text-rose-500" />,
+    title: "Deteksi Red Flag & Kualitas Laba",
+    desc: "Uji integritas kas operasional vs laba bersih dan aksi insider/direksi pada emiten ASII.",
   },
 ];
 

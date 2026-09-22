@@ -11,6 +11,8 @@ import {
   ExternalLink,
   Star,
   Sparkles,
+  BarChart3,
+  Scale,
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { FlowLensModule } from "@/components/FlowLensModule";
@@ -21,12 +23,15 @@ import { EventsModule } from "@/components/EventsModule";
 import { InsiderWhaleRadar } from "@/components/InsiderWhaleRadar";
 import { CommodityLensModule } from "@/components/CommodityLensModule";
 import { ReportHeader } from "@/components/ReportHeader";
+import { ExecutiveSummary } from "@/components/retail/ExecutiveSummary";
 
 interface StockInlineArtifactProps {
   report: CompanyIntelligenceReport;
   onOpenEvidence?: () => void;
   onToggleCopilot?: () => void;
   onShare?: () => void;
+  onOpenTradingPlan?: () => void;
+  onOpenDividendCalc?: () => void;
 }
 
 export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
@@ -34,9 +39,11 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
   onOpenEvidence = () => {},
   onToggleCopilot = () => {},
   onShare = () => {},
+  onOpenTradingPlan = () => {},
+  onOpenDividendCalc = () => {},
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "technical" | "insider" | "all">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "financials" | "flow" | "technical" | "peers" | "all">("overview");
 
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
@@ -48,22 +55,24 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
         onOpenEvidence={onOpenEvidence}
         onToggleCopilot={onToggleCopilot}
         onShare={onShare}
+        onOpenTradingPlan={onOpenTradingPlan}
       />
 
-      {/* 2. Tombol Accordion Buka Modul Lengkap (Financials, FlowLens, Peers, Events) */}
-      <div className="border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-2.5 flex items-center justify-between">
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-          {isExpanded
-            ? "Menampilkan seluruh modul riset bursa resmi:"
-            : "Data laporan bursa lengkap (FlowLens, Finansial, Peer, Timeline) tersedia."}
-        </span>
+      {/* 2. Toggle Bar Modul Rinci */}
+      <div className="px-4 py-2.5 bg-slate-50 dark:bg-white/5 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            {isExpanded ? "Navigasi Modul Terbuka" : "Eksplorasi Modul Finansial, Bandar & Teknikal"}
+          </span>
+        </div>
 
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-white dark:bg-black border border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:border-zinc-500 hover:text-zinc-950 transition"
         >
-          <span>{isExpanded ? "Sembunyikan Modul Rinci" : "Buka Modul Riset Lengkap"}</span>
+          <span>{isExpanded ? "Tutup Rincian Modul" : "Buka Modul Riset Lengkap"}</span>
           {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
       </div>
@@ -72,48 +81,78 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
       {isExpanded && (
         <div className="p-4 space-y-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black">
           {/* Workstation Tab Bar */}
-          <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-1 rounded-md flex items-center gap-1 overflow-x-auto text-xs font-medium">
+          <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-1 rounded-xl flex items-center gap-1 overflow-x-auto text-xs font-medium">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
                 activeTab === "overview"
-                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <LayoutDashboard className="w-3.5 h-3.5 text-zinc-200" />
-              <span>Ringkasan & Finansial</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Ringkasan Cepat</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("financials")}
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                activeTab === "financials"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
+                  : "text-slate-500 dark:text-slate-400 hover:text-white"
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Fundamental</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("flow")}
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                activeTab === "flow"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
+                  : "text-slate-500 dark:text-slate-400 hover:text-white"
+              }`}
+            >
+              <Radar className="w-3.5 h-3.5" />
+              <span>Bandar Flow</span>
             </button>
 
             <button
               onClick={() => setActiveTab("technical")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
                 activeTab === "technical"
-                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
               <TrendingUp className="w-3.5 h-3.5 text-zinc-200" />
-              <span>Terminal Teknikal</span>
+              <span>Teknikal</span>
             </button>
 
             <button
-              onClick={() => setActiveTab("insider")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
-                activeTab === "insider"
-                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
+              onClick={() => setActiveTab("peers")}
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                activeTab === "peers"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
-              <Radar className="w-3.5 h-3.5 text-zinc-200" />
-              <span>Whale & Broker Flow</span>
+              <Scale className="w-3.5 h-3.5" />
+              <span>Rekan Sektor</span>
             </button>
 
             <button
               onClick={() => setActiveTab("all")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded transition ${
+              type="button"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
                 activeTab === "all"
-                  ? "bg-zinc-500/15 text-zinc-200 border border-zinc-500/30 font-semibold"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-100 font-bold shadow-2xs"
                   : "text-slate-500 dark:text-slate-400 hover:text-white"
               }`}
             >
@@ -123,12 +162,32 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
           </div>
 
           {/* Konten Tab */}
-          {(activeTab === "overview" || activeTab === "all") && (
+          {activeTab === "overview" && (
+            <div className="space-y-4">
+              <ExecutiveSummary
+                report={report}
+                onOpenTradingPlan={onOpenTradingPlan}
+                onOpenDividendCalc={onOpenDividendCalc}
+                onNavigateTab={(tabKey) => {
+                  if (tabKey === "financials") setActiveTab("financials");
+                  else if (tabKey === "flow") setActiveTab("flow");
+                  else if (tabKey === "peers") setActiveTab("peers");
+                  else if (tabKey === "technical") setActiveTab("technical");
+                }}
+              />
+            </div>
+          )}
+
+          {(activeTab === "financials" || activeTab === "all") && (
+            <div className="space-y-4">
+              <FinancialModule financials={report.financials} />
+            </div>
+          )}
+
+          {(activeTab === "flow" || activeTab === "all") && (
             <div className="space-y-4">
               <FlowLensModule flowLens={report.flowLens} />
-              <FinancialModule financials={report.financials} />
-              <PeerLensModule peerLens={report.peerLens} valuation={report.valuation} symbol={report.symbol} />
-              <EventsModule events={report.events} openQuestions={report.openQuestions} limitations={report.limitations} />
+              <InsiderWhaleRadar insiderRadar={report.insiderRadar} symbol={report.symbol} />
             </div>
           )}
 
@@ -138,9 +197,10 @@ export const StockInlineArtifact: React.FC<StockInlineArtifactProps> = ({
             </div>
           )}
 
-          {(activeTab === "insider" || activeTab === "all") && (
+          {(activeTab === "peers" || activeTab === "all") && (
             <div className="space-y-4">
-              <InsiderWhaleRadar insiderRadar={report.insiderRadar} symbol={report.symbol} />
+              <PeerLensModule peerLens={report.peerLens} valuation={report.valuation} symbol={report.symbol} />
+              <EventsModule events={report.events} openQuestions={report.openQuestions} limitations={report.limitations} />
             </div>
           )}
 

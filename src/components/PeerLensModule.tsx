@@ -140,6 +140,50 @@ export const PeerLensModule: React.FC<PeerLensModuleProps> = ({ peerLens, valuat
         </div>
       </div>
 
+      {/* Diagnosa Relatif Sektor Snapshot */}
+      {(() => {
+        const target = chartData.find((p) => p.isTarget);
+        if (!target) return null;
+
+        const isCheaperPE = target.pe > 0 && avgPE > 0 && target.pe < avgPE;
+        const isCheaperPB = target.pb > 0 && avgPB > 0 && target.pb < avgPB;
+        const sortedByCap = [...chartData].sort((a, b) => b.rawMarketCap - a.rawMarketCap);
+        const capRank = sortedByCap.findIndex((p) => p.isTarget) + 1;
+
+        return (
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+              <span className="text-[10px] text-slate-400 block">Posisi Valuasi (P/E)</span>
+              <span className={`font-bold mt-0.5 block ${isCheaperPE ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+                {target.pe > 0
+                  ? isCheaperPE
+                    ? `Diskon Sektor (${target.pe}x vs Rata-rata ${avgPE}x)`
+                    : `Premium Sektor (${target.pe}x vs Rata-rata ${avgPE}x)`
+                  : "Data Belum Tersedia"}
+              </span>
+            </div>
+
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+              <span className="text-[10px] text-slate-400 block">Peringkat Kapitalisasi Sektor</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
+                {capRank === 1
+                  ? "Pemain No. 1 Terbesar di Sektor"
+                  : `Peringkat #${capRank} dari ${chartData.length} Emiten`}
+              </span>
+            </div>
+
+            <div className="p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60">
+              <span className="text-[10px] text-slate-400 block">Daya Tarik Dividen</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">
+                {target.divYield !== null && target.divYield > 0
+                  ? `Yield: ${target.divYield}% (Rutin Bagikan)`
+                  : "Growth Play (Yield Rendah / Reinvestasi)"}
+              </span>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bar Chart Section */}
       {metricTab !== "table" && (
         <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-2">

@@ -20,6 +20,7 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { JargonBusterModal } from "@/components/retail/JargonBusterModal";
 import { DividendCalculatorModal } from "@/components/retail/DividendCalculatorModal";
 import { ShareAlphaCardModal } from "@/components/retail/ShareAlphaCardModal";
+import { TradingPlanModal } from "@/components/retail/TradingPlanModal";
 import { ChatMessage, ChatSession } from "@/components/chat/types";
 import { AnalysisMode, CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
@@ -38,6 +39,7 @@ import {
   removeHistoryItem,
   getWatchlistSymbols,
 } from "@/lib/storage/history";
+import { ExecutiveSummary } from "@/components/retail/ExecutiveSummary";
 import {
   AlertCircle,
   HelpCircle,
@@ -52,9 +54,13 @@ import {
   Plus,
   Terminal,
   Search,
+  BarChart3,
+  Scale,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 
-type DashboardTab = "overview" | "technical" | "insider" | "commodity" | "all";
+type DashboardTab = "overview" | "financials" | "flow" | "technical" | "peers" | "claims" | "commodity" | "all";
 
 export default function Home() {
   const [symbolParam, setSymbolParam] = useState<string | null>(null);
@@ -102,6 +108,7 @@ export default function Home() {
   const [isJargonOpen, setIsJargonOpen] = useState(false);
   const [isDividendOpen, setIsDividendOpen] = useState(false);
   const [isShareCardOpen, setIsShareCardOpen] = useState(false);
+  const [isTradingPlanOpen, setIsTradingPlanOpen] = useState(false);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null);
 
   // Quick Command Search Dialog state (⌘K)
@@ -923,7 +930,8 @@ export default function Home() {
                   setIsEvidenceOpen(true);
                 }}
                 onToggleCopilot={() => setIsCopilotOpen((prev) => !prev)}
-                onShare={() => setIsShareOpen(true)}
+                onShare={() => setIsShareCardOpen(true)}
+                onOpenTradingPlan={() => setIsTradingPlanOpen(true)}
               />
 
               {/* Workstation Tab Bar */}
@@ -931,40 +939,79 @@ export default function Home() {
                 <div className="flex items-center gap-1 flex-1 min-w-max">
                   <button
                     onClick={() => setActiveTab("overview")}
+                    type="button"
                     className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
                       activeTab === "overview" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
-                    <span>Ringkasan 360°</span>
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                    <span>Ringkasan Cepat</span>
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("technical")}
+                    onClick={() => setActiveTab("financials")}
+                    type="button"
                     className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
-                      activeTab === "technical" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
+                      activeTab === "financials" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
-                    <CandleIcon className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
-                    <span>Terminal Teknikal</span>
+                    <BarChart3 className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                    <span>Fundamental & Laba</span>
                   </button>
 
                   <button
-                    onClick={() => setActiveTab("insider")}
+                    onClick={() => setActiveTab("flow")}
+                    type="button"
                     className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
-                      activeTab === "insider" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
+                      activeTab === "flow" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
                   >
                     <Radar className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
-                    <span>Whale & Broker Flow</span>
+                    <span>Bandar & Whale Flow</span>
                     {report.insiderRadar?.clusterBuyDetected && (
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     )}
                   </button>
 
+                  <button
+                    onClick={() => setActiveTab("technical")}
+                    type="button"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "technical" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
+                    }`}
+                  >
+                    <CandleIcon className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                    <span>Teknikal & Chart</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("peers")}
+                    type="button"
+                    className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                      activeTab === "peers" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
+                    }`}
+                  >
+                    <Scale className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                    <span>Rekan Sektor</span>
+                  </button>
+
+                  {report.claims && report.claims.length > 0 && (
+                    <button
+                      onClick={() => setActiveTab("claims")}
+                      type="button"
+                      className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
+                        activeTab === "claims" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-zinc-950 dark:text-white" />
+                      <span>Validasi Klaim ({report.claims.length})</span>
+                    </button>
+                  )}
+
                   {isCommodity && (
                     <button
                       onClick={() => setActiveTab("commodity")}
+                      type="button"
                       className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
                         activeTab === "commodity" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                       }`}
@@ -976,6 +1023,7 @@ export default function Home() {
 
                   <button
                     onClick={() => setActiveTab("all")}
+                    type="button"
                     className={`flex items-center gap-1.5 px-3 py-2 border-b-2 transition text-zinc-950 dark:text-white ${
                       activeTab === "all" ? "border-zinc-950 dark:border-white font-bold" : "border-transparent font-medium"
                     }`}
@@ -986,34 +1034,63 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Tab Content: Overview */}
-              {(activeTab === "overview" || activeTab === "all") && (
-                <div className="space-y-3">
-                  <ClaimCards claims={report.claims} onSelectEvidence={handleOpenEvidenceWithId} />
-                  <FlowLensModule flowLens={report.flowLens} />
+              {/* Tab Content: Executive Summary (Default Ringkas & Simpel) */}
+              {activeTab === "overview" && (
+                <div className="space-y-4">
+                  <ExecutiveSummary
+                    report={report}
+                    onOpenTradingPlan={() => setIsTradingPlanOpen(true)}
+                    onOpenDividendCalc={() => setIsDividendOpen(true)}
+                    onNavigateTab={(tabKey) => {
+                      if (tabKey === "financials") setActiveTab("financials");
+                      else if (tabKey === "flow") setActiveTab("flow");
+                      else if (tabKey === "peers") setActiveTab("peers");
+                      else if (tabKey === "technical") setActiveTab("technical");
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Tab Content: Financials */}
+              {(activeTab === "financials" || activeTab === "all") && (
+                <div className="space-y-4">
                   <FinancialModule financials={report.financials} />
-                  <PeerLensModule peerLens={report.peerLens} valuation={report.valuation} symbol={report.symbol} />
-                  <EventsModule events={report.events} openQuestions={report.openQuestions} limitations={report.limitations} />
+                </div>
+              )}
+
+              {/* Tab Content: Flow & Bandarmology */}
+              {(activeTab === "flow" || activeTab === "all") && (
+                <div className="space-y-4">
+                  <FlowLensModule flowLens={report.flowLens} />
+                  <InsiderWhaleRadar insiderRadar={report.insiderRadar} symbol={report.symbol} />
                 </div>
               )}
 
               {/* Tab Content: Technical */}
               {(activeTab === "technical" || activeTab === "all") && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <TechnicalModule technical={report.technical} symbol={report.symbol} companyName={report.companyName} />
                 </div>
               )}
 
-              {/* Tab Content: Insider & Whale Radar */}
-              {(activeTab === "insider" || activeTab === "all") && (
-                <div className="space-y-3">
-                  <InsiderWhaleRadar insiderRadar={report.insiderRadar} symbol={report.symbol} />
+              {/* Tab Content: Peers & Events */}
+              {(activeTab === "peers" || activeTab === "all") && (
+                <div className="space-y-4">
+                  <PeerLensModule peerLens={report.peerLens} valuation={report.valuation} symbol={report.symbol} />
+                  <EventsModule events={report.events} openQuestions={report.openQuestions} limitations={report.limitations} />
+                </div>
+              )}
+
+              {/* Tab Content: Claims */}
+              {(activeTab === "claims" || activeTab === "all") && report.claims && (
+                <div className="space-y-4">
+                  <ClaimCards claims={report.claims} onSelectEvidence={handleOpenEvidenceWithId} />
                 </div>
               )}
 
               {/* Tab Content: Commodity Lens */}
               {(activeTab === "commodity" || activeTab === "all") && isCommodity && (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <CommodityLensModule
                     commodityLens={report.commodityLens!}
                     symbol={report.symbol}
@@ -1186,6 +1263,17 @@ export default function Home() {
           isOpen={isShareCardOpen}
           onClose={() => setIsShareCardOpen(false)}
           report={report}
+        />
+      )}
+
+      {/* Multi-Horizon Trading & Investment Plan Modal */}
+      {report && (
+        <TradingPlanModal
+          isOpen={isTradingPlanOpen}
+          onClose={() => setIsTradingPlanOpen(false)}
+          tradingPlan={report.tradingPlan}
+          symbol={report.symbol}
+          currentPrice={report.technical?.lastPrice || 0}
         />
       )}
     

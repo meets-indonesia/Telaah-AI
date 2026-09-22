@@ -61,7 +61,7 @@ export const HistoryWatchlistBar: React.FC<HistoryWatchlistBarProps> = ({
     const cached = getReportFromCache(symbol);
     if (cached) {
       onRestoreReport(cached);
-      setToastMessage(`⚡ Memuat arsip telaah lokal untuk ${symbol} (0 Kredit API)`);
+      setToastMessage(`Memuat arsip telaah lokal untuk ${symbol} (0 Kredit API)`);
       setTimeout(() => setToastMessage(null), 3500);
     } else if (onSelectSymbolPrompt) {
       onSelectSymbolPrompt(symbol);

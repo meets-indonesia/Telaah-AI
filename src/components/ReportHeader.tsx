@@ -11,6 +11,20 @@ import {
   TrendingDown,
   Sparkles,
   Star,
+  ShieldCheck,
+  ShieldAlert,
+  AlertTriangle,
+  Flame,
+  HelpCircle,
+  Zap,
+  Target,
+  Lightbulb,
+  Building2,
+  DollarSign,
+  Activity,
+  Layers,
+  ArrowUpRight,
+  CheckCircle2,
 } from "lucide-react";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
@@ -22,6 +36,7 @@ interface ReportHeaderProps {
   onOpenEvidence: () => void;
   onToggleCopilot?: () => void;
   onShare: () => void;
+  onOpenTradingPlan?: () => void;
 }
 
 export const ReportHeader: React.FC<ReportHeaderProps> = ({
@@ -29,8 +44,11 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   onOpenEvidence,
   onToggleCopilot,
   onShare,
+  onOpenTradingPlan,
 }) => {
   const [inWatchlist, setInWatchlist] = useState(false);
+  const [isRetailMode, setIsRetailMode] = useState(false);
+  const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
 
   useEffect(() => {
     if (report?.symbol) {
@@ -60,10 +78,33 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
     ? "Netral"
     : "-";
 
+  const integrity = report.integrity;
+  const score = integrity?.score ?? 85;
+  const verdict = integrity?.verdict ?? "Fakta Solid";
+
+  // Contextual Evaluation Helpers
+  const getPeEvaluation = (pe: number | null | undefined) => {
+    if (pe === null || pe === undefined) return { label: "N/A", color: "text-slate-400 bg-slate-100 dark:bg-slate-800" };
+    if (pe <= 0) return { label: "Laba Negatif", color: "text-rose-600 bg-rose-50 dark:bg-rose-950/50" };
+    if (pe <= 15) return { label: "Murah / Terjangkau", color: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50" };
+    if (pe <= 28) return { label: "Valuasi Wajar", color: "text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50" };
+    return { label: "Valuasi Premium", color: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50" };
+  };
+
+  const getRsiEvaluation = (r: number | null | undefined) => {
+    if (r === null || r === undefined) return { label: "N/A", color: "text-slate-400 bg-slate-100 dark:bg-slate-800" };
+    if (r < 30) return { label: "Jenuh Jual (Oversold)", color: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50" };
+    if (r > 70) return { label: "Jenuh Beli (Overbought)", color: "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50" };
+    return { label: "Momentum Netral", color: "text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800" };
+  };
+
+  const peEval = getPeEvaluation(peRatio);
+  const rsiEval = getRsiEvaluation(rsi);
+
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {/* Institutional Emiten Strip */}
-      <div className="bg-white dark:bg-black rounded-lg border border-slate-200 dark:border-slate-800/80 p-3.5 transition-colors">
+      <div className="bg-white dark:bg-black rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 transition-colors shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
           {/* Company ID & Logo */}
           <div className="flex items-center gap-3 min-w-0">
@@ -84,7 +125,46 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 shrink-0">
                   {report.overview?.listing_board || "Papan Utama"}
                 </span>
+
+                {/* Red Flag & Integrity Score Meter Badge */}
+                {integrity && (
+                  <button
+                    type="button"
+                    onClick={() => setShowIntegrityDetails(!showIntegrityDetails)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border transition ${
+                      verdict === "Fakta Solid"
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
+                        : verdict === "Speculative Play"
+                        ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20"
+                        : "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400 hover:bg-rose-500/20"
+                    }`}
+                  >
+                    {verdict === "Fakta Solid" ? (
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                    ) : verdict === "Speculative Play" ? (
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                    ) : (
+                      <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                    )}
+                    <span>Radar: {score}/100</span>
+                    <span className="text-[9px] uppercase tracking-wider font-semibold opacity-90">({verdict})</span>
+                  </button>
+                )}
+
+                {/* Trading Plan Quick Badge */}
+                {report.tradingPlan && onOpenTradingPlan && (
+                  <button
+                    type="button"
+                    onClick={onOpenTradingPlan}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-indigo-500/10 border-indigo-500/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-500/20 transition"
+                  >
+                    <Target className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Plan: {report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].label}</span>
+                    <span className="text-[9px] font-mono opacity-80">(1:{report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].rrr})</span>
+                  </button>
+                )}
               </div>
+
               <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5 flex-wrap">
                 <span>{report.overview?.sector || "Sektor"}</span>
                 <span>•</span>
@@ -140,135 +220,325 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           </div>
         </div>
 
-        {/* High-Density Key Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 pt-3">
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+        {/* Integrity Details Collapsible Card */}
+        {showIntegrityDetails && integrity && (
+          <div className="mt-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 animate-in fade-in space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  Audit Radar Integritas & Red Flag ({report.symbol})
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Skor: {integrity.score}/100</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowIntegrityDetails(false)}
+                className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                Tutup
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+              {integrity.headline}: {integrity.retailSummary}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              {integrity.checks.map((c) => (
+                <div
+                  key={c.id}
+                  className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs space-y-1"
+                >
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className="text-slate-800 dark:text-slate-200">{c.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded font-bold uppercase ${
+                        c.status === "pass"
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
+                          : c.status === "warning"
+                          ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+                          : c.status === "danger"
+                          ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                      }`}
+                    >
+                      {c.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    {c.detail}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced High-Density Key Metrics Grid with Contextual Micro-Evaluations */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 pt-3">
+          {/* Market Cap */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              Market Cap
+              Kapitalisasi Pasar
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
+            <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {report.overview?.market_cap
                 ? `Rp ${(report.overview.market_cap / 1e12).toFixed(1)}T`
                 : "-"}
             </span>
+            <span className="text-[10px] text-slate-500 truncate block">
+              {report.overview?.market_cap_rank ? `Peringkat #${report.overview.market_cap_rank}` : "Papan IDX"}
+            </span>
           </div>
 
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          {/* P/E Ratio with Status */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              P/E (TTM)
+              P/E Ratio (Valuasi Laba)
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
+            <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {peRatio ? `${peRatio.toFixed(1)}x` : "-"}
             </span>
+            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded w-fit ${peEval.color}`}>
+              {peEval.label}
+            </span>
           </div>
 
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          {/* PBV Ratio */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              PBV
+              PBV (Nilai Buku Aset)
             </span>
-            <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums truncate block">
+            <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {pbvRatio ? `${pbvRatio.toFixed(2)}x` : "-"}
             </span>
+            <span className="text-[10px] text-slate-500 truncate block">
+              {pbvRatio && pbvRatio < 1.5 ? "Di Bawah Nilai Buku" : "Standar Industri"}
+            </span>
           </div>
 
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          {/* RSI Momentum */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              RSI (14D)
+              RSI 14 (Momentum Harga)
             </span>
-            <span
-              className={`text-xs font-mono font-bold tabular-nums truncate block ${
-                rsi && rsi > 70
-                  ? "text-rose-600 dark:text-rose-400"
-                  : rsi && rsi < 30
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-slate-800 dark:text-slate-200"
-              }`}
-            >
+            <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {rsi != null ? rsi.toFixed(1) : "-"}
             </span>
+            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded w-fit ${rsiEval.color}`}>
+              {rsiEval.label}
+            </span>
           </div>
 
-          <div className="p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 overflow-hidden">
+          {/* Foreign Flow */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              Foreign Flow
+              Arus Asing 5 Hari
             </span>
-            <span className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 truncate block tabular-nums">
+            <span className={`text-sm font-mono font-bold truncate block my-0.5 ${foreignVal && foreignVal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
               {foreignFlow || "Netral"}
             </span>
+            <span className="text-[10px] text-slate-500 truncate block">
+              {report.flowLens?.foreignFlow?.recentTrend || "Flow Netral"}
+            </span>
           </div>
 
-          <div className="sm:col-span-3 xl:col-span-1 p-2 rounded bg-white dark:bg-black border border-slate-100 dark:border-slate-800/60 min-w-0 space-y-2">
-            <div className="flex items-center justify-between gap-2 min-w-0">
-              <div className="min-w-0">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans">
-                  Biaya Analisis
-                </span>
-                <span className="text-[11px] font-mono font-semibold tabular-nums block whitespace-nowrap">
-                  {report.fromVectorCache ? (
-                    <span className="text-emerald-600 dark:text-emerald-400" title={`Matched in local Qdrant (similarity ${((report.cacheScore || 1) * 100).toFixed(0)}%)`}>
-                      0 kredit · Cache lokal
-                    </span>
-                  ) : (
-                    <span className="text-zinc-700 dark:text-zinc-300">
-                      {report.creditsConsumed} kredit
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
+          {/* Action Tools & API Cost */}
+          <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 flex flex-col justify-between">
+            <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-sans">
+              <span>Aksi & Audit</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                {report.fromVectorCache ? "0 cr" : `${report.creditsConsumed} cr`}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 pt-1">
+              <button
+                type="button"
+                onClick={onOpenEvidence}
+                title="Lihat Bukti Data & Audit Trail"
+                className="p-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 transition"
+              >
+                <Database className="w-3.5 h-3.5" />
+              </button>
+              {onOpenTradingPlan && (
                 <button
                   type="button"
-                  onClick={onOpenEvidence}
-                  title="Lihat Bukti Data"
-                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                  onClick={onOpenTradingPlan}
+                  title="Buka Trading & Investment Plan"
+                  aria-label="Open Trading Plan"
+                  className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition"
                 >
-                  <Database className="w-3.5 h-3.5" />
+                  <Target className="w-3.5 h-3.5" />
                 </button>
-                {onToggleCopilot && (
-                  <button
-                    type="button"
-                    onClick={onToggleCopilot}
-                    title="Buka atau sembunyikan Copilot emiten ini"
-                    aria-label="Toggle Copilot"
-                    className="p-1.5 rounded text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                  </button>
-                )}
+              )}
+              {onToggleCopilot && (
                 <button
                   type="button"
-                  onClick={onShare}
-                  title="Bagikan Laporan"
-                  className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition"
+                  onClick={onToggleCopilot}
+                  title="Buka Copilot Emiten Ini"
+                  aria-label="Toggle Copilot"
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <MessageSquare className="w-3.5 h-3.5" />
                 </button>
-              </div>
+              )}
+              <button
+                type="button"
+                onClick={onShare}
+                title="Bagikan Alpha Card"
+                className="p-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Executive Thesis & Direct Answer Strip */}
-      <div className="bg-black text-white dark:bg-[#18181b] dark:text-zinc-100 rounded-md border border-zinc-800 dark:border-white/10 p-3.5 space-y-2">
-        <div className="flex items-center justify-between border-b border-white/15 pb-1.5 text-[10px] font-mono">
-          <div className="flex items-center gap-1.5 text-zinc-200 uppercase tracking-wider font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-            <span>Executive Brief</span>
+      {/* 🌟 4-Pillar Decision Deck: "Peta 3-Detik Keputusan Investasi" */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Pilar 1: Kesehatan Bisnis & Laba */}
+        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">1. Kesehatan Bisnis</span>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              integrity?.riskCount.danger === 0
+                ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
+                : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+            }`}>
+              {integrity?.riskCount.danger === 0 ? "Laba Riil Kuat" : "Perlu Pantauan"}
+            </span>
           </div>
-          <span className="text-zinc-400 uppercase tracking-widest text-[9px]">
-            Mode: {report.mode}
-          </span>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+            {report.financials?.solvencyHealth?.description || "Arus kas operasi positif dan menopang pertumbuhan bisnis."}
+          </p>
         </div>
 
-        <div className="text-xs text-zinc-200 leading-relaxed space-y-1.5">
-          <p className="font-semibold text-white dark:text-zinc-100 text-xs sm:text-[13px] leading-snug">
-            {report.directAnswer}
+        {/* Pilar 2: Valuasi & Kemurahan Harga */}
+        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                <DollarSign className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">2. Kewajaran Valuasi</span>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${peEval.color}`}>
+              {peEval.label.split(" ")[0]}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+            {peRatio ? `PER ${peRatio.toFixed(1)}x dan PBV ${pbvRatio ? pbvRatio.toFixed(1) + "x" : "-"} terhadap rata-rata emiten sejenis.` : "Valuasi pasar stabil."}
           </p>
-          {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
-            <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed pt-1 border-t border-white/10">
-              {report.executiveSummary}
-            </p>
+        </div>
+
+        {/* Pilar 3: Arus Bandar & Asing */}
+        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <Activity className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">3. Bandar & Asing</span>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              report.flowLens?.bandarmologySummary?.phase.includes("Akumulasi")
+                ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
+                : report.flowLens?.bandarmologySummary?.phase.includes("Distribusi")
+                ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+            }`}>
+              {report.flowLens?.bandarmologySummary?.phase.split(" ")[0] || "Netral"}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+            {report.flowLens?.bandarmologySummary?.topBuyersAvgPrice
+              ? `Avg modal borongan top buyer di Rp ${report.flowLens.bandarmologySummary.topBuyersAvgPrice.toLocaleString("id-ID")}.`
+              : `Arus asing 5 hari: ${foreignFlow}.`}
+          </p>
+        </div>
+
+        {/* Pilar 4: Rencana Trading & Eksekusi */}
+        <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                <Target className="w-4 h-4" />
+              </div>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">4. Trading Plan</span>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400">
+              {report.tradingPlan ? report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].label : "Optimal"}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+            {report.tradingPlan
+              ? `RRR 1:${report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].rrr} • SL ${report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].stopLossPct}% • TP1 +${report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].target1Pct}%`
+              : "Disiplin gunakan batasan stop loss terukur."}
+          </p>
+        </div>
+      </div>
+
+      {/* Executive Thesis & Direct Answer Strip with ELIR Retail Toggle */}
+      <div className="bg-slate-950 text-white rounded-2xl border border-slate-800 p-4 space-y-2.5 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2 text-[10px] font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="text-slate-300 uppercase tracking-wider font-bold">
+              {isRetailMode ? "Intisari Bahasa Ritel Unyu (ELIR)" : "Executive Thesis & Kesimpulan Riset"}
+            </span>
+          </div>
+
+          {/* Mode Switcher */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setIsRetailMode(!isRetailMode)}
+              className={`px-3 py-1 rounded-xl text-xs font-sans font-bold flex items-center gap-1.5 transition ${
+                isRetailMode
+                  ? "bg-amber-500 text-black shadow-xs font-black"
+                  : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{isRetailMode ? "Mode: Ritel Santai" : "Ganti: Mode Ritel"}</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="text-xs text-slate-200 leading-relaxed space-y-2">
+          {isRetailMode ? (
+            <div className="space-y-2 bg-slate-900/90 p-3.5 rounded-xl border border-amber-500/30 text-amber-100">
+              <div className="flex items-center gap-1.5 text-amber-400 font-bold text-xs sm:text-sm">
+                <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Terjemahan Bahasa Warung Kopi:</span>
+              </div>
+              <p className="text-xs sm:text-[13px] leading-relaxed text-slate-100">
+                {integrity?.retailSummary || report.directAnswer}
+              </p>
+              {report.flowLens?.bandarmologySummary && (
+                <div className="text-[11px] text-amber-200/90 pt-2 border-t border-amber-500/20 flex items-center gap-1.5">
+                  <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Status Bandar: <strong>{report.flowLens.bandarmologySummary.phase}</strong> ({report.flowLens.bandarmologySummary.controllingCohort}). {report.flowLens.bandarmologySummary.topBuyersAvgPrice > 0 ? `Avg borongan mereka di Rp ${report.flowLens.bandarmologySummary.topBuyersAvgPrice.toLocaleString("id-ID")}.` : ""}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <p className="font-semibold text-white text-xs sm:text-[13px] leading-relaxed">
+                {report.directAnswer}
+              </p>
+              {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
+                <p className="text-[11px] text-slate-400 leading-relaxed pt-1.5 border-t border-slate-800">
+                  {report.executiveSummary}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

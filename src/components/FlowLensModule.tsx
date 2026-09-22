@@ -164,6 +164,42 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
         </div>
       </div>
 
+      {/* Diagnosa Bandarmology Bahasa Manusia Box */}
+      {flowLens.bandarmologySummary && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-slate-50 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40 border border-blue-200 dark:border-blue-900/60 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <span>Diagnosa Bandarmology & Volume Ritel:</span>
+              </span>
+              <span
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  flowLens.bandarmologySummary.phase.includes("Akumulasi")
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : flowLens.bandarmologySummary.phase.includes("Distribusi")
+                    ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                }`}
+              >
+                {flowLens.bandarmologySummary.phase}
+              </span>
+            </div>
+
+            <div className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-3">
+              <span>Pengendali: <strong className="text-slate-900 dark:text-white">{flowLens.bandarmologySummary.controllingCohort}</strong></span>
+              {flowLens.bandarmologySummary.topBuyersAvgPrice > 0 && (
+                <span>Avg Borongan Top Buyer: <strong className="font-mono text-blue-600 dark:text-blue-400">Rp {flowLens.bandarmologySummary.topBuyersAvgPrice.toLocaleString("id-ID")}</strong></span>
+              )}
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-normal bg-white/70 dark:bg-slate-950/60 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800/60">
+            {flowLens.bandarmologySummary.humanNarrative}
+          </p>
+        </div>
+      )}
+
       {/* Foreign Flow Bar Chart */}
       {series.length > 0 && (
         <div className="bg-white/70 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/80 p-4 space-y-3">

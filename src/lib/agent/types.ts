@@ -1,6 +1,8 @@
 import { TechnicalAnalysisResult } from "../quant/indicators";
 import { FinancialHealthAnalysis } from "../quant/financials";
 import { FlowLensAnalysis } from "../quant/flow";
+import { RedFlagAnalysisResult } from "../quant/integrity";
+import { TradingPlanResult, HorizonPlan, TimeHorizonKey } from "../quant/tradingPlan";
 import {
   CompanyOverview,
   ValuationData,
@@ -109,6 +111,8 @@ export interface CompanyIntelligenceReport {
   ownership?: OwnershipData;
   insiderRadar?: InsiderClusterAnalysis;
   commodityLens?: CommodityLensData;
+  integrity?: RedFlagAnalysisResult;
+  tradingPlan?: TradingPlanResult;
   segments?: any;
   providerError?: string;
 
