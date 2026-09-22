@@ -44,6 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const goHome = (query: string) => {
     setActiveSessionId(new URLSearchParams(query).get("session"));
     router.push(`/?${query}`);
+    window.dispatchEvent(new CustomEvent("telaah:navigate", { detail: query }));
   };
 
   return (

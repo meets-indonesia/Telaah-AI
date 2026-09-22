@@ -250,23 +250,23 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       </div>
 
       {/* Executive Thesis & Direct Answer Strip */}
-      <div className="bg-[#111113] rounded-md border border-black/20 dark:border-white/10 p-3.5 space-y-2 text-white">
-        <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-mono">
+      <div className="bg-black text-white dark:bg-[#18181b] dark:text-zinc-100 rounded-md border border-zinc-800 dark:border-white/10 p-3.5 space-y-2">
+        <div className="flex items-center justify-between border-b border-white/15 pb-1.5 text-[10px] font-mono">
           <div className="flex items-center gap-1.5 text-zinc-200 uppercase tracking-wider font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
             <span>Executive Brief</span>
           </div>
-          <span className="text-slate-500 uppercase tracking-widest text-[9px]">
+          <span className="text-zinc-400 uppercase tracking-widest text-[9px]">
             Mode: {report.mode}
           </span>
         </div>
 
-        <div className="text-xs text-slate-200 leading-relaxed space-y-1.5">
-          <p className="font-semibold text-slate-100 text-xs sm:text-[13px] leading-snug">
+        <div className="text-xs text-zinc-200 leading-relaxed space-y-1.5">
+          <p className="font-semibold text-white dark:text-zinc-100 text-xs sm:text-[13px] leading-snug">
             {report.directAnswer}
           </p>
           {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
-            <p className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-white/5">
+            <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed pt-1 border-t border-white/10">
               {report.executiveSummary}
             </p>
           )}

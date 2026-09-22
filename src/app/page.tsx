@@ -60,10 +60,8 @@ export default function Home() {
   const [symbolParam, setSymbolParam] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setSymbolParam(params.get("symbol"));
-    }
+    const params = new URLSearchParams(window.location.search);
+    setSymbolParam(params.get("symbol"));
   }, []);
   // Split pane: Copilot dock visibility
   const [isCopilotOpen, setIsCopilotOpen] = useState(true);
@@ -187,10 +185,12 @@ export default function Home() {
       if (savedSessions) {
         const parsed = JSON.parse(savedSessions);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const requestedId = new URLSearchParams(window.location.search).get("session");
+          const selected = parsed.find((session: ChatSession) => session.id === requestedId) || parsed[0];
           setSessions(parsed);
-          setActiveSessionId(parsed[0].id);
-          setMessages(parsed[0].messages || []);
-          if (parsed[0].report) setReport(parsed[0].report);
+          setActiveSessionId(selected.id);
+          setMessages(selected.messages || []);
+          if (selected.report) setReport(selected.report);
           return;
         }
       }
@@ -320,6 +320,20 @@ export default function Home() {
       handleNewChat();
     }
   };
+
+  // AppShell persists across routes, so query-only navigation must notify this page explicitly.
+  useEffect(() => {
+    const handleNavigation = (event: Event) => {
+      const params = new URLSearchParams((event as CustomEvent<string>).detail);
+      const sessionId = params.get("session");
+      const symbol = params.get("symbol");
+      if (sessionId) handleSelectSession(sessionId);
+      else if (symbol) setSymbolParam(symbol);
+      else if (params.has("newChat")) handleNewChat();
+    };
+    window.addEventListener("telaah:navigate", handleNavigation);
+    return () => window.removeEventListener("telaah:navigate", handleNavigation);
+  }, [sessions, activeSessionId]);
 
   const handleSelectExample = (prompt: string, mode: "quick" | "full" = "full") => {
     setPromptValue(prompt);
