@@ -89,15 +89,15 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
         </div>
 
         {/* 2. 3-PILLAR SNAPSHOT STRIP */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 pt-4">
           {/* Fundamental Pillar */}
           <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-zinc-950/60 border border-slate-200/60 dark:border-zinc-800/60 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <BarChart3 className="w-4 h-4 text-blue-500" />
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <span className="min-w-0 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4 shrink-0 text-blue-500" />
                 Kesehatan Bisnis
               </span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isLabaGrowing ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400"}`}>
+              <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${isLabaGrowing ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400"}`}>
                 {isLabaGrowing ? "Laba Tumbuh" : "Melambat"}
               </span>
             </div>
@@ -115,12 +115,12 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
 
           {/* Bandarmology Pillar */}
           <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-zinc-950/60 border border-slate-200/60 dark:border-zinc-800/60 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-emerald-500" />
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <span className="min-w-0 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Users className="w-4 h-4 shrink-0 text-emerald-500" />
                 Arus Bandar
               </span>
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isAccumulated ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-slate-500/10 text-slate-600 dark:text-slate-400"}`}>
+              <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${isAccumulated ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-slate-500/10 text-slate-600 dark:text-slate-400"}`}>
                 {isAccumulated ? "Akumulasi" : "Netral"}
               </span>
             </div>
@@ -138,12 +138,12 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
 
           {/* Valuation Pillar */}
           <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-zinc-950/60 border border-slate-200/60 dark:border-zinc-800/60 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Scale className="w-4 h-4 text-amber-500" />
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <span className="min-w-0 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Scale className="w-4 h-4 shrink-0 text-amber-500" />
                 Valuasi Harga
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 P/E: {peVal ? `${peVal.toFixed(1)}x` : "-"}
               </span>
             </div>

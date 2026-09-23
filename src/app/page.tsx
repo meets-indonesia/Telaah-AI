@@ -1131,12 +1131,12 @@ export default function Home() {
             {/* Copilot Header */}
             <div className="px-3.5 py-2.5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-2 bg-white dark:bg-black">
               <div className="flex items-center gap-2">
-                <Bot className="w-4 h-4 text-zinc-200" />
-                <span className="font-mono text-xs font-bold text-slate-100 uppercase tracking-wider">
+                <Bot className="w-4 h-4 text-zinc-800 dark:text-zinc-200" />
+                <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
                   RESEARCH COPILOT
                 </span>
                 {report && (
-                  <span className="px-1.5 py-0.2 rounded bg-zinc-500/10 text-[10px] font-mono font-bold text-zinc-200 border border-zinc-500/30">
+                  <span className="px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-500/10 text-[10px] font-mono font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-500/30">
                     {report.symbol}
                   </span>
                 )}
