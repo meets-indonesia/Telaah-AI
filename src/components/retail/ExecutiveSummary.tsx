@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useI18n } from "@/lib/i18n/context";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 import {
@@ -29,6 +30,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   onOpenDividendCalc,
   onNavigateTab,
 }) => {
+  const { t } = useI18n();
   const { symbol, companyName, financials, flowLens, valuation, technical, integrity, tradingPlan } = report;
 
   // Key derived values
@@ -221,14 +223,16 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
       </div>
 
       {/* 4. FAST ACTION CENTER: TRADING PLAN & TOOLS */}
-      <div className="p-4 rounded-xl bg-linear-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+      <div className="p-4 rounded-xl bg-black dark:bg-linear-to-r dark:from-slate-900 dark:to-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
         <div className="space-y-0.5 text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <Crosshair className="w-4 h-4 text-emerald-400" />
-            <h3 className="font-bold text-xs text-white">Siap Eksekusi? Gunakan Trading Plan & Kalkulator</h3>
+            <h3 className="font-bold text-xs text-white">
+              {t("summary.readyTitle", "Siap Eksekusi? Gunakan Trading Plan & Kalkulator")}
+            </h3>
           </div>
           <p className="text-[11px] text-slate-300 max-w-md">
-            Dapatkan area beli ideal, batas cut loss, target profit multi-horizon, dan simulasi alokasi lot otomatis.
+            {t("summary.readySubtitle", "Dapatkan area beli ideal, batas cut loss, target profit multi-horizon, dan simulasi alokasi lot otomatis.")}
           </p>
         </div>
 
@@ -239,16 +243,16 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition shadow-2xs"
           >
             <Crosshair className="w-3.5 h-3.5" />
-            <span>Buka Trading Plan</span>
+            <span>{t("summary.openTradingPlan", "Buka Trading Plan")}</span>
           </button>
 
           <button
             onClick={onOpenDividendCalc}
             type="button"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-black font-semibold text-xs border border-white transition"
           >
             <Calculator className="w-3.5 h-3.5" />
-            <span>Kalkulator Dividen</span>
+            <span>{t("summary.openDividend", "Kalkulator Dividen")}</span>
           </button>
         </div>
       </div>

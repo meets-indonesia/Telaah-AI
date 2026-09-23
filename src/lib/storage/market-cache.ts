@@ -83,6 +83,7 @@ export async function getOrFetchDailyMarketData(forceRefresh: boolean = false): 
     try {
       const res = await fetch(`https://api.sectors.app/v2/index-daily/${code.toLowerCase()}/`, {
         headers: authHeaders,
+        cache: "no-store",
       });
       if (res.ok) {
         const data = await res.json();
@@ -120,6 +121,7 @@ export async function getOrFetchDailyMarketData(forceRefresh: boolean = false): 
     try {
       const res = await fetch(`https://api.sectors.app/v2/mining/commodities/${commodity.toLowerCase()}/price/`, {
         headers: authHeaders,
+        cache: "no-store",
       });
       if (res.ok) {
         const data = await res.json();
@@ -153,7 +155,7 @@ export async function getOrFetchDailyMarketData(forceRefresh: boolean = false): 
   // Helper to fetch live USD/IDR FX
   const fetchUsdIdr = async () => {
     try {
-      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      const res = await fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.rates?.IDR) {

@@ -9,7 +9,7 @@ interface MarkdownTextProps {
 }
 
 // Parses inline markdown: **bold**, *italic*, `code`
-function renderInline(text: string, isUser: boolean): React.ReactNode[] {
+function renderInline(text: string, isUser: boolean, overrideClass?: string): React.ReactNode[] {
   const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
   const parts = text.split(regex);
 
@@ -19,7 +19,7 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
         <strong
           key={index}
           className={`font-bold ${
-            isUser ? "text-white font-extrabold" : "text-slate-900 dark:text-white"
+            overrideClass ? "text-inherit font-extrabold" : isUser ? "text-white font-extrabold" : "text-slate-900 dark:text-white"
           }`}
         >
           {part.slice(2, -2)}
@@ -31,7 +31,7 @@ function renderInline(text: string, isUser: boolean): React.ReactNode[] {
         <em
           key={index}
           className={`italic ${
-            isUser ? "text-slate-200" : "text-slate-700 dark:text-slate-300"
+            overrideClass ? "text-inherit" : isUser ? "text-slate-200" : "text-slate-700 dark:text-slate-300"
           }`}
         >
           {part.slice(1, -1)}
@@ -131,9 +131,10 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
 
   // Split by double line breaks into paragraphs / blocks
   const blocks = content.split(/\n\n+/);
+  const textColorClass = className.includes("text-") ? "" : "text-slate-800 dark:text-slate-200";
 
   return (
-    <div className={`space-y-2.5 text-xs sm:text-[13px] leading-relaxed text-slate-800 dark:text-slate-200 ${className}`}>
+    <div className={`space-y-2.5 text-xs sm:text-[13px] leading-relaxed ${textColorClass} ${className}`}>
       {blocks.map((block, bIdx) => {
         const lines = block.split("\n");
 
@@ -195,7 +196,7 @@ export const MarkdownText: React.FC<MarkdownTextProps> = ({
           <p key={bIdx} className="whitespace-normal">
             {lines.map((line, lIdx) => (
               <React.Fragment key={lIdx}>
-                {renderInline(line, false)}
+                {renderInline(line, false, className)}
                 {lIdx < lines.length - 1 && <br />}
               </React.Fragment>
             ))}

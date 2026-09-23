@@ -11,6 +11,8 @@ import {
   Command,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface MarketIndexItem {
   name: string;
@@ -35,16 +37,17 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   marketIndices = [],
-  marketAsOfDate = "2026-09-11",
+  marketAsOfDate = "",
   onOpenJargon,
   onOpenDividend,
   onFocusSearch,
 }) => {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   const navLinks = [
-    { href: "/", label: "Terminal" },
-    { href: "/watchlist", label: "Watchlist" },
+    { href: "/", label: t("nav.terminal", "Terminal") },
+    { href: "/watchlist", label: t("nav.watchlist", "Watchlist") },
   ];
 
   return (
@@ -96,11 +99,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenDividend}
-              title="Kalkulator Dividen"
+              title={t("btn.dividend", "Kalkulator Dividen")}
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white text-xs transition"
             >
               <Calculator className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
-              <span className="hidden xl:inline">Dividen</span>
+              <span className="hidden xl:inline">{t("btn.dividendShort", "Dividen")}</span>
             </button>
           )}
 
@@ -108,15 +111,16 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenJargon}
-              title="Kamus Jargon Saham"
+              title={t("btn.jargon", "Kamus Jargon Saham")}
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-50 text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white text-xs transition"
             >
               <BookOpen className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
-              <span className="hidden xl:inline">Jargon</span>
+              <span className="hidden xl:inline">{t("btn.jargonShort", "Jargon")}</span>
             </button>
           )}
 
           <div className="h-4 w-px bg-slate-300 dark:bg-white/10 mx-0.5" />
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>
@@ -150,11 +154,13 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-700"></span>
             </span>
             <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-900 dark:text-zinc-100">
-              IDX LIVE
+              {t("ticker.status", "IDX TERKINI")}
             </span>
-            <span className="text-[9px] text-slate-500 dark:text-slate-400 hidden sm:inline">
-              ({marketAsOfDate})
-            </span>
+            {marketAsOfDate && (
+              <span className="text-[9px] text-slate-500 dark:text-slate-400 hidden sm:inline">
+                ({marketAsOfDate})
+              </span>
+            )}
           </div>
 
           {/* Tape Container */}

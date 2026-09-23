@@ -1,0 +1,47 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_PASSPHRASE }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            echo "🚀 Memulai auto-deployment di VPS..."
+
+            # 1. Pindah ke direktori proyek
+            cd /var/www/telaah-ai
+
+            # 2. Tarik kode terbaru dari branch main
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 3. Pastikan database Docker (Qdrant & Redis) tetap running
+            docker compose up -d
+
+            # 4. Install dependencies jika ada package baru
+            npm install --production=false
+
+            # 5. Build production Next.js
+            npm run build
+
+            # 6. Restart PM2 tanpa downtime (reload)
+            pm2 reload telaah-ai || pm2 restart telaah-ai || pm2 start npm --name "telaah-ai" -- start -- -p 3000
+
+            # 7. Simpan state PM2
+            pm2 save
+
+            echo "✅ Deployment berhasil dan live!"

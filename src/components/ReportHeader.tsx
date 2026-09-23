@@ -30,6 +30,8 @@ import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 import { toggleWatchlist, isWatchlisted } from "@/lib/storage/history";
 import { CompanyLogo } from "./CompanyLogo";
+import { useI18n } from "@/lib/i18n/context";
+import { AutoTranslateText } from "@/components/chat/AutoTranslateText";
 
 interface ReportHeaderProps {
   report: CompanyIntelligenceReport;
@@ -46,6 +48,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   onShare,
   onOpenTradingPlan,
 }) => {
+  const { t } = useI18n();
   const [inWatchlist, setInWatchlist] = useState(false);
   const [isRetailMode, setIsRetailMode] = useState(false);
   const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
@@ -275,11 +278,11 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
         )}
 
         {/* Enhanced High-Density Key Metrics Grid with Contextual Micro-Evaluations */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 pt-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-3">
           {/* Market Cap */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              Kapitalisasi Pasar
+              {t("metric.marketCap", "Kapitalisasi Pasar")}
             </span>
             <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {report.overview?.market_cap
@@ -294,7 +297,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           {/* P/E Ratio with Status */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              P/E Ratio (Valuasi Laba)
+              {t("metric.pe", "P/E Ratio (Valuasi Laba)")}
             </span>
             <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {peRatio ? `${peRatio.toFixed(1)}x` : "-"}
@@ -307,7 +310,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           {/* PBV Ratio */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              PBV (Nilai Buku Aset)
+              {t("metric.pbv", "PBV (Nilai Buku Aset)")}
             </span>
             <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {pbvRatio ? `${pbvRatio.toFixed(2)}x` : "-"}
@@ -320,7 +323,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           {/* RSI Momentum */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              RSI 14 (Momentum Harga)
+              {t("metric.rsi", "RSI 14 (Momentum Harga)")}
             </span>
             <span className="text-sm font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums truncate block my-0.5">
               {rsi != null ? rsi.toFixed(1) : "-"}
@@ -333,7 +336,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           {/* Foreign Flow */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 overflow-hidden flex flex-col justify-between">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-sans truncate">
-              Arus Asing 5 Hari
+              {t("metric.foreignFlow", "Arus Asing 5 Hari")}
             </span>
             <span className={`text-sm font-mono font-bold truncate block my-0.5 ${foreignVal && foreignVal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
               {foreignFlow || "Netral"}
@@ -346,12 +349,12 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           {/* Action Tools & API Cost */}
           <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 min-w-0 flex flex-col justify-between">
             <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-sans">
-              <span>Aksi & Audit</span>
+              <span>{t("metric.actionAudit", "Aksi & Audit")}</span>
               <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                 {report.fromVectorCache ? "0 cr" : `${report.creditsConsumed} cr`}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 pt-1">
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <button
                 type="button"
                 onClick={onOpenEvidence}
@@ -396,17 +399,19 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       </div>
 
       {/* 🌟 4-Pillar Decision Deck: "Peta 3-Detik Keputusan Investasi" */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Pilar 1: Kesehatan Bisnis & Laba */}
         <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="shrink-0 p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <Building2 className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white">1. Kesehatan Bisnis</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                {t("pillar.health", "1. Kesehatan Bisnis")}
+              </span>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+            <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
               integrity?.riskCount.danger === 0
                 ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
                 : "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
@@ -421,14 +426,16 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
         {/* Pilar 2: Valuasi & Kemurahan Harga */}
         <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="shrink-0 p-1.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
                 <DollarSign className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white">2. Kewajaran Valuasi</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                {t("pillar.valuation", "2. Kewajaran Valuasi")}
+              </span>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${peEval.color}`}>
+            <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${peEval.color}`}>
               {peEval.label.split(" ")[0]}
             </span>
           </div>
@@ -439,14 +446,16 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
         {/* Pilar 3: Arus Bandar & Asing */}
         <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="shrink-0 p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
                 <Activity className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white">3. Bandar & Asing</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                {t("pillar.bandar", "3. Bandar & Asing")}
+              </span>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+            <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
               report.flowLens?.bandarmologySummary?.phase.includes("Akumulasi")
                 ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
                 : report.flowLens?.bandarmologySummary?.phase.includes("Distribusi")
@@ -465,14 +474,16 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
 
         {/* Pilar 4: Rencana Trading & Eksekusi */}
         <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="shrink-0 p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                 <Target className="w-4 h-4" />
               </div>
-              <span className="text-xs font-bold text-slate-900 dark:text-white">4. Trading Plan</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white">
+                {t("pillar.plan", "4. Trading Plan")}
+              </span>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400">
+            <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400">
               {report.tradingPlan ? report.tradingPlan.horizons[report.tradingPlan.bestFitHorizon].label : "Optimal"}
             </span>
           </div>
@@ -490,7 +501,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
             <span className="text-slate-300 uppercase tracking-wider font-bold">
-              {isRetailMode ? "Intisari Bahasa Ritel Unyu (ELIR)" : "Executive Thesis & Kesimpulan Riset"}
+              {isRetailMode ? t("thesis.retailTitle", "Intisari Bahasa Ritel Unyu (ELIR)") : t("thesis.title", "Executive Thesis & Kesimpulan Riset")}
             </span>
           </div>
 
@@ -506,7 +517,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{isRetailMode ? "Mode: Ritel Santai" : "Ganti: Mode Ritel"}</span>
+              <span>{isRetailMode ? t("thesis.switchRetail", "Mode: Ritel Santai") : t("thesis.switchFormal", "Ganti: Mode Ritel")}</span>
             </button>
           </div>
         </div>
@@ -518,9 +529,9 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
                 <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>Terjemahan Bahasa Warung Kopi:</span>
               </div>
-              <p className="text-xs sm:text-[13px] leading-relaxed text-slate-100">
-                {integrity?.retailSummary || report.directAnswer}
-              </p>
+          <div className="text-xs sm:text-[13px] leading-relaxed text-white">
+            <AutoTranslateText text={integrity?.retailSummary || report.directAnswer} className="text-white" />
+          </div>
               {report.flowLens?.bandarmologySummary && (
                 <div className="text-[11px] text-amber-200/90 pt-2 border-t border-amber-500/20 flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -530,13 +541,13 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
             </div>
           ) : (
             <>
-              <p className="font-semibold text-white text-xs sm:text-[13px] leading-relaxed">
-                {report.directAnswer}
-              </p>
+              <div className="font-semibold text-white text-xs sm:text-[13px] leading-relaxed">
+                <AutoTranslateText text={report.directAnswer} className="text-white font-medium" />
+              </div>
               {report.executiveSummary && report.executiveSummary !== report.directAnswer && (
-                <p className="text-[11px] text-slate-400 leading-relaxed pt-1.5 border-t border-slate-800">
-                  {report.executiveSummary}
-                </p>
+                <div className="text-[11px] text-slate-200 leading-relaxed pt-1.5 border-t border-slate-800">
+                  <AutoTranslateText text={report.executiveSummary} className="text-slate-200" />
+                </div>
               )}
             </>
           )}

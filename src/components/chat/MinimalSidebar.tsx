@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ChatSession } from "@/components/chat/types";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { useI18n } from "@/lib/i18n/context";
 
 interface MinimalSidebarProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
   onSelectSymbol,
   onClearAllSessions,
 }) => {
+  const { t } = useI18n();
   const [activeSubTab, setActiveSubTab] = useState<"chats" | "watchlist">("chats");
 
   // Sort sessions: pinned first, then chronological
@@ -107,7 +109,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
             }`}
           >
             <SquarePen className="w-4 h-4 text-zinc-700 shrink-0" />
-            {isOpen && <span>Obrolan Baru</span>}
+            {isOpen && <span>{t("sidebar.newChat", "Obrolan Baru")}</span>}
           </button>
         </div>
 
@@ -126,7 +128,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>Riwayat Chat ({sessions.length})</span>
+                <span>{t("sidebar.chats", "Riwayat Chat")} ({sessions.length})</span>
               </button>
 
               <button
@@ -139,7 +141,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                 }`}
               >
                 <Star className="w-3.5 h-3.5" />
-                <span>Watchlist ({watchlistSymbols.length})</span>
+                <span>{t("sidebar.watchlist", "Watchlist")} ({watchlistSymbols.length})</span>
               </button>
             </div>
 
@@ -179,7 +181,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                               e.stopPropagation();
                               onTogglePinSession(session.id);
                             }}
-                            title={session.isPinned ? "Lepas Pin Chat" : "Pin Chat Ini"}
+                            title={session.isPinned ? t("sidebar.unpin", "Lepas Pin") : t("sidebar.pin", "Pin Chat Ini")}
                             className={`p-1 rounded transition ${
                               session.isPinned
                                 ? "text-zinc-400 hover:text-zinc-500"
@@ -194,7 +196,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                               e.stopPropagation();
                               onDeleteSession(session.id);
                             }}
-                            title="Hapus Chat"
+                            title={t("sidebar.delete", "Hapus Chat")}
                             className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 transition"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -205,13 +207,13 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                   })
                 ) : (
                   <div className="p-4 text-center text-slate-400 text-xs space-y-2">
-                    <p>Belum ada riwayat chat.</p>
+                    <p>{t("sidebar.emptyChat", "Belum ada riwayat chat.")}</p>
                     <button
                       type="button"
                       onClick={onNewChat}
                       className="px-2.5 py-1 text-[11px] rounded bg-zinc-500/10 text-zinc-200 border border-zinc-500/25 hover:bg-zinc-500/15 transition"
                     >
-                      + Buat Obrolan Baru
+                      + {t("sidebar.newChat", "Obrolan Baru")}
                     </button>
                   </div>
                 )
@@ -232,7 +234,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                   ))
                 ) : (
                   <div className="p-4 text-center text-slate-400 text-xs">
-                    Watchlist masih kosong.
+                    {t("sidebar.emptyWatchlist", "Watchlist masih kosong.")}
                   </div>
                 )
               )}
@@ -246,7 +248,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                   onClick={onClearAllSessions}
                   className="w-full text-center text-[10px] text-slate-400 hover:text-rose-400 py-1 transition font-mono"
                 >
-                  Bersihkan Seluruh Chat
+                  {t("sidebar.clearAll", "Bersihkan Seluruh Chat")}
                 </button>
               </div>
             )}

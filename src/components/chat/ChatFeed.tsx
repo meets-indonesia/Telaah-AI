@@ -17,6 +17,7 @@ import { StockCompareCard } from "./StockCompareCard";
 import { RumorFactCheckerCard } from "./RumorFactCheckerCard";
 import { StockInlineArtifact } from "./StockInlineArtifact";
 import { MarkdownText } from "./MarkdownText";
+import { AutoTranslateText } from "./AutoTranslateText";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 
 interface ChatFeedProps {
@@ -154,9 +155,13 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
                 </div>
               )}
 
-              {/* Message text with clean formatting */}
+              {/* Message text with clean formatting & auto translation */}
               <div className={!isUser ? "bg-white dark:bg-[#18181b] p-3.5 rounded-xl border border-zinc-200 dark:border-white/10 space-y-2 leading-relaxed overflow-hidden break-words shadow-xs" : ""}>
-                <MarkdownText content={msg.text} isUser={isUser} />
+                {!isUser ? (
+                  <AutoTranslateText text={msg.text} isUser={false} />
+                ) : (
+                  <MarkdownText content={msg.text} isUser={true} />
+                )}
               </div>
 
               {/* Optional Stock Card Widget & Full Inline Artifact */}

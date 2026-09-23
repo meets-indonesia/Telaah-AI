@@ -67,6 +67,7 @@ export function toggleWatchlist(symbol: string): boolean {
 
   try {
     localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("telaah:storage"));
   } catch (e) {
     console.warn("Gagal menyimpan watchlist ke localStorage:", e);
   }
@@ -141,6 +142,7 @@ export function saveReportToHistory(report: CompanyIntelligenceReport): void {
     const existing = getHistory().filter((item) => item.symbol !== clean);
     const updated = [summaryItem, ...existing].slice(0, MAX_HISTORY_ITEMS);
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("telaah:storage"));
   } catch (err) {
     console.warn("Gagal menyimpan riwayat penelaahan ke localStorage:", err);
   }
@@ -173,6 +175,7 @@ export function removeHistoryItem(symbol: string): void {
     const current = getHistory().filter((item) => item.symbol !== clean);
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(current));
     localStorage.removeItem(`${REPORT_CACHE_KEY_PREFIX}${clean}`);
+    window.dispatchEvent(new Event("telaah:storage"));
   } catch (err) {
     console.error("Gagal menghapus item riwayat:", err);
   }
@@ -189,6 +192,7 @@ export function clearHistory(): void {
       localStorage.removeItem(`${REPORT_CACHE_KEY_PREFIX}${h.symbol}`);
     }
     localStorage.removeItem(HISTORY_STORAGE_KEY);
+    window.dispatchEvent(new Event("telaah:storage"));
   } catch (err) {
     console.error("Gagal membersihkan riwayat:", err);
   }

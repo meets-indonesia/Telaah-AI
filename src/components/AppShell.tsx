@@ -28,9 +28,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     refresh();
     setActiveSessionId(new URLSearchParams(window.location.search).get("session"));
     window.addEventListener("storage", refresh);
+    window.addEventListener("telaah:storage", refresh);
     window.addEventListener("telaah:sessions", refresh);
     return () => {
       window.removeEventListener("storage", refresh);
+      window.removeEventListener("telaah:storage", refresh);
       window.removeEventListener("telaah:sessions", refresh);
     };
   }, []);

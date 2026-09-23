@@ -115,6 +115,29 @@ Aplikasi membuat collection `telaah_intelligence_cache` secara otomatis. Collect
 
 Qdrant bersifat opsional. Jika tidak tersedia, aplikasi tetap dapat melakukan analisis langsung tanpa semantic cache.
 
+## Menjalankan Redis (Docker)
+
+Untuk cache terjemahan global (Multilingual AI Translation Cache) dan sesi berkecepatan tinggi:
+
+```bash
+mkdir -p data/redis_storage
+
+docker run -d \
+  --name telaah-redis \
+  -p 6379:6379 \
+  -v "$(pwd)/data/redis_storage:/data" \
+  redis:alpine redis-server --appendonly yes
+```
+
+Periksa status Redis:
+
+```bash
+docker exec -it telaah-redis redis-cli ping
+# Respon: PONG
+```
+
+Redis bersifat opsional; jika Redis tidak aktif, sistem otomatis beralih ke cache memori lokal aman.
+
 ## Menjalankan Aplikasi
 
 Development:
