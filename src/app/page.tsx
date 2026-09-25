@@ -535,7 +535,15 @@ export default function Home() {
 
     // 4. Check if user introduced a NEW stock ticker to switch focus
     const newTarget = detectNewTargetSymbol(userText, report?.symbol);
-    if (newTarget) {
+    const mentionsActiveStock = report?.symbol && userText.toUpperCase().includes(report.symbol);
+    const isExplicitSwitch =
+      newTarget &&
+      (!report ||
+       !mentionsActiveStock ||
+       userText.trim().toUpperCase() === newTarget ||
+       /(?:analisis|telaah|buka|bedah|ganti|pindah|fokus|pilih|cek emiten)\s+/i.test(userText));
+
+    if (newTarget && isExplicitSwitch) {
       await executeAnalysis(userText, mode, newTarget, newMessages, images);
       return;
     }

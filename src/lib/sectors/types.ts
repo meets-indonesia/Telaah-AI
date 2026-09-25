@@ -20,6 +20,7 @@ export interface CompanyOverview {
   description?: string;
   ipo_date?: string;
   listing_shares?: number;
+  affiliates?: string[];
 }
 
 export interface HistoricalValuationYear {

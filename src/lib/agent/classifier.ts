@@ -1,5 +1,6 @@
 import { callOpenRouter } from "./openrouter";
 import { AtomicClaim, IntentType } from "./types";
+import { VALID_IDX_TICKERS } from "./chat-router";
 
 export interface ClassificationResult {
   symbol: string;
@@ -39,14 +40,16 @@ Jawab HANYA format JSON valid:
 
     // Sanitasi simbol
     let sym = String(result.symbol || "").toUpperCase().replace(".JK", "").trim();
-    const isAmbiguous = !/^[A-Z]{4}$/.test(sym);
-    if (isAmbiguous) {
-      // Coba ekstrak regex 4 huruf jika model mengembalikan teks campur
+    if (!VALID_IDX_TICKERS.has(sym)) {
+      // Coba cari ticker 4 huruf yang valid dalam teks kembalian
       const match = sym.match(/\b([A-Z]{4})\b/);
-      if (match) {
+      if (match && VALID_IDX_TICKERS.has(match[1])) {
         sym = match[1];
+      } else {
+        sym = "";
       }
     }
+    const isAmbiguous = !sym || !VALID_IDX_TICKERS.has(sym);
 
     // Sanitasi intent
     const rawIntent = String(result.intent || "").toLowerCase();

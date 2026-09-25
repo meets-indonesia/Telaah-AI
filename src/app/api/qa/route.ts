@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { callOpenRouter } from "@/lib/agent/openrouter";
 import { extractVisionDataWithClaude } from "@/lib/agent/vision";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
+import { extractValuationMultiples } from "@/lib/sectors/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,49 +25,34 @@ export async function POST(req: NextRequest) {
       visionContext = `[Temuan Visual Gambar Terlampir (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
     }
 
-    const systemPrompt = `Anda adalah Telaah-AI, asisten riset pasar modal Indonesia (IDX) yang cerdas, objektif, dan ramah.
-Konteks emiten yang sedang aktif di terminal saat ini: ${report.symbol} (${report.companyName}).
+    const systemPrompt = `Anda adalah Telaah-AI, asisten riset pasar modal Bursa Efek Indonesia (IDX) yang serba tahu, cerdas, mengalir luwes, dan berbasis data.
 
-PANDUAN MENJAWAB:
-1. FLEKSIBEL & RESPONSIF:
-   - Jika pengguna bertanya tentang ${report.symbol}, gunakan data laporan resmi untuk menjawab secara mendalam dan presisi.
-   - Jika pengguna melampirkan gambar, screenshot grafik, atau menanyakan emiten lain: BAHAS DAN JELASKAN DATA GAMBAR ATAU EMITEN LAIN TERSEBUT DENGAN JELAS DAN TUNTAS. DILARANG menolak atau menepis pertanyaan pengguna hanya karena berbeda dengan emiten yang sedang terbuka. Berikan analisis mendalam atas gambar/data yang dilampirkan, lalu bandingkan dengan ${report.symbol} jika relevan.
-   - Jika pengguna menyapa atau bertanya konsep umum (misal: tips investasi, indikator, dividen), jawab secara edukatif dan santai.
-2. RAMAH RITEL & EDUKATIF: Bahasa Indonesia jelas, santai, terstruktur, tanpa jargon berbelit.
-3. GROUNDED ON DATA: Jangan mengarang angka.
-4. BUKAN AJAKAN BELI: Jangan memberi perintah beli/jual atau rekomendasi spekulatif.`;
+KEPRIBADIAN & CARA MENJAWAB:
+1. LUWES, MENGALIR, DAN TIDAK KAKU:
+   - Anda BUKAN bot kaku yang terjebak pada satu emiten saja. Anda adalah analis riset ekosistem pasar modal Indonesia secara utuh.
+   - Ketika pengguna menanyakan saham lain yang berhubungan (misal: anak usaha, perusahaan satu grup konglomerasi, rekan satu sektor/industri, atau ekosistem bisnis seperti SCMA, BUKA, GOTO, SAME untuk EMTK; atau BUMI, BRMS untuk Bakrie; atau ASII, UNTR untuk Astra):
+     WAJIB ANDA JELASKAN SECARA MENDALAM! Paparkan hubungan kepemilikannya, bandingkan performa masing-masing emiten (valuasi PER/PBV, skala bisnis, pendapatan, laba, kapitalisasi pasar), sajikan tabel komparasi jika perlu, dan berikan wawasan ekosistem bisnis yang komprehensif. DILARANG KERAS menolak, membatasi diri, atau mengatakan "saya hanya memiliki akses satu emiten" / "aturan isolasi konteks".
+2. GROUNDING DATA:
+   - Jika pengguna menanyakan emiten yang sedang dibuka (${report.symbol}), padukan dengan data pasar modal yang disediakan di bawah.
+   - Jika pengguna bertanya konsep investasi umum atau tips trading, jawab secara ramah dan profesional.
+3. OBJEKTIF & BERWAWASAN INSTITUSIONAL:
+   - Jaga gaya bahasa tetap santai, tajam, profesional, ramah ritel, dan berwawasan institusional tanpa rekomendasi beli/jual ilegal.`;
 
-    const context = {
-      symbol: report.symbol,
-      companyName: report.companyName,
-      directAnswer: report.directAnswer,
-      financials: {
-        latestDate: report.financials.latestPeriodDate,
-        metrics: report.financials.latest,
-        growthYoY: report.financials.yoyGrowth,
-        solvency: report.financials.solvencyHealth,
-      },
-      flowLens: {
-        topBuyers: report.flowLens.topBuyers.slice(0, 3),
-        topSellers: report.flowLens.topSellers.slice(0, 3),
-        foreignFlowTrend: report.flowLens.foreignFlow.recentTrend,
-        foreignFlow5d: report.flowLens.foreignFlow.cumulative5d,
-      },
-      technical: {
-        price: report.technical.lastPrice,
-        trend: report.technical.trendAssessment,
-        rsi: report.technical.rsi14,
-        sma20: report.technical.sma20,
-      },
-      peers: report.peerLens?.peers,
-      eventsCount: report.events?.actions.length,
-      claims: report.claims,
-    };
-
-    // Format riwayat percakapan copilot sebelumnya untuk context window percakapan
+    const multiples = extractValuationMultiples(report.valuation);
     const recentHistoryText = history.slice(-6).map((h) => `${h.role === "user" ? "Pengguna" : "Copilot"}: ${h.text}`).join("\n");
 
-    const userPrompt = `Data Laporan Resmi ${report.symbol}:\n${JSON.stringify(context, null, 2)}\n\n${visionContext}${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentHistoryText}\n\n` : ""}Pertanyaan Pengguna: "${question || "Tolong analisis gambar terkait emiten ini."}"`;
+    const userPrompt = `Konteks Ringkasan Pasar Modal ${report.symbol} (${report.companyName}):
+- Sektor / Subsektor: ${report.overview?.sector || "N/A"} / ${report.overview?.sub_sector || "N/A"}
+- Harga Terakhir: Rp ${report.technical?.lastPrice || multiples.lastClosePrice || "-"}
+- Valuasi: PER ${multiples.pe ? multiples.pe.toFixed(1) + "x" : "-"}, PBV ${multiples.pb ? multiples.pb.toFixed(2) + "x" : "-"}
+- Kapitalisasi Pasar: Rp ${((report.overview?.market_cap || 0) / 1e12).toFixed(1)}T
+- Pertumbuhan Laba YoY: ${report.financials?.yoyGrowth?.netIncomePct ? report.financials.yoyGrowth.netIncomePct.toFixed(1) + "%" : "-"}
+- Net Margin (NPM): ${report.financials?.latest?.netMarginPct ? report.financials.latest.netMarginPct.toFixed(1) + "%" : "-"}
+- Arus Broker 5H: ${report.flowLens?.foreignFlow?.recentTrend || "Netral"}
+${report.overview?.affiliates?.length ? `- Afiliasi / Grup Konglomerasi: ${report.overview.affiliates.join(", ")}` : ""}
+${report.peerLens?.peers?.length ? `- Rekan Sektor Tercatat: ${report.peerLens.peers.map((p) => `${p.symbol} (${p.pe ? p.pe.toFixed(1) + "x" : "-"} PER)`).join(", ")}` : ""}
+
+${visionContext}${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentHistoryText}\n\n` : ""}Pertanyaan Pengguna: "${question || "Tolong analisis terkait emiten ini."}"`;
 
     let answer = "";
     if (process.env.OPENROUTER_API_KEY) {
