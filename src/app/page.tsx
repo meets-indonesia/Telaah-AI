@@ -526,8 +526,8 @@ export default function Home() {
       } catch (e) {}
     }
 
-    // 3b. If user provided image(s), ALWAYS run executeAnalysis so Vision (GPT-4o-mini) can inspect the image,
-    // detect its ticker (e.g. ANII, BBCA) or extract the visual chart/table data, and synthesize with Qwen!
+    // 3b. If user provided image(s), ALWAYS run executeAnalysis so Vision can inspect the image,
+    // detect its ticker (e.g. ANII, BBCA) or extract the visual chart/table data, and synthesize with reasoning model!
     if (images && images.length > 0) {
       await executeAnalysis(userText, mode, undefined, newMessages, images);
       return;
@@ -656,7 +656,7 @@ export default function Home() {
       updateActiveSession(baseMessages, report);
     }
 
-    setLoadingStage(images && images.length > 0 ? "Membaca data visual gambar (GPT-4o-mini Vision)..." : "Menganalisis intensi & mengekstrak data emiten...");
+    setLoadingStage(images && images.length > 0 ? "Membaca data visual & memverifikasi berita..." : "Menganalisis intensi & mengekstrak data emiten...");
 
     try {
       const res = await fetch("/api/analyze", {

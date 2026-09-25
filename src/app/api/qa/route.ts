@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callOpenRouter } from "@/lib/agent/openrouter";
-import { extractVisionDataWithGPT } from "@/lib/agent/vision";
+import { extractVisionDataWithClaude } from "@/lib/agent/vision";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 
 export async function POST(req: NextRequest) {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     let visionContext = "";
     if (images.length > 0) {
-      const visionResult = await extractVisionDataWithGPT(images, question);
+      const visionResult = await extractVisionDataWithClaude(images, question);
       visionContext = `[Temuan Visual Gambar Terlampir (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
     }
 

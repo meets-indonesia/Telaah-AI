@@ -4,7 +4,7 @@ import { classifyInputAndExtractClaims } from "@/lib/agent/classifier";
 import { executeEvidencePlan } from "@/lib/agent/coordinator";
 import { synthesizeIntelligenceReport } from "@/lib/agent/synthesizer";
 import { callOpenRouter } from "@/lib/agent/openrouter";
-import { extractVisionDataWithGPT } from "@/lib/agent/vision";
+import { extractVisionDataWithClaude } from "@/lib/agent/vision";
 import { AnalysisMode } from "@/lib/agent/types";
 import { sectorsErrorMessage } from "@/lib/sectors/errors";
 import {
@@ -28,14 +28,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 0: Stage 1 Pipeline (Vision Extraction with GPT-4o-mini if images present)
+    // Step 0: Stage 1 Pipeline (Vision Extraction with Multimodal Claude 3.7 Sonnet)
     let visionContext = "";
     if (images.length > 0) {
-      const visionResult = await extractVisionDataWithGPT(images, prompt);
+      const visionResult = await extractVisionDataWithClaude(images, prompt);
       if (visionResult.detectedTicker && !confirmedSymbol) {
         confirmedSymbol = visionResult.detectedTicker;
       }
-      visionContext = `[Temuan Visual Gambar via GPT-4o-mini (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
+      visionContext = `[Temuan Visual Gambar (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
     }
 
     const effectivePrompt = `${visionContext}${prompt || "Analisis data dari gambar terlampir."}`.trim();
