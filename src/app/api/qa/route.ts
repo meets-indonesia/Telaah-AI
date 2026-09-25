@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callOpenRouter } from "@/lib/agent/openrouter";
+import { extractVisionDataWithGPT } from "@/lib/agent/vision";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 
 export async function POST(req: NextRequest) {
@@ -8,12 +9,19 @@ export async function POST(req: NextRequest) {
     const question = body.question?.trim();
     const report: CompanyIntelligenceReport = body.report;
     const history: Array<{ role: "user" | "assistant"; text: string }> = Array.isArray(body.history) ? body.history : [];
+    const images: string[] = Array.isArray(body.images) ? body.images : [];
 
-    if (!question || !report) {
+    if ((!question && images.length === 0) || !report) {
       return NextResponse.json(
         { error: "Pertanyaan dan data laporan harus disertakan." },
         { status: 400 }
       );
+    }
+
+    let visionContext = "";
+    if (images.length > 0) {
+      const visionResult = await extractVisionDataWithGPT(images, question);
+      visionContext = `[Temuan Visual Gambar Terlampir (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
     }
 
     const systemPrompt = `Anda adalah Telaah-AI, asisten riset saham ramah pemula (Financial Copilot) untuk bursa saham Indonesia (IDX).
@@ -55,7 +63,7 @@ ATURAN ISOLASI KONTEKS & GROUNDING:
     // Format riwayat percakapan copilot sebelumnya untuk context window percakapan
     const recentHistoryText = history.slice(-6).map((h) => `${h.role === "user" ? "Pengguna" : "Copilot"}: ${h.text}`).join("\n");
 
-    const userPrompt = `Data Laporan Resmi ${report.symbol}:\n${JSON.stringify(context, null, 2)}\n\n${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentHistoryText}\n\n` : ""}Pertanyaan Pengguna: "${question}"`;
+    const userPrompt = `Data Laporan Resmi ${report.symbol}:\n${JSON.stringify(context, null, 2)}\n\n${visionContext}${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentHistoryText}\n\n` : ""}Pertanyaan Pengguna: "${question || "Tolong analisis gambar terkait emiten ini."}"`;
 
     let answer = "";
     if (process.env.OPENROUTER_API_KEY) {

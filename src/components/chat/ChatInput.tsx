@@ -69,10 +69,42 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (!file.type.startsWith("image/")) return;
     const reader = new FileReader();
     reader.onload = (uploadEvent) => {
-      const base64 = uploadEvent.target?.result as string;
-      if (base64) {
-        setImages((prev) => [...prev, base64].slice(-4)); // Max 4 images
-      }
+      const rawBase64 = uploadEvent.target?.result as string;
+      if (!rawBase64) return;
+
+      // Compress via HTML5 Canvas to keep file under ~100KB for localStorage stability
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1024;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) {
+          if (w > MAX_DIM) {
+            h = Math.round((h * MAX_DIM) / w);
+            w = MAX_DIM;
+          }
+        } else {
+          if (h > MAX_DIM) {
+            w = Math.round((w * MAX_DIM) / h);
+            h = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL("image/jpeg", 0.8);
+          setImages((prev) => [...prev, compressed].slice(-4));
+        } else {
+          setImages((prev) => [...prev, rawBase64].slice(-4));
+        }
+      };
+      img.onerror = () => {
+        setImages((prev) => [...prev, rawBase64].slice(-4));
+      };
+      img.src = rawBase64;
     };
     reader.readAsDataURL(file);
   };

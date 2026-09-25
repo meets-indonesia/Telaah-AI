@@ -3,6 +3,8 @@ import { SectorsClient } from "@/lib/sectors/client";
 import { classifyInputAndExtractClaims } from "@/lib/agent/classifier";
 import { executeEvidencePlan } from "@/lib/agent/coordinator";
 import { synthesizeIntelligenceReport } from "@/lib/agent/synthesizer";
+import { callOpenRouter } from "@/lib/agent/openrouter";
+import { extractVisionDataWithGPT } from "@/lib/agent/vision";
 import { AnalysisMode } from "@/lib/agent/types";
 import { sectorsErrorMessage } from "@/lib/sectors/errors";
 import {
@@ -16,14 +18,27 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const prompt = body.prompt?.trim();
     const mode: AnalysisMode = body.mode === "quick" ? "quick" : "full";
-    const confirmedSymbol = body.confirmedSymbol?.trim()?.toUpperCase()?.replace(".JK", "");
+    let confirmedSymbol = body.confirmedSymbol?.trim()?.toUpperCase()?.replace(".JK", "");
+    const images: string[] = Array.isArray(body.images) ? body.images : [];
 
-    if (!prompt) {
+    if (!prompt && images.length === 0) {
       return NextResponse.json(
-        { error: "Prompt atau teks analisis tidak boleh kosong." },
+        { error: "Prompt atau gambar analisis tidak boleh kosong." },
         { status: 400 }
       );
     }
+
+    // Step 0: Stage 1 Pipeline (Vision Extraction with GPT-4o-mini if images present)
+    let visionContext = "";
+    if (images.length > 0) {
+      const visionResult = await extractVisionDataWithGPT(images, prompt);
+      if (visionResult.detectedTicker && !confirmedSymbol) {
+        confirmedSymbol = visionResult.detectedTicker;
+      }
+      visionContext = `[Temuan Visual Gambar via GPT-4o-mini (${visionResult.imageType})]:\n${visionResult.summary}\n${visionResult.extractedData}\n\n`;
+    }
+
+    const effectivePrompt = `${visionContext}${prompt || "Analisis data dari gambar terlampir."}`.trim();
 
     // Fast-path: Check semantic cache if confirmedSymbol is passed
     if (confirmedSymbol && /^[A-Z]{4}$/.test(confirmedSymbol)) {
@@ -62,6 +77,24 @@ export async function POST(req: NextRequest) {
     const targetSymbol = confirmedSymbol || classification.symbol;
 
     if (!targetSymbol || !/^[A-Z]{4}$/.test(targetSymbol)) {
+      // Fallback Stage 2: Qwen Conversational Answer if no IDX stock ticker identified
+      if (process.env.OPENROUTER_API_KEY) {
+        const conversationalReply = await callOpenRouter<string>({
+          systemPrompt: `Anda adalah Asisten Riset Kuantitatif Pasar Modal Indonesia (IDX).
+Jawab pertanyaan pengguna atau bahas temuan dari gambar/grafik/tabel yang dilampirkan dengan ramah, profesional, analitis, dan berbasis edukasi investasi yang objektif.
+Jika gambar menunjukkan grafik teknikal, broker summary, atau laporan keuangan tanpa kode ticker yang jelas, jelaskan pola data yang terlihat dan tawarkan pengguna untuk menyebutkan kode sahamnya agar data resmi bursa dapat ditarik.
+DILARANG memberikan rekomendasi beli/jual ilegal (selalu sertakan disclaimer edukasi).`,
+          userPrompt: `Pertanyaan Pengguna: "${prompt || "Tolong analisis gambar ini."}"\n\n${visionContext ? visionContext : ""}`,
+          responseFormat: "text",
+          temperature: 0.3,
+        });
+
+        return NextResponse.json({
+          success: true,
+          conversationalReply,
+        });
+      }
+
       return NextResponse.json(
         {
           needsConfirmation: true,
