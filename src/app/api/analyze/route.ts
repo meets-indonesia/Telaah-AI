@@ -107,28 +107,59 @@ DILARANG memberikan rekomendasi beli/jual ilegal (selalu sertakan disclaimer edu
     }
 
     // Step 1b: Semantic Vector Cache Check with targetSymbol
-    const cacheHit = await searchSemanticReportCache(prompt, targetSymbol, 0.88, mode);
-    if (cacheHit.isMatch && cacheHit.isFresh && cacheHit.payload?.report) {
-      return NextResponse.json({
-        success: true,
-        report: {
-          ...cacheHit.payload.report,
-          fromVectorCache: true,
-          cacheScore: Number(cacheHit.score.toFixed(3)),
-          cacheDate: cacheHit.payload.capturedDate,
-        },
-      });
+    try {
+      const cacheHit = await searchSemanticReportCache(prompt, targetSymbol, 0.88, mode);
+      if (cacheHit.isMatch && cacheHit.isFresh && cacheHit.payload?.report) {
+        return NextResponse.json({
+          success: true,
+          report: {
+            ...cacheHit.payload.report,
+            fromVectorCache: true,
+            cacheScore: Number(cacheHit.score.toFixed(3)),
+            cacheDate: cacheHit.payload.capturedDate,
+          },
+        });
+      }
+    } catch (e) {
+      // ignore cache check errors
     }
 
     // Step 2: Coordinator & Evidence Collection (Cache Miss / Stale Day)
     const sectorsClient = new SectorsClient();
-    const evidence = await executeEvidencePlan(
-      sectorsClient,
-      targetSymbol,
-      mode,
-      classification.intent,
-      classification.claims
-    );
+    let evidence;
+    try {
+      evidence = await executeEvidencePlan(
+        sectorsClient,
+        targetSymbol,
+        mode,
+        classification.intent,
+        classification.claims
+      );
+    } catch (coordErr: any) {
+      // Graceful AI Fallback: If Sectors API key quota is exhausted or plan restricted,
+      // fallback to Qwen 3.5 to answer the question directly with financial intelligence
+      if (process.env.OPENROUTER_API_KEY) {
+        console.warn(`Sectors API restricted for ${targetSymbol} (${coordErr.message}). Falling back to reasoning AI.`);
+        const conversationalReply = await callOpenRouter<string>({
+          systemPrompt: `Anda adalah Telaah-AI, asisten riset pasar modal Bursa Efek Indonesia (IDX) yang cerdas, objektif, dan berbasis data.
+Tugas Anda: Memberikan analisis riset pasar modal mendalam untuk pertanyaan pengguna mengenai saham ${targetSymbol}.
+BAHAS DENGAN MENDALAM:
+1. Profil dan bisnis inti emiten ${targetSymbol}.
+2. Karakteristik pergerakan harga, sektor industri, dan faktor fundamental/teknikal yang relevan.
+3. Rencana eksekusi/pertimbangan entry (area support, batas cut loss disiplin, dan rasio risk-to-reward).
+4. Catatan: Sampaikan bahwa ringkasan ini adalah telaah riset AI independen untuk membantu pertimbangan pengguna tanpa rekomendasi spekulatif ilegal.`,
+          userPrompt: `Pertanyaan Pengguna: "${prompt}"\n\n${visionContext ? visionContext : ""}`,
+          responseFormat: "text",
+          temperature: 0.3,
+        });
+
+        return NextResponse.json({
+          success: true,
+          conversationalReply,
+        });
+      }
+      throw coordErr;
+    }
 
     // Step 3: Synthesis Guard & Final Report Generation
     const report = await synthesizeIntelligenceReport(
