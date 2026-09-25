@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         explanation: `Direct lookup for ${confirmedSymbol}`,
       };
     } else {
-      classification = await classifyInputAndExtractClaims(prompt);
+      classification = await classifyInputAndExtractClaims(effectivePrompt);
     }
 
     const targetSymbol = confirmedSymbol || classification.symbol;
@@ -133,7 +133,7 @@ DILARANG memberikan rekomendasi beli/jual ilegal (selalu sertakan disclaimer edu
     // Step 3: Synthesis Guard & Final Report Generation
     const report = await synthesizeIntelligenceReport(
       evidence,
-      prompt,
+      effectivePrompt,
       mode,
       classification.intent,
       classification.claims

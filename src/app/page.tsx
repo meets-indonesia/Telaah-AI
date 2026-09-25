@@ -526,6 +526,13 @@ export default function Home() {
       } catch (e) {}
     }
 
+    // 3b. If user provided image(s), ALWAYS run executeAnalysis so Vision (GPT-4o-mini) can inspect the image,
+    // detect its ticker (e.g. ANII, BBCA) or extract the visual chart/table data, and synthesize with Qwen!
+    if (images && images.length > 0) {
+      await executeAnalysis(userText, mode, undefined, newMessages, images);
+      return;
+    }
+
     // 4. Check if user introduced a NEW stock ticker to switch focus
     const newTarget = detectNewTargetSymbol(userText, report?.symbol);
     if (newTarget) {
