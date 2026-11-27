@@ -203,23 +203,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* Credit Meter */}
+        {/* Data sources */}
         {!isCollapsed && report && (
           <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800/80 text-[11px] text-slate-400 font-mono space-y-1">
             <div className="flex items-center justify-between text-[10px]">
               <span className="flex items-center gap-1 text-slate-400">
-                <Coins className="w-3 h-3 text-zinc-400" /> Kredit Terpakai:
+                <Coins className="w-3 h-3 text-zinc-400" /> Sumber Data:
               </span>
-              <span className="font-bold text-zinc-400">{report.creditsConsumed} Kredit</span>
+              <span className="font-bold text-zinc-400">Yahoo · IDX</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-zinc-500"
-                style={{ width: `${Math.min(100, (report.creditsConsumed / 30) * 100)}%` }}
-              />
-            </div>
-            <span className="text-[9px] text-emerald-400 block text-right font-sans">
-              Status Efisien (&lt;30 Max PRD)
+            <span className="text-[9px] text-slate-500 block text-right font-sans">
+              Data publik; dapat tertunda/tidak lengkap.
             </span>
           </div>
         )}

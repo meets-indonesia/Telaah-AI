@@ -46,6 +46,10 @@ export interface ValuationData {
   current_pe?: number | null;
   current_pb?: number | null;
   current_ps?: number | null;
+  /** Statement currency Yahoo reports the financials in (e.g. "USD" for ADRO). */
+  financialCurrency?: string;
+  /** "reported" when the multiples come as-is from the provider, "computed" when derived from IDR-normalized financials. */
+  multipleBasis?: "reported" | "computed";
   historical_valuation?: HistoricalValuationYear[] | {
     pe?: {
       current?: number;
@@ -130,9 +134,9 @@ export interface PeerCompany {
   market_cap: number;
   pe?: number;
   pe_ttm?: number;
-  pb?: number;
-  pb_mrq?: number;
-  ps?: number;
+  pb?: number | null;
+  pb_mrq?: number | null;
+  ps?: number | null;
   dividend_yield?: number;
   close?: number;
   daily_change?: number;
@@ -199,6 +203,16 @@ export interface ManagementData {
   }>;
 }
 
+export type CompanyReportSection =
+  | "overview"
+  | "valuation"
+  | "financials"
+  | "peers"
+  | "ownership"
+  | "management"
+  | "dividend"
+  | "future";
+
 export interface CompanyReport {
   symbol: string;
   company_name: string;
@@ -246,11 +260,15 @@ export interface BrokerSummaryResponse {
   start?: string;
   end?: string;
   data: DailyBrokerSummary[];
+  source?: "stockbit" | "ipot";
+  coverage?: "full" | "top10";
 }
 
 export interface ForeignFlowItem {
   date: string;
   net_foreign_inflow: number;
+  net_foreign_shares?: number;
+  close?: number;
 }
 
 export interface ForeignFlowResponse {
@@ -285,11 +303,23 @@ export interface FilingItem {
   body?: string;
   symbol?: string;
   category?: string;
+  holder_name?: string;
+  holder_type?: "insider" | "major_holder" | string;
+  transaction_type?: "buy" | "sell" | "transfer" | "neutral" | string;
+  amount_transaction?: number;
+  price?: number;
+  transaction_value?: number;
+  share_percentage_before?: number;
+  share_percentage_after?: number;
+  attachment_url?: string;
+  source?: string;
+  unparsed?: boolean;
 }
 
 export interface NewsItem {
   id?: string | number;
   title: string;
+  image?: string;
   body?: string;
   published_at?: string;
   source?: string;
@@ -301,6 +331,12 @@ export interface NewsItem {
 export interface QuarterlyFinancialMetrics {
   symbol: string;
   date: string;
+  /** Currency of the monetary fields in this record; normalized to IDR by the Yahoo client. */
+  currency?: string;
+  /** Currency the statements were reported in before conversion. */
+  sourceCurrency?: string;
+  /** Rate applied to convert sourceCurrency to IDR (1 when already IDR). */
+  fxRate?: number;
   revenue?: number;
   gross_profit?: number;
   earnings?: number;

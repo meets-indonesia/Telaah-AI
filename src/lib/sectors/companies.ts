@@ -55,6 +55,7 @@ export function searchEmiten(query: string, limit = 8): IDXCompany[] {
 export function getCompanyName(symbol: string): string | undefined {
   if (!symbol) return undefined;
   const clean = symbol.toUpperCase().trim();
+  if (clean === "IHSG" || clean === "COMPOSITE") return "IDX Composite";
   const found = companies.find((c) => c.symbol.toUpperCase() === clean);
   return found?.name;
 }

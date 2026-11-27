@@ -13,7 +13,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "Telaah 360 — Asisten Riset Emiten IDX Berbasis Bukti",
-  description: "Membedah rumor, berita, dan postingan saham IDX dengan data faktual dari Sectors API v2.",
+  description: "Membedah rumor, berita, dan postingan saham IDX dengan data pasar publik Yahoo Finance dan IDX.",
 };
 
 export default function RootLayout({

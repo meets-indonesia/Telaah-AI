@@ -8,7 +8,13 @@ interface EvidenceDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   evidenceRecords: EvidenceRecord[];
-  toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
+  toolCallTrace: Array<{
+    endpoint: string;
+    params: any;
+    credits: number;
+    timestamp: string;
+    provider?: string;
+  }>;
   selectedEvidenceId?: string | null;
 }
 
@@ -38,16 +44,16 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm flex justify-end">
-      <div className="w-full max-w-2xl bg-[#090d16] border-l border-slate-800 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-2xl bg-white dark:bg-[#0b0b0c] border-l border-slate-200 dark:border-white/10 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+        <div className="p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/[0.03]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
               <Database className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Evidence & Audit Drawer</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Evidence & Audit Drawer</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Transparansi 100% data mentah, parameter endpoint, dan jejak panggilan API.
               </p>
             </div>
@@ -55,21 +61,21 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition"
+            className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="px-5 py-2.5 border-b border-slate-800 bg-slate-950 flex items-center justify-between text-xs">
+        <div className="px-5 py-2.5 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setActiveTab("records")}
               className={`px-3 py-1.5 rounded-lg font-medium transition ${
                 activeTab === "records"
                   ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               Evidence Records ({evidenceRecords.length})
@@ -79,7 +85,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
               className={`px-3 py-1.5 rounded-lg font-medium transition ${
                 activeTab === "trace"
                   ? "bg-blue-600/30 text-blue-300 border border-blue-500/40"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               Tool Call Trace ({toolCallTrace.length})
@@ -90,7 +96,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
             <select
               value={filterModule}
               onChange={(e) => setFilterModule(e.target.value)}
-              className="bg-slate-900 border border-slate-800 text-slate-300 rounded-lg px-2.5 py-1 text-xs focus:outline-none"
+              className="bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg px-2.5 py-1 text-xs focus:outline-none"
             >
               <option value="all">Semua Modul</option>
               <option value="overview">Overview</option>
@@ -118,7 +124,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                     className={`p-4 rounded-xl border transition ${
                       isHighlighted
                         ? "bg-blue-950/40 border-blue-500 ring-1 ring-blue-500"
-                        : "bg-slate-900/70 border-slate-800"
+                        : "bg-slate-50 dark:bg-white/[0.03] border-slate-200 dark:border-white/10"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -126,7 +132,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                         <span className="font-mono text-xs font-bold text-blue-400">
                           #{record.id}
                         </span>
-                        <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                        <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
                           {record.module}
                         </span>
                       </div>
@@ -135,14 +141,14 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                       </span>
                     </div>
 
-                    <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-mono text-slate-300 mb-2 flex items-center justify-between">
+                    <div className="bg-slate-50 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-mono text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
                       <span className="truncate">{record.sourceEndpoint}</span>
                       <span className="text-slate-500 text-[10px] shrink-0 ml-2">
                         As of: {record.asOfDate}
                       </span>
                     </div>
 
-                    <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
                       {record.summary}
                     </p>
 
@@ -156,7 +162,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                             onClick={() =>
                               handleCopy(JSON.stringify(record.rawData, null, 2), record.id)
                             }
-                            className="flex items-center gap-1 hover:text-slate-300 transition"
+                            className="flex items-center gap-1 hover:text-slate-700 dark:text-slate-300 transition"
                           >
                             {copiedId === record.id ? (
                               <>
@@ -170,7 +176,7 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
                             )}
                           </button>
                         </div>
-                        <pre className="p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-400 overflow-x-auto max-h-48">
+                        <pre className="p-3 bg-slate-50 dark:bg-white/[0.04] rounded-lg border border-slate-200 dark:border-white/10 text-[11px] font-mono text-slate-500 dark:text-slate-400 overflow-x-auto max-h-48">
                           {JSON.stringify(record.rawData, null, 2)}
                         </pre>
                       </div>
@@ -181,23 +187,23 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
-                Jejak pemanggilan endpoint bursa untuk laporan ini. Menunjukkan kepatuhan kuota kredit (Stop Condition &lt;30 calls).
+              <div className="bg-slate-50 dark:bg-white/[0.03] p-3 rounded-xl border border-slate-200 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400">
+                Jejak pemanggilan endpoint pasar untuk laporan ini. Menunjukkan sumber dan urutan pengambilan data.
               </div>
 
               {toolCallTrace.map((call, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono"
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-xs font-mono"
                 >
-                  <div className="flex items-center justify-between text-slate-300 mb-1">
+                  <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-1">
                     <span className="font-semibold text-blue-400">GET {call.endpoint}</span>
                     <span className="text-zinc-400 text-[11px] font-bold">
-                      +{call.credits} Kredit
+                      {call.provider ? `Sumber: ${call.provider}` : "Open Data"}
                     </span>
                   </div>
                   {call.params && Object.keys(call.params).length > 0 && (
-                    <div className="text-[10px] text-slate-400">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
                       Params: {JSON.stringify(call.params)}
                     </div>
                   )}

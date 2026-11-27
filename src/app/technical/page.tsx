@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import { TechnicalModule } from "@/components/TechnicalModule";
 import { CandlestickChart } from "@/components/CandlestickChart";
 import { getReportFromCache, saveReportToHistory } from "@/lib/storage/history";
@@ -127,7 +128,12 @@ export default function TechnicalPage() {
 
           <div className="flex items-center gap-2 self-start sm:self-auto font-mono text-[11px]">
             <span className="text-slate-400">Aktif:</span>
-            <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+              <CompanyLogo
+                symbol={selectedSymbol}
+                companyName={report?.companyName}
+                size="xs"
+              />
               {selectedSymbol}
             </span>
           </div>
@@ -221,6 +227,11 @@ export default function TechnicalPage() {
                       >
                         <td className="py-2 px-2">
                           <div className="flex items-center gap-1.5">
+                            <CompanyLogo
+                              symbol={stock.symbol}
+                              companyName={stock.companyName}
+                              size="xs"
+                            />
                             <span className="font-bold text-slate-100">{stock.symbol}</span>
                             <span className="text-[10px] text-slate-500 truncate max-w-[90px] hidden sm:inline font-sans">
                               {stock.companyName}
@@ -280,7 +291,7 @@ export default function TechnicalPage() {
               <div className="bg-black rounded-lg border border-slate-800/80 p-16 text-center space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mx-auto" />
                 <p className="text-xs font-mono text-slate-400">
-                  Memuat data transaksi 90 hari {selectedSymbol} dari Sectors API v2...
+                  Memuat data transaksi 90 hari {selectedSymbol} dari Yahoo Finance...
                 </p>
               </div>
             ) : report && report.technical ? (

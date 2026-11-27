@@ -1,0 +1,50 @@
+/**
+ * Curated liquid IDX names for the BSJP pre-close scan.
+ *
+ * BSJP needs a fast scan before the close. This list is intentionally smaller
+ * than the full liquid universe; edit it freely. Failures are skipped, never
+ * replaced with invented quotes.
+ */
+export const BSJP_UNIVERSE: string[] = [
+  "AADI",
+  "AALI",
+  "ADMR",
+  "ADRO",
+  "AKRA",
+  "AMRT",
+  "ANTM",
+  "ARTO",
+  "ASII",
+  "ASSA",
+  "BBCA",
+  "BBNI",
+  "BBRI",
+  "BMRI",
+  "BRIS",
+  "BSDE",
+  "BUKA",
+  "CPIN",
+  "CTRA",
+  "EXCL",
+  "GOTO",
+  "ICBP",
+  "INCO",
+  "INDF",
+  "ISAT",
+  "ITMG",
+  "KLBF",
+  "LSIP",
+  "MAPI",
+  "MDKA",
+  "MEDC",
+  "MTEL",
+  "PGAS",
+  "PTBA",
+  "PWON",
+  "SILO",
+  "SMRA",
+  "TLKM",
+  "TOWR",
+  "UNTR",
+  "UNVR",
+];

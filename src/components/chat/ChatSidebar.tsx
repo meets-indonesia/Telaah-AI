@@ -207,19 +207,19 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </div>
         </div>
 
-        {/* Footer: Sectors quota info */}
+        {/* Footer: data source info */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/40 text-xs">
           <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-zinc-700" />
-              Sectors API v2
+              Open Market Data
             </span>
             <span className="font-semibold text-zinc-900 dark:text-zinc-300">
-              {creditUsed} kredit dipakai
+              Yahoo · IDX
             </span>
           </div>
           <p className="text-[10px] text-slate-400 mt-1">
-            Data terverifikasi Bursa Efek Indonesia (IDX).
+            Data pasar publik; dapat tertunda atau tidak lengkap.
           </p>
         </div>
       </aside>

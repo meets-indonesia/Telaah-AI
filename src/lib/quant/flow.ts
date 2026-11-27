@@ -27,6 +27,8 @@ export interface BandarmologySummary {
 
 export interface FlowLensAnalysis {
   status: "available" | "partial" | "unavailable";
+  coverage: "full" | "top10" | "none";
+  source?: "stockbit" | "ipot";
   startDate: string;
   endDate: string;
   totalTradingDays: number;
@@ -49,6 +51,36 @@ export interface FlowLensAnalysis {
   limitationDisclaimer: string;
 }
 
+function buildForeignFlow(foreignFlowData: ForeignFlowResponse | null): FlowLensAnalysis["foreignFlow"] {
+  const series: Array<{ date: string; netInflow: number }> = [];
+  let cumulative5d = 0;
+  let cumulative14d = 0;
+
+  if (foreignFlowData?.data && foreignFlowData.data.length > 0) {
+    const sorted = [...foreignFlowData.data].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    for (const item of sorted) {
+      series.push({
+        date: item.date,
+        netInflow: item.net_foreign_inflow || 0,
+      });
+    }
+    cumulative5d = sorted
+      .slice(-5)
+      .reduce((acc, curr) => acc + (curr.net_foreign_inflow || 0), 0);
+    cumulative14d = sorted
+      .slice(-14)
+      .reduce((acc, curr) => acc + (curr.net_foreign_inflow || 0), 0);
+  }
+
+  let recentTrend: "Net Inflow" | "Net Outflow" | "Netral" = "Netral";
+  if (cumulative5d > 5_000_000_000) recentTrend = "Net Inflow";
+  else if (cumulative5d < -5_000_000_000) recentTrend = "Net Outflow";
+
+  return { cumulative5d, cumulative14d, recentTrend, series };
+}
+
 export function analyzeFlowLens(
   brokerSummaryData: BrokerSummaryResponse | null,
   foreignFlowData: ForeignFlowResponse | null,
@@ -63,8 +95,11 @@ export function analyzeFlowLens(
   }
 
   if (!brokerSummaryData || !brokerSummaryData.data || brokerSummaryData.data.length === 0) {
+    const foreignFlow = buildForeignFlow(foreignFlowData);
+    const hasForeign = foreignFlow.series.length > 0;
     return {
-      status: "unavailable",
+      status: hasForeign ? "partial" : "unavailable",
+      coverage: "none",
       startDate: "",
       endDate: "",
       totalTradingDays: 0,
@@ -77,13 +112,10 @@ export function analyzeFlowLens(
         institutionalNetValue: 0,
         retailNetValue: 0,
       },
-      foreignFlow: {
-        cumulative5d: 0,
-        cumulative14d: 0,
-        recentTrend: "Netral",
-        series: [],
-      },
-      limitationDisclaimer,
+      foreignFlow,
+      limitationDisclaimer: hasForeign
+        ? `${limitationDisclaimer} Broker summary tidak tersedia; hanya foreign flow yang ditampilkan.`
+        : limitationDisclaimer,
     };
   }
 
@@ -102,8 +134,24 @@ export function analyzeFlowLens(
 
   let totalTurnover = 0;
   const days = brokerSummaryData.data;
-  const startDate = days[0]?.date || brokerSummaryData.start || "";
-  const endDate = days[days.length - 1]?.date || brokerSummaryData.end || "";
+  const startDate = brokerSummaryData.start || days[0]?.date || "";
+  const endDate = brokerSummaryData.end || days[days.length - 1]?.date || "";
+  const countWeekdays = (start: string, end: string): number => {
+    if (!start || !end) return days.length;
+    const cursor = new Date(`${start}T00:00:00Z`);
+    const last = new Date(`${end}T00:00:00Z`);
+    if (!Number.isFinite(cursor.getTime()) || !Number.isFinite(last.getTime())) {
+      return days.length;
+    }
+    let count = 0;
+    while (cursor <= last) {
+      const weekday = cursor.getUTCDay();
+      if (weekday !== 0 && weekday !== 6) count += 1;
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    return count || days.length;
+  };
+  const tradingDays = countWeekdays(startDate, endDate);
 
   for (const day of days) {
     for (const item of day.summary) {
@@ -182,33 +230,7 @@ export function analyzeFlowLens(
   const sellers = [...participants].sort((a, b) => a.netValue - b.netValue);
   const topSellers = sellers.filter((s) => s.netValue < 0).slice(0, 5);
 
-  // Foreign flow analysis
-  const ffSeries: Array<{ date: string; netInflow: number }> = [];
-  let cum5d = 0;
-  let cum14d = 0;
-
-  if (foreignFlowData?.data && foreignFlowData.data.length > 0) {
-    const sortedFF = [...foreignFlowData.data].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-
-    for (const item of sortedFF) {
-      ffSeries.push({
-        date: item.date,
-        netInflow: item.net_foreign_inflow || 0,
-      });
-    }
-
-    const last5 = sortedFF.slice(-5);
-    cum5d = last5.reduce((acc, curr) => acc + (curr.net_foreign_inflow || 0), 0);
-
-    const last14 = sortedFF.slice(-14);
-    cum14d = last14.reduce((acc, curr) => acc + (curr.net_foreign_inflow || 0), 0);
-  }
-
-  let recentTrend: "Net Inflow" | "Net Outflow" | "Netral" = "Netral";
-  if (cum5d > 5_000_000_000) recentTrend = "Net Inflow";
-  else if (cum5d < -5_000_000_000) recentTrend = "Net Outflow";
+  const foreignFlow = buildForeignFlow(foreignFlowData);
 
   // Hitung Bandarmology Human Decoder
   const top3Buyers = topBuyers.slice(0, 3);
@@ -255,20 +277,26 @@ export function analyzeFlowLens(
     humanNarrative = `Kekuatan beli dan jual relatif seimbang antar broker, belum ada konsentrasi akumulasi atau distribusi searah yang dominan.`;
   }
 
-  const bandarmologySummary: BandarmologySummary = {
-    phase,
-    topBuyersAvgPrice: top3BuyAvg,
-    topSellersAvgPrice: top3SellAvg,
-    topBuyersSharePct,
-    controllingCohort,
-    humanNarrative,
-  };
+  const coverage = brokerSummaryData.coverage ?? "full";
+  const isTop10 = coverage === "top10";
+  const bandarmologySummary: BandarmologySummary | undefined = isTop10
+    ? undefined
+    : {
+        phase,
+        topBuyersAvgPrice: top3BuyAvg,
+        topSellersAvgPrice: top3SellAvg,
+        topBuyersSharePct,
+        controllingCohort,
+        humanNarrative,
+      };
 
   return {
-    status: "available",
+    status: isTop10 ? "partial" : "available",
+    coverage,
+    source: brokerSummaryData.source,
     startDate,
     endDate,
-    totalTradingDays: days.length,
+    totalTradingDays: tradingDays,
     totalTurnover,
     topBuyers,
     topSellers,
@@ -279,12 +307,12 @@ export function analyzeFlowLens(
       retailNetValue: retailNet,
     },
     foreignFlow: {
-      cumulative5d: cum5d,
-      cumulative14d: cum14d,
-      recentTrend,
-      series: ffSeries.slice(-20), // last 20 trading days
+      ...foreignFlow,
+      series: foreignFlow.series.slice(-20), // last 20 trading days
     },
     bandarmologySummary,
-    limitationDisclaimer,
+    limitationDisclaimer: isTop10
+      ? `${limitationDisclaimer} Hanya 10 broker teratas per sisi; fase akumulasi/distribusi tidak dihitung.`
+      : limitationDisclaimer,
   };
 }

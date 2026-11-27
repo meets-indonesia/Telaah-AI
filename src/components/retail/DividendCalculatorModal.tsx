@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Coins, X, Calculator, PiggyBank, ArrowRight, CheckCircle2, TrendingUp, Info, Target, Sparkles } from "lucide-react";
 
 interface DividendCalculatorModalProps {
@@ -8,6 +8,8 @@ interface DividendCalculatorModalProps {
   onClose: () => void;
   defaultSymbol?: string;
   defaultPrice?: number;
+  defaultYieldPct?: number;
+  defaultDividendPerShare?: number;
 }
 
 const POPULAR_DIVIDEND_STOCKS = [
@@ -26,16 +28,38 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
   onClose,
   defaultSymbol = "BBRI",
   defaultPrice,
+  defaultYieldPct,
+  defaultDividendPerShare,
 }) => {
-  const initialStock = POPULAR_DIVIDEND_STOCKS.find((s) => s.symbol === defaultSymbol) || POPULAR_DIVIDEND_STOCKS[0];
+  const reportYield =
+    defaultYieldPct !== undefined && defaultYieldPct > 0
+      ? defaultYieldPct
+      : null;
+  const initialStock = useMemo(
+    () =>
+      POPULAR_DIVIDEND_STOCKS.find((s) => s.symbol === defaultSymbol) || {
+        symbol: defaultSymbol,
+        name: defaultSymbol,
+        yieldPct: reportYield ?? 0,
+        price: defaultPrice ?? 0,
+      },
+    [defaultSymbol, defaultPrice, reportYield]
+  );
 
   const [selectedStock, setSelectedStock] = useState(initialStock.symbol);
   const [calcMode, setCalcMode] = useState<"monthlyDca" | "lumpSum" | "targetIncome">("targetIncome");
   const [amount, setAmount] = useState<number>(1000000); // 1 Juta per bulan / modal
   const [targetMonthlyIncome, setTargetMonthlyIncome] = useState<number>(5000000); // Target Rp 5 Juta/bln
   const [customPrice, setCustomPrice] = useState<number>(defaultPrice || initialStock.price);
-  const [customYield, setCustomYield] = useState<number>(initialStock.yieldPct);
+  const [customYield, setCustomYield] = useState<number>(reportYield ?? initialStock.yieldPct);
   const [durationYears, setDurationYears] = useState<number>(3);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedStock(initialStock.symbol);
+    setCustomPrice(defaultPrice || initialStock.price);
+    setCustomYield(reportYield ?? initialStock.yieldPct);
+  }, [isOpen, initialStock, defaultPrice, reportYield]);
 
   if (!isOpen) return null;
 
@@ -82,9 +106,9 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl bg-white dark:bg-[#0c1424] border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-white dark:bg-[#0b0b0c] border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900/40">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 bg-slate-50/60 dark:bg-white/[0.03]">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
               <Coins className="w-5 h-5" />
@@ -105,7 +129,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
           <button
             onClick={onClose}
             type="button"
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -127,7 +151,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   className={`p-2 rounded-xl text-center border transition ${
                     selectedStock === s.symbol
                       ? "bg-amber-50 dark:bg-amber-950/40 border-amber-500 text-amber-700 dark:text-amber-300 font-bold shadow-xs"
-                      : "bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                      : "bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300"
                   }`}
                 >
                   <span className="block text-xs">{s.symbol}</span>
@@ -144,7 +168,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 block">
               Model Perhitungan:
             </label>
-            <div className="grid grid-cols-3 rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800 text-xs">
+            <div className="grid grid-cols-3 rounded-xl bg-slate-100 dark:bg-white/[0.04] p-1 border border-slate-200 dark:border-white/10 text-xs">
               <button
                 type="button"
                 onClick={() => setCalcMode("targetIncome")}
@@ -201,7 +225,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                       className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition ${
                         targetMonthlyIncome === preset
                           ? "bg-amber-500 text-white border-amber-600"
-                          : "bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+                          : "bg-slate-50 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100"
                       }`}
                     >
                       {preset >= 1000000 ? `Rp ${preset / 1000000} Jt` : preset}
@@ -213,7 +237,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   step={500000}
                   value={targetMonthlyIncome}
                   onChange={(e) => setTargetMonthlyIncome(Math.max(100000, Number(e.target.value)))}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             </div>
@@ -228,7 +252,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   step={500000}
                   value={amount}
                   onChange={(e) => setAmount(Math.max(100000, Number(e.target.value)))}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.04] text-xs sm:text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
 
@@ -256,6 +280,13 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
             </div>
           )}
 
+          {defaultDividendPerShare ? (
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Dividen terakhir dari data laporan: <strong className="text-slate-800 dark:text-slate-200">Rp {defaultDividendPerShare.toLocaleString("id-ID")}/saham</strong>
+              {reportYield ? ` · yield acuan ~${reportYield.toFixed(2)}%` : ""}
+            </p>
+          ) : null}
+
           {/* Results Summary Box */}
           <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-slate-50 dark:from-amber-950/40 dark:via-amber-950/20 dark:to-slate-900/60 border border-amber-200 dark:border-amber-800/60 space-y-4">
             <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center justify-between">
@@ -268,13 +299,13 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                 </span>
               </span>
               <span className="text-[11px] font-normal text-slate-500">
-                Yield Acuan: ~{customYield}% / thn
+                {reportYield ? "Yield laporan" : "Yield manual"}: ~{customYield.toFixed(2)}% / thn
               </span>
             </div>
 
             {/* Primary KPI Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10">
                 <span className="text-[10px] text-slate-400 block">
                   {calcMode === "targetIncome" ? "Total Modal Yang Dibutuhkan" : "Dividen per Tahun"}
                 </span>
@@ -286,7 +317,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800">
+              <div className="p-3 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10">
                 <span className="text-[10px] text-slate-400 block">Target Jumlah Lot</span>
                 <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white block mt-0.5">
                   {totalLots.toLocaleString("id-ID")} Lot
@@ -296,7 +327,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                 </span>
               </div>
 
-              <div className="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 col-span-2 sm:col-span-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-slate-400 block">
                   {calcMode === "targetIncome" ? "Gaji Dividen per Tahun" : "Total Modal Disetor"}
                 </span>
@@ -310,9 +341,9 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
             </div>
 
             {/* Comparison vs Bank Deposit */}
-            <div className="p-3 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60 text-xs space-y-1.5">
+            <div className="p-3 rounded-xl bg-white/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/10 text-xs space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Dividen Saham {selectedStock} ({customYield}%):</span>
+                <span className="text-slate-500">Dividen Saham {selectedStock} ({customYield.toFixed(2)}%):</span>
                 <strong className="text-emerald-600 dark:text-emerald-400">
                   +Rp {yearlyDividend.toLocaleString("id-ID")} / thn
                 </strong>
@@ -323,7 +354,7 @@ export const DividendCalculatorModal: React.FC<DividendCalculatorModalProps> = (
                   +Rp {bankDepositYearly.toLocaleString("id-ID")} / thn
                 </span>
               </div>
-              <div className="pt-1 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between font-bold text-[11px] text-amber-700 dark:text-amber-300">
+              <div className="pt-1 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between font-bold text-[11px] text-amber-700 dark:text-amber-300">
                 <span>Ekstra Imbal Hasil dari Dividen:</span>
                 <span>+Rp {Math.max(0, dividendExcess).toLocaleString("id-ID")} / thn</span>
               </div>

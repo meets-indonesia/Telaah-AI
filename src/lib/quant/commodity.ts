@@ -18,7 +18,7 @@ export function analyzeCommodityLens(
   return {
     isCommodityIssuer: false,
     status: "unavailable",
-    reason: "Verified issuer and commodity data are unavailable from the current Sectors API subscription.",
+    reason: "Verified issuer and commodity data are unavailable from the free data sources.",
     sectorBadge: overview?.sector || "Data tidak tersedia",
     primaryCommodity: "N/A",
     benchmarks: [],

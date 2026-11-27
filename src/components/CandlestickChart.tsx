@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef } from "react";
 import { CandlestickPoint } from "@/lib/quant/indicators";
+import { CompanyLogo } from "./CompanyLogo";
 import {
   TrendingUp,
   TrendingDown,
@@ -182,12 +183,13 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       {/* Top Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs font-mono">
-            {symbol}
-          </div>
+          <CompanyLogo symbol={symbol} companyName={companyName} size="md" />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-white text-sm">Interactive Candlestick Terminal</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                {symbol}
+              </span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
                 {filteredData.length} Hari Bursa
               </span>

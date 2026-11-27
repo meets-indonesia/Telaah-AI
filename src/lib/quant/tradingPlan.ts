@@ -93,7 +93,7 @@ export function calculateTradingPlan(params: {
   const sma50 = technical.sma50 || currentPrice;
   const avgBuyBandar = flow?.bandarmologySummary?.topBuyersAvgPrice || currentPrice;
   const multiples = extractValuationMultiples(valuation);
-  const intrinsicVal = multiples.intrinsicValue || currentPrice * 1.25;
+  const intrinsicVal = multiples.intrinsicValue;
 
   // 2. Horizon 1: Scalping / Fast Trade (1 - 3 Hari)
   const scalpEntryMin = roundToTick(currentPrice - tick * 2);
@@ -138,8 +138,8 @@ export function calculateTradingPlan(params: {
   const investEntryMin = roundToTick(Math.min(currentPrice * 0.92, s2));
   const investEntryMax = roundToTick(currentPrice);
   const investSL = roundToTick(s2 * 0.9); // Deep safety net
-  const investTP1 = roundToTick(Math.max(intrinsicVal, currentPrice * 1.2));
-  const investTP2 = roundToTick(Math.max(intrinsicVal * 1.2, currentPrice * 1.35));
+  const investTP1 = roundToTick(Math.max(intrinsicVal ?? r2 * 1.1, currentPrice * 1.2));
+  const investTP2 = roundToTick(Math.max((intrinsicVal ?? r2) * 1.2, currentPrice * 1.35));
 
   const investRisk = Math.abs(currentPrice - investSL);
   const investReward = Math.abs(investTP1 - currentPrice);
@@ -240,7 +240,9 @@ export function calculateTradingPlan(params: {
       target2: investTP2,
       target2Pct: calcPct(investTP2, currentPrice),
       rrr: investRRR,
-      catalystFocus: "Nilai Wajar Intrinsik, Pertumbuhan Laba Riil & Dividen",
+      catalystFocus: intrinsicVal !== null
+        ? "Nilai Wajar Intrinsik, Pertumbuhan Laba Riil & Dividen"
+        : "Proyeksi teknikal (bukan nilai intrinsik fundamental), Pertumbuhan Laba & Dividen",
       actionGuidance: "Akumulasi bertahap saat valuasi murah atau terjadi koreksi pasar. Fokus pada dividen reinvestment.",
     },
   };
@@ -256,6 +258,6 @@ export function calculateTradingPlan(params: {
     resistances: { r1, r2 },
     pivotPoint,
     horizons,
-    disclaimer: "Kalkulasi berbasis analisis teknikal dan manajemen risiko matematis. Bukan rekomendasi beli/jual mengikat. Disiplin gunakan money management mandiri.",
+    disclaimer: `${intrinsicVal === null ? "Target jangka panjang dihitung dari level teknikal, bukan nilai intrinsik fundamental. " : ""}Kalkulasi berbasis analisis teknikal dan manajemen risiko matematis. Bukan rekomendasi beli/jual mengikat. Disiplin gunakan money management mandiri.`,
   };
 }

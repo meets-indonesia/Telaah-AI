@@ -39,8 +39,10 @@ import {
   clearHistory,
   removeHistoryItem,
   getWatchlistSymbols,
+  isReportCacheCompatible,
 } from "@/lib/storage/history";
 import { ExecutiveSummary } from "@/components/retail/ExecutiveSummary";
+import { extractDividendInfo } from "@/lib/quant/dividends";
 import {
   AlertCircle,
   HelpCircle,
@@ -138,7 +140,7 @@ export default function Home() {
   ]);
   const [marketAsOfDate, setMarketAsOfDate] = useState<string>("");
 
-  // Fetch live market overview from Sectors API on mount & poll every 1 hour
+  // Fetch live market overview from the open market data source on mount & poll every 1 hour
   useEffect(() => {
     const fetchMarket = () => {
       fetch("/api/market-overview")
@@ -194,6 +196,13 @@ export default function Home() {
       if (savedSessions) {
         const parsed = JSON.parse(savedSessions);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const sanitized: ChatSession[] = parsed.map((session: ChatSession) => ({
+            ...session,
+            report:
+              session.report && isReportCacheCompatible(session.report)
+                ? session.report
+                : null,
+          }));
           const requestedId = new URLSearchParams(window.location.search).get("session");
           const selected = (requestedId && parsed.find((session: ChatSession) => session.id === requestedId)) || parsed[0];
           setSessions(parsed);
@@ -231,7 +240,7 @@ export default function Home() {
 
   // Copilot contextual chat khusus emiten aktif di kanvas
   const handleCopilotSend = async (userText: string) => {
-    if (!report) return;
+    if (!report || !isReportCacheCompatible(report)) return;
     const timeStr = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
     const userMsg: ChatMessage = {
       id: "u_cop_" + Date.now(),
@@ -256,6 +265,9 @@ export default function Home() {
         body: JSON.stringify({ question: userText, report, history: historyPayload }),
       });
       const qaData = await qaRes.json();
+      if (!qaRes.ok) {
+        throw new Error(qaData.error || "Gagal memproses pertanyaan.");
+      }
       const botReply: ChatMessage = {
         id: "b_cop_" + Date.now(),
         sender: "assistant",
@@ -328,7 +340,11 @@ export default function Home() {
     if (session) {
       setActiveSessionId(session.id);
       setMessages(session.messages);
-      if (session.report) setReport(session.report);
+      setReport(
+        session.report && isReportCacheCompatible(session.report)
+          ? session.report
+          : null
+      );
       setViewMode("chat"); // Pastikan selalu kembali ke tampilan history chat utama
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
@@ -549,9 +565,15 @@ export default function Home() {
     }
 
     // 5. If a report is already active and NO new stock was introduced, answer as contextual QA
-    if (report) {
+    const activeReport =
+      report && isReportCacheCompatible(report) ? report : null;
+    if (report && !activeReport) {
+      setReport(null);
+    }
+
+    if (activeReport) {
       setIsLoading(true);
-      setLoadingStage(`Menjawab pertanyaan berbasis data ${report.symbol}...`);
+      setLoadingStage(`Menjawab pertanyaan berbasis data ${activeReport.symbol}...`);
 
       try {
         const historyPayload = messages.slice(-6).map((m) => ({
@@ -566,16 +588,20 @@ export default function Home() {
         });
         const qaData = await qaRes.json();
 
+        if (!qaRes.ok) {
+          throw new Error(qaData.error || "Gagal memproses pertanyaan.");
+        }
+
         const botReply: ChatMessage = {
           id: "b_" + Date.now(),
           sender: "assistant",
-          text: qaData.answer || `Data untuk ${report.symbol} tercatat dengan baik. Silakan cek modul terminal jika perlu rincian lanjutan.`,
+          text: qaData.answer || `Data untuk ${activeReport.symbol} tercatat dengan baik. Silakan cek modul terminal jika perlu rincian lanjutan.`,
           timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         };
 
         const finalMsgs = [...newMessages, botReply];
         setMessages(finalMsgs);
-        updateActiveSession(finalMsgs, report);
+        updateActiveSession(finalMsgs, activeReport);
       } catch (err: any) {
         const botReply: ChatMessage = {
           id: "b_" + Date.now(),
@@ -817,6 +843,8 @@ export default function Home() {
 
   const isCommodity = report?.commodityLens?.isCommodityIssuer;
 
+  const activeDividendInfo = report ? extractDividendInfo(report) : null;
+
   return (
     <div className="flex flex-col min-w-0 h-[100dvh] overflow-hidden bg-[#f7f7f8] dark:bg-[#121214] text-zinc-900 dark:text-zinc-100 transition-colors">
         {/* Top Minimal Navigation Bar */}
@@ -824,7 +852,11 @@ export default function Home() {
           marketIndices={marketIndices}
           marketAsOfDate={marketAsOfDate}
           onOpenJargon={() => setIsJargonOpen(true)}
-          onOpenDividend={() => setIsDividendOpen(true)}
+          onOpenDividend={
+            report && activeDividendInfo && !activeDividendInfo.hasDividend
+              ? undefined
+              : () => setIsDividendOpen(true)
+          }
           onFocusSearch={() => {
             setIsSearchOpen(true);
             setTimeout(() => modalSearchInputRef.current?.focus(), 50);
@@ -835,12 +867,12 @@ export default function Home() {
         <div className="flex-1 min-h-0 relative overflow-hidden flex flex-col">
           {viewMode === "chat" ? (
             /* =========================================================================
-                CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-3xl)
+                CHATGPT-STYLE CENTER CONVERSATION STAGE (max-w-5xl)
                 ========================================================================= */
             <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-black relative">
               {/* Conversation Feed */}
-              <div className="flex-1 overflow-y-auto px-4 py-6">
-                <div className="max-w-3xl mx-auto w-full">
+              <div className="flex-1 min-h-0 overflow-hidden px-4 py-6">
+                <div className="max-w-5xl mx-auto w-full h-full flex flex-col min-h-0">
                   <ChatFeed
                     messages={messages}
                     isLoading={isLoading || isWorkstationLoading}
@@ -857,6 +889,16 @@ export default function Home() {
                       setReport(rep);
                       setIsShareCardOpen(true);
                     }}
+                    onOpenTradingPlan={(rep) => {
+                      setReport(rep);
+                      setIsTradingPlanOpen(true);
+                    }}
+                    onOpenDividendCalc={(rep) => {
+                      setReport(rep);
+                      if (extractDividendInfo(rep).hasDividend) {
+                        setIsDividendOpen(true);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -864,7 +906,7 @@ export default function Home() {
               {/* Quick Contextual Prompts Strip when report exists */}
               {report && (
                 <div className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black/90 py-2 shrink-0">
-                  <div className="max-w-3xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
+                  <div className="max-w-5xl mx-auto px-4 flex items-center gap-2 overflow-x-auto text-[11px] font-mono no-scrollbar">
                     <span className="text-slate-500 text-[10px] uppercase font-bold shrink-0">{t("quick.title", "Tanya Cepat:")}</span>
                     <button
                       onClick={() => handleChatSend(`Berapa dividen yield dan perkiraan dividen tunai ${report.symbol}?`, "quick")}
@@ -896,7 +938,7 @@ export default function Home() {
 
               {/* Centered Floating Prompt Input Bar */}
               <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-black shrink-0">
-                <div className="max-w-3xl mx-auto w-full">
+                <div className="max-w-5xl mx-auto w-full">
                   <ChatInput
                     onSend={handleChatSend}
                     isLoading={isLoading || isWorkstationLoading}
@@ -1018,7 +1060,7 @@ export default function Home() {
                   </span>
                 </div>
                 <span className="font-mono text-[10px] text-zinc-300 bg-zinc-500/15 px-2 py-0.5 rounded">
-                  Sectors v2 Engine
+                  Open Data Engine
                 </span>
               </div>
               <p className="text-slate-300 text-xs pl-7.5">
@@ -1215,7 +1257,7 @@ export default function Home() {
                   Terminal Saham Siap Digunakan
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
-                  Ketik kode emiten atau ajukan pertanyaan di search bar di atas, atau klik salah satu saham acuan (BBCA, ADRO, BBRI) untuk memulai riset.
+                  Ketik kode emiten atau ajukan pertanyaan di search bar di atas untuk memulai riset.
                 </p>
               </div>
             </div>
@@ -1288,6 +1330,16 @@ export default function Home() {
                 onOpenShareCard={(rep) => {
                   setReport(rep);
                   setIsShareCardOpen(true);
+                }}
+                onOpenTradingPlan={(rep) => {
+                  setReport(rep);
+                  setIsTradingPlanOpen(true);
+                }}
+                onOpenDividendCalc={(rep) => {
+                  setReport(rep);
+                  if (extractDividendInfo(rep).hasDividend) {
+                    setIsDividendOpen(true);
+                  }
                 }}
               />
             </div>
@@ -1363,6 +1415,8 @@ export default function Home() {
         onClose={() => setIsDividendOpen(false)}
         defaultSymbol={report?.symbol || "BBRI"}
         defaultPrice={report?.technical?.lastPrice}
+        defaultYieldPct={activeDividendInfo?.yieldPct ?? undefined}
+        defaultDividendPerShare={activeDividendInfo?.dividendPerShare ?? undefined}
       />
 
       {/* Shareable Alpha Card (Image Generator for WA/IG) */}
@@ -1390,9 +1444,9 @@ export default function Home() {
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+            className="w-full max-w-lg bg-white dark:bg-[#0b0b0c] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           >
-            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-slate-800/80">
+            <div className="flex items-center px-3.5 border-b border-slate-100 dark:border-white/10">
               <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
               <input
                 ref={modalSearchInputRef}
@@ -1415,7 +1469,7 @@ export default function Home() {
               />
               <kbd
                 onClick={() => setIsSearchOpen(false)}
-                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200"
+                className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-white/10"
               >
                 ESC
               </kbd>
@@ -1435,7 +1489,7 @@ export default function Home() {
                           key={item.symbol}
                           type="button"
                           onClick={() => handleSelectEmitenDirect(item.symbol)}
-                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                          className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-white/10"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <CompanyLogo symbol={item.symbol} companyName={item.name} size="sm" />
@@ -1489,7 +1543,7 @@ export default function Home() {
                         key={item.sym}
                         type="button"
                         onClick={() => handleSelectEmitenDirect(item.sym)}
-                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800/70 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-800"
+                        className="flex items-center justify-between p-2 rounded hover:bg-slate-100 dark:hover:bg-white/10 text-left transition group border border-transparent hover:border-slate-200 dark:hover:border-white/10"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <CompanyLogo symbol={item.sym} companyName={item.name} size="sm" />

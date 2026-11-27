@@ -57,7 +57,7 @@ export const RumorFactCheckerCard: React.FC<RumorFactCheckerCardProps> = ({
               Fact-Checker Rumor & Pom-Pom Saham ({symbol})
             </h4>
             <p className="text-[10px] text-slate-500">
-              Audit silang data real-time Sectors API v2
+              Audit silang data pasar real-time
             </p>
           </div>
         </div>

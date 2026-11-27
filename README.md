@@ -1,6 +1,6 @@
 # Telaah 360
 
-Telaah 360 adalah asisten riset saham Bursa Efek Indonesia (IDX) berbasis bukti. Aplikasi menggabungkan data resmi Sectors API v2, analisis kuantitatif lokal, model bahasa melalui OpenRouter, dan semantic cache Qdrant untuk menghasilkan riset emiten yang lengkap namun tetap mudah ditelusuri.
+Telaah 360 adalah asisten riset saham Bursa Efek Indonesia (IDX) berbasis bukti. Aplikasi menggabungkan data pasar publik Yahoo Finance dan endpoint publik IDX, analisis kuantitatif lokal, model bahasa melalui OpenRouter, dan semantic cache Qdrant untuk menghasilkan riset emiten yang lengkap namun tetap mudah ditelusuri. Tidak perlu API key data pasar untuk jalur default.
 
 > Telaah 360 adalah alat informasi dan edukasi, bukan rekomendasi beli atau jual dan bukan pengganti penasihat investasi berlisensi.
 
@@ -28,7 +28,7 @@ Browser
   └─ Next.js App Router UI
        ├─ /api/analyze
        │    ├─ Semantic cache lookup (Qdrant)
-       │    ├─ Sectors API v2 evidence collection
+       │    ├─ Yahoo Finance + IDX evidence collection
        │    ├─ Perhitungan kuantitatif lokal
        │    └─ OpenRouter synthesis
        ├─ /api/qa (Copilot emiten aktif)
@@ -41,7 +41,7 @@ Alur analisis utama:
 
 1. Pengguna mengirim pertanyaan atau memilih emiten.
 2. Sistem memvalidasi ticker dan memeriksa semantic cache Qdrant.
-3. Jika cache tidak cocok atau sudah kedaluwarsa, data diambil secara paralel dari Sectors API v2.
+3. Jika cache tidak cocok atau sudah kedaluwarsa, data diambil secara paralel dari Yahoo Finance dan endpoint publik IDX.
 4. Indikator teknikal, financial health, flow, insider, dan commodity lens dihitung secara lokal.
 5. OpenRouter menyintesis laporan terstruktur dari evidence tersebut.
 6. Laporan disimpan kembali ke Qdrant untuk pertanyaan semantik serupa pada hari yang sama.
@@ -54,7 +54,7 @@ Alur analisis utama:
 - Recharts
 - Lucide React
 - Zod
-- [Sectors API v2](https://docs.sectors.app/)
+- [Yahoo Finance](https://finance.yahoo.com/) (data publik, tidak resmi)
 - [OpenRouter](https://openrouter.ai/)
 - [Qdrant](https://qdrant.tech/) via Docker/OrbStack
 
@@ -63,7 +63,7 @@ Alur analisis utama:
 - Node.js 20+ (Node.js 24 juga didukung)
 - npm
 - Docker Desktop atau OrbStack untuk semantic cache Qdrant
-- Sectors API key
+- Tidak perlu API key data pasar (Yahoo Finance + IDX)
 - OpenRouter API key
 
 ## Instalasi
@@ -78,7 +78,7 @@ cp .env.example .env
 Isi nilai environment yang diperlukan di `.env`:
 
 ```env
-SECTORS_API_KEY=your_sectors_api_key_here
+MARKET_DATA_PROVIDER=open
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # Opsional; default http://localhost:6333
@@ -182,6 +182,32 @@ npm run lint
 | `GET /api/market-overview` | Indeks dan komoditas untuk ticker tape |
 | `GET /api/commodity-prices` | Harga komoditas global |
 | `GET /api/insider-feed` | Feed filing/aktivitas insider |
+| `POST /api/telegram/webhook` | Webhook bot Telegram (owner-only, secret-protected) |
+| `POST /api/brief/harmonic` | Harmonic brief 4H/1D/1W/1M, lokal untuk cron |
+
+## Telegram dan Harmonic Brief
+
+Telaah 360 bisa dipakai lewat bot Telegram pribadi:
+
+- **Chat** di DM bot untuk tanya-jawab emiten dengan pipeline yang sama seperti web.
+- **Brief** harian berisi 5 emiten likuid yang paling dekat ke area buy harmonic pada 4H, 1D, 1W, dan 1M.
+- Hanya `TELEGRAM_OWNER_ID` yang dilayani; tidak ada OAuth atau pendaftaran publik.
+- Brief dijadwalkan dari cron host (08:00 WIB) dan memanggil endpoint lokal, jadi aman dari timeout Cloudflare.
+
+Panduan lengkap: [`docs/TELEGRAM_HARMONIC_BRIEF.md`](./docs/TELEGRAM_HARMONIC_BRIEF.md).
+
+## Phase 2: IDX Public Data
+
+Sejak Phase 2, Telaah 360 juga memakai data publik IDX melalui service scraper lokal:
+
+- **Foreign flow** harian per emiten (net asing dalam lembar dan estimasi rupiah).
+- **Profil emiten** IDX: sektor, subsektor, papan pencatatan, direksi, komisaris, pemegang saham besar.
+- **Insider/ownership filings** dari PDF keterbukaan IDX, termasuk market-wide insider feed di `/insider`.
+- **Suspensi dan kalender aksi korporasi** sebagai data pendukung.
+
+Service berjalan di container `telaah-scraper` dalam pod yang sama dan hanya listen di `127.0.0.1:8001`. Jika `SCRAPER_URL` kosong atau service mati, aplikasi tetap berjalan dengan data Yahoo dan menandai flow/insider sebagai tidak tersedia.
+
+Broker summary penuh belum aktif karena IPOT sedang 502 dan Stockbit belum dikonfigurasi; FlowLens akan menampilkan status `partial` dengan foreign flow saja. Panduan lengkap: [`docs/PHASE2_IDX_SCRAPER.md`](./docs/PHASE2_IDX_SCRAPER.md).
 
 ## Struktur Folder
 
@@ -201,7 +227,8 @@ src/
 └── lib/
     ├── agent/               # Classifier, coordinator, router, synthesizer
     ├── quant/               # Financial, technical, flow, insider calculations
-    ├── sectors/             # Typed Sectors API client dan normalisasi data
+    ├── market/              # Yahoo/IDX provider, FX, berita, komoditas
+    ├── sectors/             # Legacy Sectors client (opsional)
     ├── storage/             # Browser/server cache helpers
     └── vector/              # Embedding dan Qdrant semantic cache
 ```
@@ -211,7 +238,7 @@ src/
 Telaah 360 memiliki beberapa lapisan cache:
 
 1. **Browser report cache** untuk membuka kembali laporan tanpa request tambahan.
-2. **In-memory Sectors response cache** dengan TTL sesuai jenis endpoint.
+2. **In-memory Yahoo/IDX response cache** dengan TTL sesuai jenis endpoint.
 3. **Qdrant semantic cache** untuk prompt yang semantically similar.
 
 Aturan freshness semantic cache menggunakan hari kalender WIB (`Asia/Jakarta`):
@@ -258,7 +285,7 @@ Data belum disinkronkan lintas browser atau akun pengguna.
 - Validasi simbol dan parameter dilakukan sebelum request ke provider.
 - Broker summary adalah data agregat; bukan identitas pemilik manfaat dan bukan bukti koordinasi bandar.
 - Technical indicators bersifat lagging dan harus dibaca bersama fundamental serta kondisi pasar.
-- Ketersediaan field dapat berbeda menurut emiten, sektor, periode laporan, dan paket Sectors API.
+- Ketersediaan field dapat berbeda menurut emiten, sektor, periode laporan, dan sumber data publik. Yahoo Finance bukan API resmi dan dapat berubah sewaktu-waktu.
 - Lampiran gambar saat ini dipreview dan disimpan bersama sesi chat sebagai data URL di browser. Hindari gambar sensitif atau berukuran sangat besar.
 
 ## Dokumentasi Proyek
@@ -266,9 +293,11 @@ Data belum disinkronkan lintas browser atau akun pengguna.
 - [`PRD-Telaah-360.md`](./PRD-Telaah-360.md) — product requirements utama
 - [`Design.md`](./Design.md) — rancangan tampilan dan pengalaman pengguna
 - [`API-MAP-Telaah-360.md`](./API-MAP-Telaah-360.md) — pemetaan endpoint
-- [`Sectors-API-v2-Audit.md`](./Sectors-API-v2-Audit.md) — audit kemampuan dan biaya Sectors API v2
+- [`Sectors-API-v2-Audit.md`](./Sectors-API-v2-Audit.md) — catatan historis audit Sectors API v2 (legacy)
 - [`docs/superpowers/specs/`](./docs/superpowers/specs/) — spesifikasi perubahan besar
 - [`docs/superpowers/plans/`](./docs/superpowers/plans/) — implementation plans
+- [`docs/TELEGRAM_HARMONIC_BRIEF.md`](./docs/TELEGRAM_HARMONIC_BRIEF.md) — operasional bot Telegram dan brief harmonic
+- [`docs/PHASE2_IDX_SCRAPER.md`](./docs/PHASE2_IDX_SCRAPER.md) — scraper IDX, foreign flow, insider PDF, dan batasan data
 
 ## Disclaimer
 

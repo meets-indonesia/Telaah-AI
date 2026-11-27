@@ -1,0 +1,13 @@
+.git
+.gitignore
+.next
+node_modules
+.superpowers
+.env
+.env.*
+data/market_cache.json
+data/qdrant_storage
+data/redis_storage
+signalx_stock_signal_dashboard.html
+docs
+*.md

@@ -5,16 +5,22 @@ import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 
 export async function POST(req: NextRequest) {
+  const limited = await guardRateLimit(req, "qa", RATE_LIMIT_RULES.qa);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
-    const question = body.question?.trim();
-    const report: CompanyIntelligenceReport = body.report;
+    const { text: question } = sanitizeUserPrompt(body.question);
+    const report = body.report as CompanyIntelligenceReport | null;
     const history: Array<{ role: "user" | "assistant"; text: string }> = Array.isArray(body.history) ? body.history : [];
     const images: string[] = Array.isArray(body.images) ? body.images : [];
 
     if ((!question && images.length === 0) || !report) {
       return NextResponse.json(
-        { error: "Pertanyaan dan data laporan harus disertakan." },
+        {
+          error:
+            "Pertanyaan dan laporan lengkap harus disertakan. Laporan mungkin kedaluwarsa; muat ulang emiten.",
+        },
         { status: 400 }
       );
     }
@@ -64,7 +70,7 @@ ${visionContext}${recentHistoryText ? `Riwayat Percakapan Sebelumnya:\n${recentH
       });
     } else {
       // Fallback ringkasan edukatif berbasis data laporan langsung
-      answer = `**Berdasarkan data resmi Sectors API untuk ${report.symbol} (${report.companyName})**:\n\n` +
+      answer = `**Berdasarkan data pasar yang tersedia untuk ${report.symbol} (${report.companyName})**:\n\n` +
         `• **Ringkasan:** ${report.directAnswer}\n` +
         `• **Harga & Tren:** Rp ${report.technical.lastPrice.toLocaleString("id-ID")} (${report.technical.trendAssessment})\n` +
         `• **Foreign Flow (Asing):** ${report.flowLens.foreignFlow.recentTrend}\n\n` +

@@ -4,6 +4,7 @@ import React from "react";
 import { useI18n } from "@/lib/i18n/context";
 import { CompanyIntelligenceReport } from "@/lib/agent/types";
 import { extractValuationMultiples } from "@/lib/sectors/types";
+import { extractDividendInfo } from "@/lib/quant/dividends";
 import {
   TrendingUp,
   ShieldCheck,
@@ -34,19 +35,21 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   const { symbol, companyName, financials, flowLens, valuation, technical, integrity, tradingPlan } = report;
 
   // Key derived values
-  const yoyLaba = financials?.yoyGrowth?.netIncomePct;
+  const hasFinancials = Boolean(financials?.latest);
+  const yoyLaba = hasFinancials ? financials?.yoyGrowth?.netIncomePct : null;
   const isNetCash = financials?.solvencyHealth?.hasNetCash;
-  const isLabaGrowing = yoyLaba !== null && yoyLaba !== undefined && yoyLaba > 0;
+  const isLabaGrowing = hasFinancials && yoyLaba !== null && yoyLaba !== undefined && yoyLaba > 0;
   const topBuyers = flowLens?.topBuyers || [];
   const totalBuyerVal = topBuyers.slice(0, 3).reduce((acc: number, b) => acc + b.netValue, 0);
-  const isAccumulated = totalBuyerVal > 0;
+  const hasBrokerSummary = topBuyers.length > 0;
+  const isAccumulated = hasBrokerSummary && totalBuyerVal > 0;
+  const dividendInfo = extractDividendInfo(report);
 
   // Valuation
   const multiples = valuation ? extractValuationMultiples(valuation) : null;
   const peVal = valuation?.current_pe ?? multiples?.pe ?? null;
   const pbVal = valuation?.current_pb ?? multiples?.pb ?? null;
-  const targetPeer = report.peerLens?.peers?.find((p) => p.isTarget || p.symbol === symbol);
-  const divYieldPct = targetPeer?.dividendYield ? targetPeer.dividendYield * 100 : null;
+  const divYieldPct = dividendInfo.yieldPct;
 
   return (
     <div className="space-y-4">
@@ -64,24 +67,26 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              {isLabaGrowing && isAccumulated
-                ? "Fundamental Sehat dengan Dukungan Akumulasi Whale"
-                : isLabaGrowing
-                ? "Pertumbuhan Fundamental Kuat, Pantau Titik Beli Teknikal"
-                : isAccumulated
-                ? "Fase Akumulasi Bandar, Cek Ketahanan Fundamental"
-                : "Momentum Konsolidasi, Disarankan Disiplin Risk Management"}
+              {!hasFinancials
+                ? "Data Fundamental Terbatas, Fokus pada Teknikal & Risiko"
+                : isLabaGrowing && isAccumulated
+                  ? "Fundamental Sehat dengan Dukungan Akumulasi Whale"
+                  : isLabaGrowing
+                    ? "Pertumbuhan Fundamental Kuat, Pantau Titik Beli Teknikal"
+                    : isAccumulated
+                      ? "Fase Akumulasi Bandar, Cek Ketahanan Fundamental"
+                      : "Momentum Konsolidasi, Disarankan Disiplin Risk Management"}
             </h2>
           </div>
 
           {/* Quick Score Pill */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="p-2.5 px-3 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/80 dark:border-zinc-800 text-right">
-              <span className="text-[10px] text-slate-400 font-mono uppercase block">Skor Kejujuran Fundamental</span>
+              <span className="text-[10px] text-slate-400 font-mono uppercase block">Skor Integritas Data</span>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
-                  {integrity?.score !== undefined ? 100 - integrity.score : 85}/100
+                  {integrity?.score ?? 0}/100
                 </span>
               </div>
             </div>
@@ -102,7 +107,13 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Laba YoY: <strong className="text-slate-900 dark:text-white">{yoyLaba ? `${yoyLaba.toFixed(1)}%` : "-"}</strong>. Struktur modal {isNetCash ? "sangat aman (Net Cash)." : "terkendali."}
+              {hasFinancials ? (
+                <>
+                  Laba YoY: <strong className="text-slate-900 dark:text-white">{yoyLaba != null ? `${yoyLaba.toFixed(1)}%` : "-"}</strong>. Struktur modal {isNetCash ? "sangat aman (Net Cash)." : "terkendali."}
+                </>
+              ) : (
+                "Laporan keuangan rinci belum tersedia; kesehatan bisnis belum dapat diverifikasi."
+              )}
             </p>
             <button
               onClick={() => onNavigateTab?.("financials")}
@@ -125,7 +136,9 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Top buyer menyerap <strong className="text-slate-900 dark:text-white">Rp {(Math.abs(totalBuyerVal) / 1e9).toFixed(1)} Miliar</strong> pada rentang harga saat ini.
+              {hasBrokerSummary
+                ? <>Top buyer menyerap <strong className="text-slate-900 dark:text-white">Rp {(Math.abs(totalBuyerVal) / 1e9).toFixed(1)} Miliar</strong> pada rentang harga saat ini.</>
+                : "Broker summary belum aktif: IPOT sedang down dan Stockbit belum dikonfigurasi. FlowLens hanya menampilkan foreign flow."}
             </p>
             <button
               onClick={() => onNavigateTab?.("flow")}
@@ -170,16 +183,27 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
             <span>Kekuatan Utama & Sinyal Positif</span>
           </div>
           <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
+            {hasFinancials && financials?.periods?.[0]?.operatingMarginPct ? (
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                <span>
+                  <strong>Kinerja Operasional:</strong> Margin laba operasional {financials.periods[0].operatingMarginPct}% menunjukkan kontrol beban yang baik.
+                </span>
+              </li>
+            ) : (
+              <li className="flex items-start gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 shrink-0" />
+                <span>Data margin operasional belum tersedia; tidak ada klaim positif yang dibuat.</span>
+              </li>
+            )}
             <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+              <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${hasFinancials ? "bg-emerald-500" : "bg-slate-400"}`} />
               <span>
-                <strong>Kinerja Operasional:</strong> Margin laba operasional {financials?.periods?.[0]?.operatingMarginPct ? `${financials.periods[0].operatingMarginPct}%` : "solid"} menunjukkan kontrol beban yang baik.
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-              <span>
-                <strong>Kekuatan Neraca:</strong> {financials?.solvencyHealth?.description || "Struktur permodalan terkendali tanpa risiko gagal bayar mendesak."}
+                <strong>Kekuatan Neraca:</strong>{" "}
+                {financials?.solvencyHealth?.description ||
+                  (hasFinancials
+                    ? "Struktur permodalan terkendali tanpa risiko gagal bayar mendesak."
+                    : "Data neraca belum tersedia; belum dapat diverifikasi.")}
               </span>
             </li>
             {divYieldPct !== null && divYieldPct > 2 && (
@@ -223,37 +247,52 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
       </div>
 
       {/* 4. FAST ACTION CENTER: TRADING PLAN & TOOLS */}
-      <div className="p-4 rounded-xl bg-black dark:bg-linear-to-r dark:from-slate-900 dark:to-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
-        <div className="space-y-0.5 text-center sm:text-left">
-          <div className="flex items-center justify-center sm:justify-start gap-2">
-            <Crosshair className="w-4 h-4 text-emerald-400" />
-            <h3 className="font-bold text-xs text-white">
+      <div className="p-4 rounded-xl bg-black dark:bg-linear-to-r dark:from-slate-900 dark:to-slate-800 text-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-md">
+        <div className="min-w-0 flex-1 space-y-0.5 text-left">
+          <div className="flex items-center justify-start gap-2">
+            <Crosshair className="w-4 h-4 text-emerald-400 shrink-0" />
+            <h3 className="font-bold text-xs text-white leading-snug">
               {t("summary.readyTitle", "Siap Eksekusi? Gunakan Trading Plan & Kalkulator")}
             </h3>
           </div>
-          <p className="text-[11px] text-slate-300 max-w-md">
+          <p className="text-[11px] text-slate-300 max-w-md leading-snug">
             {t("summary.readySubtitle", "Dapatkan area beli ideal, batas cut loss, target profit multi-horizon, dan simulasi alokasi lot otomatis.")}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            onClick={onOpenTradingPlan}
-            type="button"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition shadow-2xs"
-          >
-            <Crosshair className="w-3.5 h-3.5" />
-            <span>{t("summary.openTradingPlan", "Buka Trading Plan")}</span>
-          </button>
+        <div className="flex w-full sm:w-auto max-w-full flex-col items-stretch sm:items-end gap-1.5">
+          <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2">
+            {report.tradingPlan && onOpenTradingPlan && (
+              <button
+                onClick={onOpenTradingPlan}
+                type="button"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition shadow-2xs"
+              >
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>{t("summary.openTradingPlan", "Buka Trading Plan")}</span>
+              </button>
+            )}
 
-          <button
-            onClick={onOpenDividendCalc}
-            type="button"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-black font-semibold text-xs border border-white transition"
-          >
-            <Calculator className="w-3.5 h-3.5" />
-            <span>{t("summary.openDividend", "Kalkulator Dividen")}</span>
-          </button>
+            {dividendInfo.hasDividend && onOpenDividendCalc && (
+              <button
+                onClick={onOpenDividendCalc}
+                type="button"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-black font-semibold text-xs border border-white transition"
+              >
+                <Calculator className="w-3.5 h-3.5" />
+                <span>{t("summary.openDividend", "Kalkulator Dividen")}</span>
+              </button>
+            )}
+          </div>
+
+          {!dividendInfo.hasDividend && (
+            <span
+              className="text-[10px] leading-snug text-slate-400 text-left sm:text-right"
+              title="Emiten ini belum membagikan dividen pada data yang tersedia."
+            >
+              Kalkulator dividen tidak tersedia
+            </span>
+          )}
         </div>
       </div>
     </div>

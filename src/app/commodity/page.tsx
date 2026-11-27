@@ -143,7 +143,10 @@ export default function CommodityPage() {
           </div>
         </div>
 
-        {/* Global Commodities 4-Metric Grid (Live Sectors Mining API) */}
+        {/* Global Commodities 4-Metric Grid (Yahoo Finance benchmarks) */}
+        <p className="text-[10px] font-mono text-slate-500">
+          Benchmark: Coal API2, COMEX Gold, COMEX Copper, Iron Ore 62% Fe. Harga nikel harian belum tersedia dari sumber gratis.
+        </p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {isLoadingCommodities ? (
             <div className="col-span-4 bg-black p-6 rounded-lg border border-slate-800/80 text-center text-xs font-mono text-slate-400">
@@ -194,10 +197,13 @@ export default function CommodityPage() {
           <div className="lg:col-span-4 bg-black rounded-lg border border-slate-800/80 p-3.5 space-y-3 flex flex-col">
             <div className="border-b border-slate-800/60 pb-2 flex items-center justify-between">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-zinc-400" /> Mining Universe Matrix
+                <Layers className="w-3.5 h-3.5 text-zinc-400" /> Contoh Emiten Komoditas
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">7 Emiten</span>
+              <span className="text-[10px] text-slate-500 font-mono">Ilustrasi</span>
             </div>
+            <p className="text-[10px] text-slate-500 font-mono leading-relaxed">
+              Daftar ini statis untuk navigasi. Market cap tidak ditampilkan karena bukan data live.
+            </p>
 
             <div className="space-y-1.5">
               {COMMODITY_EMITEN_LIST.map((item) => {
@@ -226,10 +232,7 @@ export default function CommodityPage() {
                     </div>
 
                     <div className="text-right font-mono">
-                      <span className="text-slate-300 font-semibold text-xs block">
-                        Rp {item.mcap}
-                      </span>
-                      <span className="text-[9px] text-slate-500">Market Cap</span>
+                      <span className="text-[9px] text-slate-500">Lihat laporan</span>
                     </div>
                   </div>
                 );

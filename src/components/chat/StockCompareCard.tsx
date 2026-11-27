@@ -24,7 +24,7 @@ export const StockCompareCard: React.FC<StockCompareCardProps> = ({
             Komparasi Valuasi: {comparison.symbolA} vs {comparison.symbolB}
           </span>
         </div>
-        <span className="text-[10px] font-mono text-slate-400">Sectors v2</span>
+        <span className="text-[10px] font-mono text-slate-400">Open Data</span>
       </div>
 
       {/* Side-by-Side Emiten Profile */}

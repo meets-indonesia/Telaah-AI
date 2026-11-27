@@ -96,6 +96,12 @@ export const InsiderWhaleRadar: React.FC<InsiderWhaleRadarProps> = ({
         </div>
       </div>
 
+      {insiderRadar.status === "partial" && transactions.length === 0 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+          Filings tersedia, tetapi transaksi insider belum dapat diverifikasi dari data ini.
+        </div>
+      )}
+
       {/* Cluster Announcement Banner */}
       {clusterBuyDetected && (
         <div className="p-3 rounded-md bg-emerald-500/10 border-l-4 border-l-emerald-500 border-y border-r border-emerald-500/20 text-xs">

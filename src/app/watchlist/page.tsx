@@ -36,7 +36,7 @@ interface WatchlistItemData {
   pb: number | null;
   rsi: number | null;
   trend: string;
-  flow5d: number;
+  flow5d: number | null;
 }
 
 type SortKey = "symbol" | "lastPrice" | "dailyChangePct" | "marketCap" | "pe" | "pb" | "rsi" | "flow5d";
@@ -289,10 +289,12 @@ export default function WatchlistPage() {
                 {displayItems.length > 0 ? (
                   displayItems.map((item) => {
                     const isPositive = item.dailyChangePct >= 0;
-                    const isFlowPositive = item.flow5d > 0;
-                    const flowStr = item.flow5d !== 0
-                      ? `${isFlowPositive ? "+" : ""}${(item.flow5d / 1e9).toFixed(1)}B`
-                      : "-";
+                    const isFlowPositive = item.flow5d !== null && item.flow5d > 0;
+                    const flowStr = item.flow5d === null
+                      ? "—"
+                      : item.flow5d !== 0
+                        ? `${isFlowPositive ? "+" : ""}${(item.flow5d / 1e9).toFixed(1)}B`
+                        : "-";
 
                     return (
                       <tr
@@ -368,9 +370,9 @@ export default function WatchlistPage() {
                         <td className="py-3 px-3 text-right">
                           <span
                             className={`${
-                              item.flow5d > 0
+                              item.flow5d !== null && item.flow5d > 0
                                 ? "text-emerald-400 font-semibold"
-                                : item.flow5d < 0
+                                : item.flow5d !== null && item.flow5d < 0
                                 ? "text-rose-400 font-semibold"
                                 : "text-slate-400"
                             }`}

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   Search,
   Command,
 } from "lucide-react";
+import { CommandPalette } from "./CommandPalette";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useI18n } from "@/lib/i18n/context";
@@ -33,6 +34,7 @@ interface HeaderProps {
   onOpenJargon?: () => void;
   onOpenDividend?: () => void;
   onFocusSearch?: () => void;
+  showSearch?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -41,13 +43,32 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenJargon,
   onOpenDividend,
   onFocusSearch,
+  showSearch = true,
 }) => {
   const pathname = usePathname();
   const { t } = useI18n();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const navLinks = [
     { href: "/", label: t("nav.terminal", "Terminal") },
     { href: "/watchlist", label: t("nav.watchlist", "Watchlist") },
+    { href: "/portfolio", label: t("nav.portfolio", "Portfolio") },
+    { href: "/screener", label: t("nav.screener", "Screener") },
+    { href: "/news", label: t("nav.news", "News") },
+    { href: "/workspace", label: t("nav.workspace", "Workspace") },
+    { href: "/harmonic", label: t("nav.harmonic", "Harmonic") },
+    { href: "/chart", label: t("nav.chart", "Chart") },
   ];
 
   return (
@@ -56,6 +77,15 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="w-full px-3 lg:px-5 py-2.5 min-h-[50px] flex items-center justify-between gap-3 text-xs">
         {/* Brand & Section Nav */}
         <div className="flex items-center gap-4 shrink-0 py-0.5">
+          <Link href="/" className="flex items-center gap-2 sm:hidden" aria-label="Telaah 360">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/dark-logo.png" alt="" className="h-5 w-auto hidden dark:block" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/light-logo.png" alt="" className="h-5 w-auto block dark:hidden" />
+            <span className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-white">
+              Telaah
+            </span>
+          </Link>
           <nav aria-label="Navigasi Utama" className="hidden sm:flex items-center gap-1 py-0.5">
             {navLinks.map((link) => {
               const active = pathname === link.href;
@@ -76,23 +106,6 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
         </div>
 
-        {/* Global Search Hotkey Trigger */}
-        <div className="flex-1 max-w-sm mx-2 py-0.5">
-          <button
-            type="button"
-            onClick={onFocusSearch}
-            className="w-full flex items-center justify-between px-3 py-2 rounded bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:border-zinc-500 hover:text-slate-900 dark:hover:text-slate-200 transition text-xs"
-          >
-            <span className="flex items-center gap-1.5">
-              <Search className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
-              <span className="text-slate-600 dark:text-slate-400">Cari emiten</span>
-            </span>
-            <kbd className="hidden lg:inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-white/10">
-              <Command className="w-2.5 h-2.5" /> K
-            </kbd>
-          </button>
-        </div>
-
         {/* Right Tools & Toggles */}
         <div className="flex items-center gap-1.5 shrink-0 py-0.5">
           {onOpenDividend && (
@@ -105,6 +118,39 @@ export const Header: React.FC<HeaderProps> = ({
               <Calculator className="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100" />
               <span className="hidden xl:inline">{t("btn.dividendShort", "Dividen")}</span>
             </button>
+          )}
+
+          {showSearch && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pathname === "/" && onFocusSearch) onFocusSearch();
+                  else setPaletteOpen(true);
+                }}
+                aria-label="Cari emiten"
+                className="hidden md:flex items-center justify-between gap-2 w-52 lg:w-60 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 transition hover:border-zinc-500 hover:text-slate-900 dark:border-white/10 dark:bg-black/50 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Search className="w-3.5 h-3.5 shrink-0" />
+                  <span>Cari emiten</span>
+                </span>
+                <kbd className="hidden lg:inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded border border-slate-300 dark:border-white/10">
+                  <Command className="w-2.5 h-2.5" /> K
+                </kbd>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pathname === "/" && onFocusSearch) onFocusSearch();
+                  else setPaletteOpen(true);
+                }}
+                aria-label="Cari emiten"
+                className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-black/50 dark:text-slate-400"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
 
           {onOpenJargon && (
@@ -146,6 +192,11 @@ export const Header: React.FC<HeaderProps> = ({
       </nav>
 
       {/* Global Macro Ticker Tape Strip */}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+      />
+
       {marketIndices && marketIndices.length > 0 && (
         <div className="border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/60 px-3 py-1 flex items-center text-[11px] font-mono overflow-hidden">
           <div className="shrink-0 flex items-center gap-2 pr-3 border-r border-slate-200 dark:border-white/10 font-sans font-medium text-slate-500 dark:text-slate-400">

@@ -1,10 +1,18 @@
 import crypto from "crypto";
-import { CompanyIntelligenceReport, AnalysisMode } from "@/lib/agent/types";
+import {
+  CompanyIntelligenceReport,
+  AnalysisMode,
+  REPORT_DATA_SOURCE,
+  REPORT_DATA_VERSION,
+} from "@/lib/agent/types";
 import { getEmbedding } from "./embeddings";
 
 const QDRANT_BASE_URL = process.env.QDRANT_URL || "http://localhost:6333";
 const COLLECTION_NAME = "telaah_intelligence_cache";
 const VECTOR_SIZE = 1536;
+
+export const CACHE_DATA_SOURCE = REPORT_DATA_SOURCE;
+export const CACHE_DATA_VERSION = REPORT_DATA_VERSION;
 
 export interface VectorCachePayload {
   symbol: string;
@@ -12,6 +20,8 @@ export interface VectorCachePayload {
   mode: AnalysisMode;
   capturedDate: string; // YYYY-MM-DD
   capturedTimestamp: number;
+  dataSource: string;
+  dataVersion: number;
   report: CompanyIntelligenceReport;
 }
 
@@ -77,6 +87,16 @@ export async function ensureCollectionExists(): Promise<boolean> {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ field_name: "mode", field_schema: "keyword" }),
         }),
+        fetch(`${QDRANT_BASE_URL}/collections/${COLLECTION_NAME}/index`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field_name: "dataSource", field_schema: "keyword" }),
+        }),
+        fetch(`${QDRANT_BASE_URL}/collections/${COLLECTION_NAME}/index`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ field_name: "dataVersion", field_schema: "integer" }),
+        }),
       ]).catch(() => {});
 
       isCollectionReady = true;
@@ -112,7 +132,10 @@ export async function searchSemanticReportCache(
     }
 
     const filterClause: any = {};
-    const mustConditions: any[] = [];
+    const mustConditions: any[] = [
+      { key: "dataSource", match: { value: CACHE_DATA_SOURCE } },
+      { key: "dataVersion", match: { value: CACHE_DATA_VERSION } },
+    ];
 
     if (symbol) {
       mustConditions.push({
@@ -132,6 +155,9 @@ export async function searchSemanticReportCache(
     if (mustConditions.length > 0) {
       filterClause.must = mustConditions;
     }
+    filterClause.must_not = [
+      { key: "report.synthesisFailed", match: { value: true } },
+    ];
 
     const searchBody: any = {
       vector,
@@ -186,6 +212,9 @@ export async function upsertReportToVectorCache(
   report: CompanyIntelligenceReport,
   mode: AnalysisMode
 ): Promise<boolean> {
+  if (report.synthesisFailed) {
+    return false;
+  }
   try {
     const collectionOk = await ensureCollectionExists();
     if (!collectionOk) return false;
@@ -206,6 +235,8 @@ export async function upsertReportToVectorCache(
       mode,
       capturedDate: today,
       capturedTimestamp: Date.now(),
+      dataSource: CACHE_DATA_SOURCE,
+      dataVersion: CACHE_DATA_VERSION,
       report,
     };
 

@@ -9,7 +9,7 @@ if (fs.existsSync(".env")) {
 }
 
 import { classifyInputAndExtractClaims } from "../src/lib/agent/classifier";
-import { SectorsClient } from "../src/lib/sectors/client";
+import { getMarketProvider } from "../src/lib/market";
 import { executeEvidencePlan } from "../src/lib/agent/coordinator";
 import { synthesizeIntelligenceReport } from "../src/lib/agent/synthesizer";
 
@@ -27,9 +27,9 @@ async function runTest() {
   classification.claims.forEach((c, i) => console.log(`  Claim ${i+1}: [${c.claimType}] "${c.originalText}"`));
 
   console.log("\n2. Step 2: Coordinator & Evidence Collection (Quick Mode)...");
-  const client = new SectorsClient();
+  const provider = getMarketProvider();
   const evidence = await executeEvidencePlan(
-    client,
+    provider,
     classification.symbol,
     "quick",
     classification.intent,

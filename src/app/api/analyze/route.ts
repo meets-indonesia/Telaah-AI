@@ -14,6 +14,9 @@ import {
 } from "@/lib/vector/qdrant";
 
 export async function POST(req: NextRequest) {
+  const limited = await guardRateLimit(req, "analyze", RATE_LIMIT_RULES.analyze);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const prompt = body.prompt?.trim();
@@ -98,9 +101,9 @@ DILARANG memberikan rekomendasi beli/jual ilegal (selalu sertakan disclaimer edu
       return NextResponse.json(
         {
           needsConfirmation: true,
-          candidateSymbol: classification.symbol || "",
-          message: "Tidak dapat mendeteksi kode saham IDX 4 huruf secara pasti. Silakan konfirmasi kode saham.",
-          classification,
+          candidateSymbol: result.candidateSymbol,
+          message: result.message,
+          classification: result.classification,
         },
         { status: 200 }
       );
@@ -180,7 +183,7 @@ BAHAS DENGAN MENDALAM:
     console.error("Error in /api/analyze:", error);
     return NextResponse.json(
       {
-        error: sectorsErrorMessage(error),
+        error: marketDataErrorMessage(error),
         code: error?.kind || "analysis_error",
       },
       { status: 500 }

@@ -2,6 +2,8 @@
 
 Dokumen ini merangkum pemetaan arsitektur, spesifikasi endpoint, alokasi kredit, payload request/response, serta mekanisme optimasi cache untuk seluruh API yang digunakan dalam aplikasi **Telaah 360**.
 
+> **Status:** Dokumen ini mencatat arsitektur Sectors API v2 yang lama. Phase 1 Telaah 360 sekarang memakai Yahoo Finance + endpoint publik IDX sebagai sumber default (lihat `docs/superpowers/specs/2026-11-23-open-market-data-provider-design.md`). Bagian Sectors di bawah dipertahankan sebagai referensi/legacy dan hanya aktif jika `MARKET_DATA_PROVIDER=sectors`.
+
 ---
 
 ## Daftar Isi
@@ -344,7 +346,10 @@ Agar penggunaan kredit efisien dan hemat biaya:
 Konfigurasi kunci API yang diperlukan di file `.env` atau `.env.local`:
 
 ```env
-# Kunci Otentikasi Sectors API v2 (https://sectors.app)
+# Default: open market data (Yahoo Finance + IDX), tanpa key
+MARKET_DATA_PROVIDER=open
+
+# Opsional/legacy: hanya jika MARKET_DATA_PROVIDER=sectors
 SECTORS_API_KEY=your_sectors_api_key_here
 
 # Kunci Otentikasi OpenRouter API (https://openrouter.ai)

@@ -56,7 +56,8 @@ export function analyzeInsiderCluster(
   management?: ManagementData,
   ownership?: OwnershipData,
   symbol: string = "",
-  lastPrice: number = 0
+  lastPrice: number = 0,
+  filingsAvailable: boolean = true
 ): InsiderClusterAnalysis {
   const cleanSymbol = symbol.toUpperCase().replace(".JK", "");
   const transactions: InsiderTransaction[] = [];
@@ -90,11 +91,15 @@ export function analyzeInsiderCluster(
 
   // 2. Parse setiap filing untuk mendeteksi transaksi insider
   filings.forEach((f: any, idx) => {
+    // A scanned/unparseable PDF has no verified shares; do not invent a
+    // neutral transaction or let it pad the cluster counts.
+    if (f.unparsed === true) return;
+
     const title = f.title || "";
     const body = f.body || "";
     const combined = `${title} ${body}`.toLowerCase();
 
-    // Deteksi aksi: BUY, SELL, TRANSFER (utamakan data terstruktur dari Sectors API)
+    // Deteksi aksi: BUY, SELL, TRANSFER (utamakan data terstruktur dari filings)
     let action: "BUY" | "SELL" | "TRANSFER" | "NEUTRAL" = "NEUTRAL";
     if (f.transaction_type) {
       const tt = String(f.transaction_type).toLowerCase();
@@ -170,108 +175,24 @@ export function analyzeInsiderCluster(
     });
   });
 
-  // 3. Khusus Fallback / Seed Data Berbasis Fakta Riil IDX jika data filings API masih kosong atau belum terparsing lengkap
-  // Contoh nyata BBCA: Jahja Setiaatmadja, Santoso, Haryanto Tiara Budiman melakukan cluster-buy 2,8 juta lembar
-  if (transactions.length === 0 && cleanSymbol === "BBCA") {
-    transactions.push(
-      {
-        id: "insider_bbca_01",
-        date: "2024-06-21",
-        insiderName: "Jahja Setiaatmadja",
-        position: "Presiden Direktur",
-        action: "BUY",
-        shares: 1_250_000,
-        price: 9800,
-        value: 12_250_000_000,
-        percentageBefore: 0.033,
-        percentageAfter: 0.034,
-        filingTitle: "Laporan Kepemilikan Saham Direksi - Jahja Setiaatmadja",
-      },
-      {
-        id: "insider_bbca_02",
-        date: "2024-06-21",
-        insiderName: "Santoso",
-        position: "Direktur",
-        action: "BUY",
-        shares: 850_000,
-        price: 9825,
-        value: 8_351_250_000,
-        percentageBefore: 0.002,
-        percentageAfter: 0.003,
-        filingTitle: "Laporan Transaksi Pembelian Saham Direksi - Santoso",
-      },
-      {
-        id: "insider_bbca_03",
-        date: "2024-06-20",
-        insiderName: "Haryanto Tiara Budiman",
-        position: "Direktur",
-        action: "BUY",
-        shares: 700_000,
-        price: 9800,
-        value: 6_860_000_000,
-        percentageBefore: 0.001,
-        percentageAfter: 0.002,
-        filingTitle: "Keterbukaan Informasi Perolehan Saham Direksi - Haryanto Tiara Budiman",
-      }
-    );
-  } else if (transactions.length === 0 && cleanSymbol === "BBRI") {
-    transactions.push(
-      {
-        id: "insider_bbri_01",
-        date: "2024-05-15",
-        insiderName: "Sunarso",
-        position: "Direktur Utama",
-        action: "BUY",
-        shares: 200_000,
-        price: 4800,
-        value: 960_000_000,
-        percentageBefore: 0.002,
-        percentageAfter: 0.0021,
-        filingTitle: "Laporan Pembelian Saham BBRI oleh Direktur Utama Sunarso",
-      },
-      {
-        id: "insider_bbri_02",
-        date: "2024-05-16",
-        insiderName: "Catur Budi Harto",
-        position: "Wakil Direktur Utama",
-        action: "BUY",
-        shares: 150_000,
-        price: 4780,
-        value: 717_000_000,
-        percentageBefore: 0.0015,
-        percentageAfter: 0.0016,
-        filingTitle: "Laporan Transaksi Saham Direksi BBRI - Catur Budi Harto",
-      }
-    );
-  } else if (transactions.length === 0 && cleanSymbol === "ADRO") {
-    transactions.push(
-      {
-        id: "insider_adro_01",
-        date: "2024-04-18",
-        insiderName: "Garibaldi Thohir",
-        position: "Presiden Direktur & CEO",
-        action: "BUY",
-        shares: 14_600_000,
-        price: 2750,
-        value: 40_150_000_000,
-        percentageBefore: 6.18,
-        percentageAfter: 6.23,
-        filingTitle: "Laporan Perubahan Kepemilikan Saham Garibaldi Thohir",
-      },
-      {
-        id: "insider_adro_02",
-        date: "2024-04-19",
-        insiderName: "Christian Ariano Rachmat",
-        position: "Wakil Presiden Direktur",
-        action: "BUY",
-        shares: 2_500_000,
-        price: 2760,
-        value: 6_900_000_000,
-        percentageBefore: 0.06,
-        percentageAfter: 0.07,
-        filingTitle: "Keterbukaan Informasi Pembelian Saham ADRO oleh Direksi",
-      }
-    );
+  if (!filingsAvailable) {
+    return {
+      status: "unavailable",
+      signal: "Netral",
+      score: 0,
+      summary: "Data keterbukaan informasi insider tidak tersedia dari provider ini.",
+      totalBuyShares: 0,
+      totalSellShares: 0,
+      netShares: 0,
+      totalBuyValue: 0,
+      totalSellValue: 0,
+      netValue: 0,
+      uniqueInsiders: 0,
+      clusterBuyDetected: false,
+      clusterSellDetected: false,
+      insiderActors: [],
+      transactions: [],
+    };
   }
 
   // 4. Hitung Agregat & Deteksi Cluster Buy / Sell
@@ -390,7 +311,7 @@ export function analyzeInsiderCluster(
       totalSellShares / 1e6
     ).toFixed(2)} juta lembar saham.`;
   } else {
-    summary = `Belum terdeteksi aksi beli atau jual signifikan oleh jajaran direksi/komisaris dalam keterbukaan informasi filings terkini.`;
+    summary = `Filings tersedia, tetapi tidak ada transaksi insider yang dapat diverifikasi dari data yang tersedia.`;
   }
 
   const status = transactions.length > 0 ? "available" : "partial";

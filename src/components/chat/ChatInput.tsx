@@ -222,7 +222,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       )}
 
       {/* Input Field Container */}
-      <div className="relative flex items-center rounded-xl border border-zinc-300 dark:border-white/15 bg-white dark:bg-zinc-900/90 focus-within:border-zinc-500 dark:focus-within:border-white/40 shadow-xs transition-colors">
+      <div className="relative flex items-center rounded-2xl border border-zinc-300 dark:border-white/15 bg-white dark:bg-zinc-900/90 focus-within:border-zinc-500 dark:focus-within:border-white/40 shadow-xs transition-colors">
         {/* Hidden File Input */}
         <input
           type="file"

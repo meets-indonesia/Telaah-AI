@@ -1,4 +1,8 @@
-import { CompanyIntelligenceReport } from "../agent/types";
+import {
+  CompanyIntelligenceReport,
+  REPORT_DATA_SOURCE,
+  REPORT_DATA_VERSION,
+} from "../agent/types";
 
 export interface SavedReportItem {
   id: string;
@@ -17,6 +21,8 @@ export interface SavedReportItem {
 const HISTORY_STORAGE_KEY = "telaah360_history_v2";
 const REPORT_CACHE_KEY_PREFIX = "telaah360_cache_rep_";
 const WATCHLIST_STORAGE_KEY = "telaah360_watchlist_v2";
+const WATCHLIST_MIGRATION_KEY = "telaah360_watchlist_default_removed_v1";
+const LEGACY_DEFAULT_WATCHLIST = ["BBCA", "ADRO", "BBRI"];
 const MAX_HISTORY_ITEMS = 15;
 
 /**
@@ -43,9 +49,24 @@ export function getWatchlistSymbols(): string[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(WATCHLIST_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : ["BBCA", "ADRO", "BBRI"];
+    let list: string[] = raw ? JSON.parse(raw) : [];
+
+    if (localStorage.getItem(WATCHLIST_MIGRATION_KEY) !== "1") {
+      const isLegacyDefault =
+        Array.isArray(list) &&
+        list.length === LEGACY_DEFAULT_WATCHLIST.length &&
+        LEGACY_DEFAULT_WATCHLIST.every((symbol, index) => list[index] === symbol);
+
+      if (isLegacyDefault) {
+        list = [];
+        localStorage.removeItem(WATCHLIST_STORAGE_KEY);
+      }
+      localStorage.setItem(WATCHLIST_MIGRATION_KEY, "1");
+    }
+
+    return Array.isArray(list) ? list : [];
   } catch {
-    return ["BBCA", "ADRO", "BBRI"];
+    return [];
   }
 }
 
@@ -134,9 +155,13 @@ export function saveReportToHistory(report: CompanyIntelligenceReport): void {
   };
 
   try {
-    // 1. Simpan full report di cache key tersendiri
+    // 1. Simpan full report di cache key tersendiri; jangan cache fallback LLM.
     const cacheKey = `${REPORT_CACHE_KEY_PREFIX}${clean}`;
-    localStorage.setItem(cacheKey, JSON.stringify(report));
+    if (report.synthesisFailed) {
+      localStorage.removeItem(cacheKey);
+    } else {
+      localStorage.setItem(cacheKey, JSON.stringify(report));
+    }
 
     // 2. Perbarui list riwayat
     const existing = getHistory().filter((item) => item.symbol !== clean);
@@ -146,6 +171,18 @@ export function saveReportToHistory(report: CompanyIntelligenceReport): void {
   } catch (err) {
     console.warn("Gagal menyimpan riwayat penelaahan ke localStorage:", err);
   }
+}
+
+export function isReportCacheCompatible(report: {
+  dataSource?: string;
+  dataVersion?: number;
+  synthesisFailed?: boolean;
+}): boolean {
+  return (
+    report.dataSource === REPORT_DATA_SOURCE &&
+    report.dataVersion === REPORT_DATA_VERSION &&
+    report.synthesisFailed !== true
+  );
 }
 
 /**
@@ -158,7 +195,12 @@ export function getReportFromCache(symbol: string): CompanyIntelligenceReport | 
   try {
     const raw = localStorage.getItem(cacheKey);
     if (!raw) return null;
-    return JSON.parse(raw) as CompanyIntelligenceReport;
+    const report = JSON.parse(raw) as CompanyIntelligenceReport;
+    if (!isReportCacheCompatible(report)) {
+      localStorage.removeItem(cacheKey);
+      return null;
+    }
+    return report;
   } catch (err) {
     console.error(`Gagal membaca cache report untuk ${clean}:`, err);
     return null;

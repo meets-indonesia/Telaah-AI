@@ -39,3 +39,36 @@ dev.log
 data/qdrant_storage/
 data/redis_storage/
 
+
+# runtime caches and local bot state
+data/harmonic_cache.json
+data/screener_snapshot.json
+data/screener-full.log
+data/screener_full.json
+data/harmonic_cache_*.json
+data/telegram_state.json
+data/brief.log
+data/alerts.log
+data/stockbit-session.log
+data/bsjp.log
+data/backtests/
+data/bsjp_paper.json
+data/bsjp-paper.log
+data/harmonic-alerts.log
+data/harmonic-evaluate.log
+data/bandar-alerts.log
+data/backups/
+data/harmonic_alerts_cache.json
+data/alert_watchlist.json
+
+# python scraper
+__pycache__/
+*.pyc
+.venv/
+
+# Stockbit rotating session (never commit)
+data/stockbit_session.json
+data/stockbit_session.lock
+data/stockbit_session.tmp
+data/harmonic_candidates.json
+data/harmonic_evaluations.json

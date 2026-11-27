@@ -211,7 +211,7 @@ export const MinimalSidebar: React.FC<MinimalSidebarProps> = ({
                     <button
                       type="button"
                       onClick={onNewChat}
-                      className="px-2.5 py-1 text-[11px] rounded bg-zinc-500/10 text-zinc-200 border border-zinc-500/25 hover:bg-zinc-500/15 transition"
+                      className="px-2.5 py-1 text-[11px] rounded bg-zinc-100 dark:bg-zinc-500/10 text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-500/25 hover:bg-zinc-200 dark:hover:bg-zinc-500/15 transition"
                     >
                       + {t("sidebar.newChat", "Obrolan Baru")}
                     </button>

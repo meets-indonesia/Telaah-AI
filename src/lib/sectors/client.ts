@@ -351,4 +351,4 @@ export class SectorsClient {
   }
 }
 
-export const sectorsClient = new SectorsClient();
+

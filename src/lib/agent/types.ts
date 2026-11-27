@@ -17,6 +17,9 @@ import {
 
 export type AnalysisMode = "quick" | "full";
 
+export const REPORT_DATA_SOURCE = "open-market";
+export const REPORT_DATA_VERSION = 8;
+
 export type IntentType =
   | "claim_check"
   | "news_event"
@@ -115,6 +118,11 @@ export interface CompanyIntelligenceReport {
   tradingPlan?: TradingPlanResult;
   segments?: any;
   providerError?: string;
+  dataSource: "open-market" | "sectors";
+  dataVersion: number;
+  dataLimitations: string[];
+  synthesisFailed?: boolean;
+  synthesisError?: string;
 
   // Synthesis, Open Questions, Audit
   openQuestions: string[];

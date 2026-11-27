@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { MinimalSidebar } from "@/components/chat/MinimalSidebar";
 import { ChatSession } from "@/components/chat/types";
 import { getWatchlistSymbols } from "@/lib/storage/history";
@@ -10,6 +10,7 @@ const SESSIONS_KEY = "telaah_chat_sessions";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(true);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>([]);
@@ -26,6 +27,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refresh();
+    // The drawer covers the page on phones, so it should start closed there.
+    if (window.matchMedia("(max-width: 767px)").matches) setIsOpen(false);
     setActiveSessionId(new URLSearchParams(window.location.search).get("session"));
     window.addEventListener("storage", refresh);
     window.addEventListener("telaah:storage", refresh);
@@ -37,6 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 767px)").matches) setIsOpen(false);
+  }, [pathname]);
+
   const persist = (next: ChatSession[]) => {
     localStorage.setItem(SESSIONS_KEY, JSON.stringify(next));
     setSessions(next);
@@ -44,6 +51,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   const goHome = (query: string) => {
+    if (window.matchMedia("(max-width: 767px)").matches) setIsOpen(false);
     setActiveSessionId(new URLSearchParams(query).get("session"));
     router.push(`/?${query}`);
     window.dispatchEvent(new CustomEvent("telaah:navigate", { detail: query }));

@@ -26,6 +26,14 @@ export interface RedFlagAnalysisResult {
     warning: number;
     pass: number;
   };
+  dataQuality: {
+    financials: boolean;
+    brokerFlow: "full" | "partial" | "none";
+    insider: boolean;
+    valuation: boolean;
+  };
+  confidence: "high" | "medium" | "low";
+  limitations: string[];
 }
 
 /**
@@ -233,8 +241,10 @@ export function calculateIntegrityScore(params: {
     }
   }
 
-  // Clamp score between 0 and 100
-  const finalScore = Math.max(0, Math.min(100, score));
+  // A perfect score with no financial statements would overstate certainty.
+  const hasFinancials = Boolean(financials?.latest);
+  const completenessPenalty = hasFinancials ? 0 : 25;
+  const finalScore = Math.max(0, Math.min(100, score - completenessPenalty));
 
   // Determine verdict & retail summary
   let verdict: IntegrityVerdict = "Fakta Solid";
@@ -259,6 +269,50 @@ export function calculateIntegrityScore(params: {
     retailSummary = "Bisnis menghasilkan uang riil, rasio utang terkendali, dan didukung akumulasi institusi yang wajar. Cocok untuk riset investasi terukur.";
   }
 
+  const dataQuality = {
+    financials: hasFinancials,
+    brokerFlow:
+      flow?.status === "available"
+        ? ("full" as const)
+        : flow?.status === "partial"
+          ? ("partial" as const)
+          : ("none" as const),
+    insider: insiderRadar?.status === "available" || insiderRadar?.status === "partial",
+    valuation: Boolean(valuation),
+  };
+
+  const limitations: string[] = [];
+  if (!dataQuality.financials) {
+    limitations.push("Laporan keuangan tidak tersedia; skor tidak menilai kualitas laba/utang.");
+  }
+  if (dataQuality.brokerFlow === "none") {
+    limitations.push("Broker/foreign flow tidak tersedia; skor tidak menilai arus dana.");
+  } else if (dataQuality.brokerFlow === "partial") {
+    limitations.push("Broker summary hanya parsial/top-10; fase bandarmologi tidak dinilai.");
+  }
+  if (!dataQuality.insider) {
+    limitations.push("Insider filings tidak tersedia; skor tidak menilai aksi orang dalam.");
+  }
+  if (!dataQuality.valuation) {
+    limitations.push("Valuasi tidak tersedia; skor tidak menilai kewajaran harga.");
+  }
+
+  const availableChecks = [
+    dataQuality.financials,
+    dataQuality.insider,
+    dataQuality.valuation,
+    dataQuality.brokerFlow !== "none",
+  ].filter(Boolean).length;
+  const confidence: RedFlagAnalysisResult["confidence"] = !hasFinancials
+    ? "low"
+    : dataQuality.brokerFlow === "full" &&
+        dataQuality.insider &&
+        dataQuality.valuation
+      ? "high"
+      : availableChecks >= 3 || dataQuality.brokerFlow === "partial"
+        ? "medium"
+        : "low";
+
   return {
     score: finalScore,
     verdict,
@@ -270,5 +324,8 @@ export function calculateIntegrityScore(params: {
       warning: warningCount,
       pass: passCount,
     },
+    dataQuality,
+    confidence,
+    limitations,
   };
 }

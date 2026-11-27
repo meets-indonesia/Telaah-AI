@@ -1,7 +1,7 @@
-import { SectorsClient } from "../sectors/client";
 import {
   BrokerSummaryResponse,
   CompanyReport,
+  CompanyReportSection,
   CorporateActionsResponse,
   DailyTransaction,
   FilingItem,
@@ -10,6 +10,11 @@ import {
   QuarterlyFinancialMetrics,
   extractValuationMultiples,
 } from "../sectors/types";
+import { MarketDataError } from "../market/errors";
+import type {
+  CallLogEntry,
+  MarketDataProvider,
+} from "../market/provider";
 import { computeTechnicalIndicators, TechnicalAnalysisResult } from "../quant/indicators";
 import { analyzeFinancialHealth, FinancialHealthAnalysis } from "../quant/financials";
 import { analyzeFlowLens, FlowLensAnalysis } from "../quant/flow";
@@ -125,13 +130,14 @@ export interface EvidenceCollectionResult {
   tradingPlan?: TradingPlanResult;
   segments?: any;
   providerError?: string;
+  dataLimitations: string[];
   evidenceRecords: EvidenceRecord[];
   creditsConsumed: number;
-  toolCallTrace: Array<{ endpoint: string; params: any; credits: number; timestamp: string }>;
+  toolCallTrace: CallLogEntry[];
 }
 
 export async function executeEvidencePlan(
-  client: SectorsClient,
+  provider: MarketDataProvider,
   symbol: string,
   mode: AnalysisMode,
   intent: IntentType,
@@ -141,12 +147,14 @@ export async function executeEvidencePlan(
   const retrievedAt = new Date().toISOString();
   const evidenceRecords: EvidenceRecord[] = [];
 
-  // Determine needed modules based on mode
-  const needFlow =
-    mode === "full" ||
-    intent === "claim_check" ||
-    intent === "market_technical" ||
-    claims.some((c) => c.claimType === "flow");
+  const hasCapability = (capability: import("../market/provider").MarketDataCapability) =>
+    provider.capabilities.has(capability);
+
+  // Determine needed modules based on mode, then gate by provider capability.
+  // Flow and insider are part of the report canvas in every mode. Quick mode
+  // may skip news/events, but it must not render an empty bandar/insider panel
+  // while the provider can supply the data.
+  const needFlow = hasCapability("brokerSummary") || hasCapability("foreignFlow");
 
   const needTechnical =
     mode === "full" ||
@@ -166,10 +174,7 @@ export async function executeEvidencePlan(
     claims.some((c) => c.claimType === "event" || c.claimType === "flow");
 
   // Plan sections for company report - always include overview & valuation for terminal metrics
-  const reportSections: Array<"overview" | "valuation" | "financials" | "peers" | "ownership" | "management"> = [
-    "overview",
-    "valuation",
-  ];
+  const reportSections: CompanyReportSection[] = ["overview", "valuation"];
 
   if (mode === "full") {
     reportSections.push("financials", "peers", "ownership", "management");
@@ -180,60 +185,68 @@ export async function executeEvidencePlan(
   // Pre-load broker registry from cache (0 credits)
   let brokerRegistry: import("../sectors/types").BrokerRegistryItem[];
   try {
-    brokerRegistry = await client.getBrokersRegistry();
-  } catch (error) {
-    // Registry is optional, but provider failures still need to be visible in the report trace.
+    brokerRegistry = await provider.getBrokersRegistry();
+  } catch {
+    // Registry is optional; a missing file should not sink the report.
     brokerRegistry = [];
   }
 
   // Parallel asynchronous fetching with graceful fallbacks
-  let companyReportPromise: Promise<CompanyReport | null> = client
-    .getCompanyReport(clean, reportSections)
-    .catch((err) => {
-      console.warn(`Company report fetch failed for ${clean}:`, err.message);
-      return null;
-    });
+  let companyReportPromise: Promise<CompanyReport | null> =
+    hasCapability("companyProfile") || hasCapability("valuation") || hasCapability("peers")
+      ? provider.getCompanyReport(clean, reportSections).catch((err) => {
+          console.warn(`Company report fetch failed for ${clean}:`, err.message);
+          return null;
+        })
+      : Promise.resolve(null);
 
-  // Always fetch up to 90 days of daily transactions (1 credit in Sectors v2) so SMA20, SMA50, MACD, and charts are fully populated
+  // Always fetch up to 90 days of daily transactions so SMA20, SMA50, MACD, and charts are fully populated
   const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-  let dailyPromise: Promise<DailyTransaction[] | null> = client
-    .getDailyTransactions(clean, ninetyDaysAgo)
-    .catch((err) => {
-      console.warn(`Daily transactions fetch failed for ${clean}:`, err.message);
-      return null;
-    });
-
-  let brokerSummaryPromise: Promise<BrokerSummaryResponse | null> = needFlow
-    ? client.getBrokerSummary(clean).catch(() => null)
+  let dailyPromise: Promise<DailyTransaction[] | null> = hasCapability("dailyOHLCV")
+    ? provider.getDailyTransactions(clean, ninetyDaysAgo).catch((err) => {
+        console.warn(`Daily transactions fetch failed for ${clean}:`, err.message);
+        return null;
+      })
     : Promise.resolve(null);
 
-  let foreignFlowPromise: Promise<ForeignFlowResponse | null> = needFlow
-    ? client.getForeignFlow(clean).catch(() => null)
-    : Promise.resolve(null);
+  let brokerSummaryPromise: Promise<BrokerSummaryResponse | null> =
+    needFlow && hasCapability("brokerSummary")
+      ? provider.getBrokerSummary(clean).catch(() => null)
+      : Promise.resolve(null);
 
-  let corporateActionsPromise: Promise<CorporateActionsResponse | null> = needEvents
-    ? client.getCorporateActions(clean).catch(() => null)
-    : Promise.resolve(null);
+  let foreignFlowPromise: Promise<ForeignFlowResponse | null> =
+    needFlow && hasCapability("foreignFlow")
+      ? provider.getForeignFlow(clean).catch(() => null)
+      : Promise.resolve(null);
 
-  let filingsPromise: Promise<{ results: FilingItem[] } | null> = needEvents
-    ? client.getFilings(clean).catch(() => null)
-    : Promise.resolve(null);
+  let corporateActionsPromise: Promise<CorporateActionsResponse | null> =
+    needEvents && hasCapability("corporateActions")
+      ? provider.getCorporateActions(clean).catch(() => null)
+      : Promise.resolve(null);
 
-  let newsPromise: Promise<{ results: NewsItem[] } | null> = needEvents
-    ? client.getNews(clean, 5).catch(() => null)
-    : Promise.resolve(null);
+  let filingsPromise: Promise<{ results: FilingItem[] } | null> =
+    hasCapability("insiderFilings")
+      ? provider.getFilings(clean).catch(() => null)
+      : Promise.resolve(null);
 
-  let suspensionsPromise: Promise<{ results: any[] } | null> = needEvents
-    ? client.getSuspensions(clean).catch(() => null)
-    : Promise.resolve(null);
+  let newsPromise: Promise<{ results: NewsItem[] } | null> =
+    needEvents && hasCapability("news")
+      ? provider.getNews(clean, 5).catch(() => null)
+      : Promise.resolve(null);
 
-  let quarterlyPromise: Promise<QuarterlyFinancialMetrics[] | null> = needFinancials
-    ? client.getQuarterlyFinancials(clean, mode === "full" ? 4 : 2).catch(() => null)
-    : Promise.resolve(null);
+  let suspensionsPromise: Promise<{ results: any[] } | null> =
+    needEvents && hasCapability("suspensions")
+      ? provider.getSuspensions(clean).catch(() => null)
+      : Promise.resolve(null);
 
-  let segmentsPromise: Promise<any | null> = client
-    .getCompanySegments(clean)
-    .catch(() => null);
+  let quarterlyPromise: Promise<QuarterlyFinancialMetrics[] | null> =
+    needFinancials && hasCapability("quarterlyFinancials")
+      ? provider.getQuarterlyFinancials(clean, mode === "full" ? 4 : 2).catch(() => null)
+      : Promise.resolve(null);
+
+  let segmentsPromise: Promise<any | null> = hasCapability("segments")
+    ? provider.getCompanySegments(clean).catch(() => null)
+    : Promise.resolve(null);
 
   // Await all parallel fetches
   const [
@@ -260,25 +273,70 @@ export async function executeEvidencePlan(
     segmentsPromise,
   ]);
 
-  const companyName = companyReport?.company_name || `PT ${clean} Tbk`;
-  const providerErrors = [
-    companyReport,
-    dailyTransactions,
-    brokerSummary,
-    foreignFlow,
-    corporateActions,
-    filingsRes,
-    newsRes,
-    suspensionsRes,
-    quarterlyData,
-    segmentsData,
-  ].every((value) => value === null)
-    ? "Sectors API tidak mengembalikan data. Periksa subscription/API key Sectors."
-    : undefined;
-
-  if (providerErrors) {
-    throw client.getLastError() instanceof Error ? client.getLastError() : new Error(providerErrors);
+  if (companyReport === null && dailyTransactions === null) {
+    throw new MarketDataError(
+      `Data inti pasar untuk ${clean} tidak tersedia dari provider ${provider.id}.`,
+      provider.id,
+      "provider"
+    );
   }
+
+  const companyName = companyReport?.company_name || `PT ${clean} Tbk`;
+  const dataLimitations: string[] = [];
+
+  if (!companyReport) {
+    dataLimitations.push("Profil/valuasi emiten tidak tersedia.");
+  }
+  if (!dailyTransactions || dailyTransactions.length === 0) {
+    dataLimitations.push("Data harga harian tidak tersedia.");
+  }
+  const supportsBroker = hasCapability("brokerSummary");
+  const supportsForeignFlow = hasCapability("foreignFlow");
+  if (!supportsBroker && !supportsForeignFlow) {
+    dataLimitations.push(
+      "Broker summary dan foreign flow tidak tersedia dari provider ini; FlowLens dinonaktifkan."
+    );
+  } else if (needFlow && !brokerSummary && !foreignFlow) {
+    dataLimitations.push(
+      "Broker summary dan foreign flow tidak tersedia; FlowLens dinonaktifkan."
+    );
+  } else if (needFlow && !brokerSummary && foreignFlow) {
+    dataLimitations.push(
+      "Broker summary tidak tersedia; FlowLens hanya menampilkan foreign flow."
+    );
+  }
+  if (!hasCapability("insiderFilings")) {
+    dataLimitations.push("Keterbukaan informasi insider tidak tersedia dari provider ini.");
+  } else if (needEvents && filingsRes === null) {
+    dataLimitations.push("Keterbukaan informasi insider tidak tersedia.");
+  }
+  if (!hasCapability("segments")) {
+    dataLimitations.push("Rincian segmen pendapatan tidak tersedia dari sumber gratis.");
+  }
+  if (
+    quarterlyData?.some(
+      (period) => period.sourceCurrency && period.sourceCurrency !== "IDR"
+    )
+  ) {
+    dataLimitations.push(
+      "Laporan keuangan dikonversi ke IDR memakai kurs USD/IDR saat ini."
+    );
+  }
+
+  const providerErrors = [
+    !companyReport ? "Profil/valuasi emiten tidak tersedia." : null,
+    !dailyTransactions || dailyTransactions.length === 0
+      ? "Data harga harian tidak tersedia."
+      : null,
+    needFlow && !brokerSummary && !foreignFlow
+      ? "Broker summary/foreign flow tidak tersedia."
+      : null,
+    needEvents && hasCapability("insiderFilings") && filingsRes === null
+      ? "Keterbukaan informasi insider tidak tersedia."
+      : null,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(" ") || undefined;
 
   // 1. Process Overview Evidence
   if (companyReport?.overview) {
@@ -466,7 +524,8 @@ export async function executeEvidencePlan(
     companyReport?.management,
     companyReport?.ownership,
     clean,
-    technical.lastPrice
+    technical.lastPrice,
+    hasCapability("insiderFilings") && filingsRes !== null
   );
 
   if (insiderRadar.status !== "unavailable") {
@@ -588,8 +647,9 @@ export async function executeEvidencePlan(
     tradingPlan,
     segments: segmentsData,
     providerError: providerErrors,
+    dataLimitations,
     evidenceRecords,
-    creditsConsumed: client.getCreditsUsed(),
-    toolCallTrace: client.getCallLog(),
+    creditsConsumed: provider.getCreditsUsed(),
+    toolCallTrace: provider.getCallLog(),
   };
 }

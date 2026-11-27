@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SectorsClient } from "@/lib/sectors/client";
+import { getMarketProvider } from "@/lib/market";
+import {
+  RATE_LIMIT_RULES,
+  guardRateLimit,
+} from "@/lib/security/rate-limit";
 import { computeTechnicalIndicators } from "@/lib/quant/indicators";
 import { extractValuationMultiples } from "@/lib/sectors/types";
 
@@ -28,6 +32,9 @@ export interface StockCompareResult {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await guardRateLimit(req, "compare", RATE_LIMIT_RULES.compare);
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     let symbolA = body.symbolA?.trim()?.toUpperCase()?.replace(".JK", "");
@@ -50,7 +57,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const client = new SectorsClient();
+    const client = getMarketProvider();
     const ninetyDaysAgo = new Date(Date.now() - 95 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
     // Fetch data in parallel for both tickers
@@ -65,8 +72,8 @@ export async function POST(req: NextRequest) {
 
     const repA = reportA.status === "fulfilled" ? reportA.value : null;
     const repB = reportB.status === "fulfilled" ? reportB.value : null;
-    const txA = dailyA.status === "fulfilled" ? dailyA.value : [];
-    const txB = dailyB.status === "fulfilled" ? dailyB.value : [];
+    const txA = dailyA.status === "fulfilled" ? (dailyA.value || []) : [];
+    const txB = dailyB.status === "fulfilled" ? (dailyB.value || []) : [];
     const fA = flowA.status === "fulfilled" ? flowA.value : [];
     const fB = flowB.status === "fulfilled" ? flowB.value : [];
 
@@ -90,6 +97,8 @@ export async function POST(req: NextRequest) {
     const flowItemsA = Array.isArray(fA) ? fA : Array.isArray((fA as any)?.data) ? (fA as any).data : [];
     const flowItemsB = Array.isArray(fB) ? fB : Array.isArray((fB as any)?.data) ? (fB as any).data : [];
 
+    const hasFlowA = flowItemsA.length > 0;
+    const hasFlowB = flowItemsB.length > 0;
     const netFlowA = flowItemsA.slice(0, 5).reduce((acc: number, cur: any) => acc + (cur.net_foreign_inflow || cur.net_foreign_flow || 0), 0);
     const netFlowB = flowItemsB.slice(0, 5).reduce((acc: number, cur: any) => acc + (cur.net_foreign_inflow || cur.net_foreign_flow || 0), 0);
 
@@ -113,9 +122,17 @@ export async function POST(req: NextRequest) {
       {
         category: "Arus Modal",
         name: "Foreign Flow (5 Hari)",
-        valueA: netFlowA >= 0 ? `+Rp ${(netFlowA / 1e9).toFixed(1)} M` : `-Rp ${(Math.abs(netFlowA) / 1e9).toFixed(1)} M`,
-        valueB: netFlowB >= 0 ? `+Rp ${(netFlowB / 1e9).toFixed(1)} M` : `-Rp ${(Math.abs(netFlowB) / 1e9).toFixed(1)} M`,
-        winner: netFlowA > netFlowB ? "A" : netFlowB > netFlowA ? "B" : "TIE",
+        valueA: !hasFlowA
+          ? "N/A"
+          : netFlowA >= 0
+            ? `+Rp ${(netFlowA / 1e9).toFixed(1)} M`
+            : `-Rp ${(Math.abs(netFlowA) / 1e9).toFixed(1)} M`,
+        valueB: !hasFlowB
+          ? "N/A"
+          : netFlowB >= 0
+            ? `+Rp ${(netFlowB / 1e9).toFixed(1)} M`
+            : `-Rp ${(Math.abs(netFlowB) / 1e9).toFixed(1)} M`,
+        winner: hasFlowA && hasFlowB ? (netFlowA > netFlowB ? "A" : netFlowB > netFlowA ? "B" : "TIE") : undefined,
         explanation: "Akumulasi dana asing yang positif menunjukkan minat institusi luar negeri terhadap emiten.",
       },
       {
@@ -138,17 +155,27 @@ export async function POST(req: NextRequest) {
       priceB,
       sectorB: repB?.overview?.sector || "IDX",
       metrics,
-      verdictA: netFlowA > 0 ? "Akumulasi Asing Positif" : "Tekanan Jual Asing",
-      verdictB: netFlowB > 0 ? "Akumulasi Asing Positif" : "Tekanan Jual Asing",
+      verdictA: !hasFlowA
+        ? "Data arus asing tidak tersedia"
+        : netFlowA > 0
+          ? "Akumulasi Asing Positif"
+          : "Tekanan Jual Asing",
+      verdictB: !hasFlowB
+        ? "Data arus asing tidak tersedia"
+        : netFlowB > 0
+          ? "Akumulasi Asing Positif"
+          : "Tekanan Jual Asing",
       retailSummary: `Komparasi langsung antara **${symbolA}** dan **${symbolB}**: ` +
         (peA && peB
           ? peA < peB
             ? `${symbolA} memiliki valuasi PER lebih atraktif (${peA.toFixed(1)}x vs ${peB.toFixed(1)}x). `
             : `${symbolB} memiliki valuasi PER lebih atraktif (${peB.toFixed(1)}x vs ${peA.toFixed(1)}x). `
           : "") +
-        (netFlowA > netFlowB
-          ? `Aliran dana asing dalam 5 hari terakhir lebih dominan masuk ke **${symbolA}**.`
-          : `Aliran dana asing dalam 5 hari terakhir lebih dominan masuk ke **${symbolB}** serta mencatatkan akumulasi lebih kuat.`),
+        (hasFlowA && hasFlowB
+          ? netFlowA > netFlowB
+            ? `Aliran dana asing dalam 5 hari terakhir lebih dominan masuk ke **${symbolA}**.`
+            : `Aliran dana asing dalam 5 hari terakhir lebih dominan masuk ke **${symbolB}** serta mencatatkan akumulasi lebih kuat.`
+          : "Data arus asing tidak tersedia untuk perbandingan flow."),
     };
 
     return NextResponse.json({ success: true, comparison: result });

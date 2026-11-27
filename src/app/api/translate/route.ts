@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCachedTranslation, setCachedTranslation } from "@/lib/storage/redis";
+import {
+  RATE_LIMIT_RULES,
+  guardRateLimit,
+} from "@/lib/security/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const limited = await guardRateLimit(
+    req,
+    "translate",
+    RATE_LIMIT_RULES.translate
+  );
+  if (limited) return limited;
+
   try {
     const { text, targetLang } = await req.json();
 

@@ -65,9 +65,9 @@ cp .env.example .env
 nano .env
 ```
 
-Pastikan variabel terisi dengan benar:
+Pastikan variabel terisi dengan benar. Jalur default tidak memerlukan API key data pasar; Sectors hanya legacy/opsional:
 ```env
-SECTORS_API_KEY=api_key_sectors_resmi_anda
+MARKET_DATA_PROVIDER=open
 OPENROUTER_API_KEY=sk-or-v1-api_key_openrouter_anda
 OPENROUTER_MODEL=qwen/qwen3.5-397b-a17b
 

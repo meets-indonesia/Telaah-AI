@@ -75,6 +75,11 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
             <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30">
               {flowLens.totalTradingDays} Hari Bursa
             </span>
+            {flowLens.source && (
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-500/10 text-slate-600 dark:text-slate-300 border border-slate-500/30">
+                {flowLens.source === "stockbit" ? "Stockbit" : "IPOT"}
+              </span>
+            )}
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Rentang: <span className="font-mono text-slate-700 dark:text-slate-300">{flowLens.startDate}</span> s.d.{" "}
@@ -110,6 +115,7 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
       </div>
 
       {/* Cohort Summary Cards */}
+      {flowLens.coverage !== "none" && (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <div className="bg-white dark:bg-black p-2.5 rounded border border-slate-100 dark:border-slate-800/60">
           <span className="text-[10px] font-mono uppercase text-slate-500 flex items-center gap-1">
@@ -163,6 +169,15 @@ export const FlowLensModule: React.FC<FlowLensModuleProps> = ({ flowLens }) => {
           </span>
         </div>
       </div>
+      )}
+
+      {flowLens.status === "partial" && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-700 dark:text-amber-300">
+          {flowLens.coverage === "top10"
+            ? "Broker summary hanya 10 broker teratas per sisi; fase akumulasi/distribusi tidak dihitung."
+            : "Broker summary belum aktif (IPOT sedang down / Stockbit belum dikonfigurasi); FlowLens hanya menampilkan foreign flow."}
+        </div>
+      )}
 
       {/* Diagnosa Bandarmology Bahasa Manusia Box */}
       {flowLens.bandarmologySummary && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import {
   Bot,
   User,
@@ -28,6 +28,8 @@ interface ChatFeedProps {
   onOpenDeepDive: (report: CompanyIntelligenceReport) => void;
   onOpenSymbolTerminal?: (symbol: string) => void;
   onOpenShareCard?: (report: CompanyIntelligenceReport) => void;
+  onOpenTradingPlan?: (report: CompanyIntelligenceReport) => void;
+  onOpenDividendCalc?: (report: CompanyIntelligenceReport) => void;
 }
 
 const STARTER_PROMPTS = [
@@ -61,15 +63,29 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
   onOpenDeepDive,
   onOpenSymbolTerminal,
   onOpenShareCard,
+  onOpenTradingPlan,
+  onOpenDividendCalc,
 }) => {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    element.scrollTop = element.scrollHeight;
+  }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const element = scrollRef.current;
+    if (!element) return;
+    element.scrollTop = element.scrollHeight;
   }, [messages, isLoading, loadingStage]);
 
   return (
-    <div className="flex-1 overflow-y-auto pl-3 sm:pl-4 pr-4 sm:pr-5 py-3.5 space-y-3.5 text-xs font-sans" aria-live="polite">
+    <div
+      ref={scrollRef}
+      className="flex-1 min-h-0 overflow-y-auto no-scrollbar pl-3 sm:pl-4 pr-4 sm:pr-5 py-3.5 space-y-3.5 text-xs font-sans"
+      aria-live="polite"
+    >
       {/* Empty State / Terminal Starter */}
       {messages.length === 0 && (
         <div className="my-auto py-6 space-y-4">
@@ -178,6 +194,16 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
                       onOpenShareCard(msg.stockCard.report);
                     }
                   }}
+                  onOpenTradingPlan={() => {
+                    if (onOpenTradingPlan && msg.stockCard?.report) {
+                      onOpenTradingPlan(msg.stockCard.report);
+                    }
+                  }}
+                  onOpenDividendCalc={() => {
+                    if (onOpenDividendCalc && msg.stockCard?.report) {
+                      onOpenDividendCalc(msg.stockCard.report);
+                    }
+                  }}
                 />
               ) : msg.stockCard ? (
                 <StockMiniCard
@@ -235,11 +261,10 @@ export const ChatFeed: React.FC<ChatFeedProps> = ({
       {isLoading && (
         <div className="flex items-center gap-2 p-2.5 rounded-md bg-white dark:bg-black border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 font-mono">
           <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-500" />
-          <span>{loadingStage || "Memproses query data Sectors API v2..."}</span>
+          <span>{loadingStage || "Memproses data pasar..."}</span>
         </div>
       )}
 
-      <div ref={bottomRef} />
     </div>
   );
 };

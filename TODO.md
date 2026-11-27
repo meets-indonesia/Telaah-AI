@@ -1,0 +1,84 @@
+# TODO
+
+- [x] Approve open-market data design <!-- id=1 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Write Phase 1 implementation plan <!-- id=2 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 1: Vitest harness + FX module <!-- id=3 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 2: Yahoo daily OHLCV + split adjustment <!-- id=4 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 3: Yahoo quarterly financials + USD/IDR <!-- id=5 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 4: Yahoo quoteSummary, valuation, peers, corporate actions <!-- id=6 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 5: Google News RSS, indices, commodities <!-- id=7 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 6: MarketDataProvider + OpenMarketProvider + factory <!-- id=8 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 7: Capability-aware coordinator + limitations <!-- id=9 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 8: FlowLens partial/coverage <!-- id=10 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 9: Insider unavailable + remove seed data <!-- id=11 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 10: Integrity confidence, trading plan, compare/watchlist N/A <!-- id=12 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 11: Cache versioning + report metadata <!-- id=13 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Task 12: API routes + market cache + commodity page <!-- id=14 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Task 13: Branding, docs, env, deployment notes <!-- id=15 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Task 14: Smoke test, lint, build, manual verification <!-- id=16 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Write Phase 2 plan after Phase 1 verification <!-- id=17 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Write Telegram + harmonic brief design and implementation plan <!-- id=18 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Build multi-timeframe harmonic detector with tests <!-- id=19 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Add Yahoo intraday data and timeframe aggregation <!-- id=20 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Build liquid-IDX harmonic screener, ranking, and cache <!-- id=21 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Build owner-only Telegram bot: client, webhook, chat handler <!-- id=22 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Add harmonic brief API, scheduler script, and setup tooling <!-- id=23 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Update docs/env/Podman deployment for Telegram brief <!-- id=24 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Verify tests, lint, build, live harmonic scan, and Telegram setup <!-- id=25 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Phase 2A: Python IDX scraper (profile, foreign flow, calendar, suspensions, insider PDF) <!-- id=26 priority=high done=2026-11-23 created=2026-11-23 -->
+- [x] Phase 2B: market-wide insider feed via IDX ownership PDFs <!-- id=27 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Phase 3: UI limitations, data-source status, and Stockbit session banner <!-- id=28 priority=medium done=2026-11-23 created=2026-11-23 -->
+- [x] Optional Phase 2C: Stockbit full broker summary (needs owner session and ToS decision) <!-- id=29 priority=low done=2026-11-24 created=2026-11-23 -->
+- [x] Add live Stockbit chart page with Yahoo fallback <!-- id=30 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Add Redis service and chart cache/pub-sub wiring <!-- id=31 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Replace chart client polling with Redis-backed SSE stream <!-- id=32 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Build navbar-style emiten search for the chart page <!-- id=33 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Redesign chart page and smooth live candle updates <!-- id=34 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Verify Redis/SSE live feed, tests, build, and deploy <!-- id=35 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Configure Cloudflare Access for telaah.hiiamanop.my.id (email OTP) and bypass /api/telegram/webhook <!-- id=36 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Add app-level rate limits for /api/analyze, /api/qa, /api/compare, and /api/chart <!-- id=37 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Build Telegram alert center v1 (server watchlist, price, volume, breakout, foreign flow) <!-- id=38 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Add Stockbit session expiry alert and one-command relogin runbook <!-- id=39 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Write robo-trade design: signals, risk limits, fees, paper-first; live broker execution blocked until API access <!-- id=40 priority=high done=2026-11-24 created=2026-11-24 -->
+- [x] Start Qdrant and verify semantic cache health <!-- id=41 priority=medium done=2026-11-27 created=2026-11-24 -->
+- [x] Extend chart: MA/EMA, RSI/MACD, compare overlay, corporate-action markers, watchlist toggle <!-- id=42 priority=medium done=2026-11-27 created=2026-11-24 -->
+- [•] Full IDX fundamentals/flow passes (flow pass running) <!-- id=43 priority=medium created=2026-11-24 -->
+- [x] Build portfolio and dividend tracker (holdings, P&L, dividend calendar) <!-- id=44 priority=medium done=2026-11-27 created=2026-11-24 -->
+- [x] Build BSJP backtest engine (close-to-next-open, fees, slippage, liquidity filters) <!-- id=45 priority=high done=2026-11-26 created=2026-11-24 -->
+- [x] Build BSJP paper runner + Telegram trade journal <!-- id=46 priority=high done=2026-11-26 created=2026-11-24 -->
+- [x] Add bandar phase alerts (harmonic PRZ alerts are now live) <!-- id=47 priority=high done=2026-11-27 created=2026-11-24 -->
+- [-] Approve BSJP assumptions (entry/exit time, universe, capital, broker) <!-- id=48 priority=high created=2026-11-24 -->
+- [x] Build BSJP pre-close signal screener (close strength, volume, trend, flow) <!-- id=49 priority=high done=2026-11-26 created=2026-11-25 -->
+- [-] Collect 4-8 weeks of BSJP paper journal and compare actual fills with backtest assumptions <!-- id=50 priority=high created=2026-11-26 -->
+- [x] Add JII70 syariah filter to BSJP scanner and backtest <!-- id=51 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Review BSJP backtest results and decide next rule experiments <!-- id=52 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Test BSJP with actual 15:50 snapshots and 09:00/09:15 exits using intraday data <!-- id=53 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Rework BSJP signal to escape next-open mean reversion and compare with random-liquid baseline <!-- id=54 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Test reversal signal with 2-3 day holds and lower-cost execution model <!-- id=55 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Audit harmonic detector quality (patterns, ratios, timeframes, false positives) <!-- id=56 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Add harmonic XABCD and PRZ overlay to the chart page <!-- id=57 priority=high done=2026-11-26 created=2026-11-26 -->
+- [x] Build a harmonic scanner page with filters and watchlist focus <!-- id=58 priority=medium done=2026-11-26 created=2026-11-26 -->
+- [x] Measure harmonic pattern success rate and target/invalidation outcomes <!-- id=59 priority=medium done=2026-11-26 created=2026-11-26 -->
+- [x] Expand harmonic success stats to 4H, 1W, and 1M with a larger sample <!-- id=60 priority=medium done=2026-11-26 created=2026-11-26 -->
+- [x] Finish chart compare overlay, corporate-action markers, and watchlist toggle <!-- id=61 priority=medium done=2026-11-27 created=2026-11-26 -->
+- [x] Expand screener to the full IDX universe and saved presets <!-- id=62 priority=medium done=2026-11-27 created=2026-11-26 -->
+- [x] Add dividend calendar to the portfolio tracker <!-- id=63 priority=medium done=2026-11-27 created=2026-11-26 -->
+- [x] Expand harmonic screener with 1D/1W visibility and remove the top-5 cap <!-- id=64 priority=high done=2026-11-27 created=2026-11-27 -->
+- [x] Validate harmonic stats: 88 symbols, walk-forward split, fees <!-- id=65 priority=high done=2026-11-27 created=2026-11-27 -->
+- [x] Add chart compare overlay, corporate-action markers, and watchlist toggle <!-- id=66 priority=medium done=2026-11-27 created=2026-11-27 -->
+- [x] Expand screener universe and add saved presets <!-- id=67 priority=medium done=2026-11-27 created=2026-11-27 -->
+- [x] Add dividend calendar to the portfolio tracker <!-- id=68 priority=medium done=2026-11-27 created=2026-11-26 -->
+- [x] Add bandar phase alerts <!-- id=69 priority=high done=2026-11-27 created=2026-11-27 -->
+- [x] Guard the deploy workflow when VPS secrets are absent <!-- id=70 priority=medium done=2026-11-27 created=2026-11-27 -->
+- [x] Build harmonic outcome logging and a reviewed calibration loop <!-- id=71 priority=high done=2026-11-27 created=2026-11-27 -->
+- [x] Expand the general screener from 88 liquid symbols to the full IDX universe <!-- id=72 priority=medium done=2026-11-27 created=2026-11-27 -->
+- [-] Local PC is production; no HA/VPS target <!-- id=73 priority=high created=2026-11-27 -->
+- [x] Build multi-panel workspace with saved layouts <!-- id=74 done=2026-11-27 created=2026-11-27 -->
+- [ ] Re-login Stockbit before the refresh token expires <!-- id=75 priority=high created=2026-11-27 -->
+- [x] Build News & Markets page (Google News RSS + indices/FX/commodities) <!-- id=76 done=2026-11-27 created=2026-11-27 -->
+- [x] Add Stockbit top-5 order book card to the chart <!-- id=77 done=2026-11-27 created=2026-11-27 -->
+- [ ] Add multi-user messaging (requires auth, DB, WebSocket) <!-- id=78 priority=low created=2026-11-27 -->
+- [ ] Add bond/options depth (data source unavailable) <!-- id=79 priority=low created=2026-11-27 -->
+- [ ] Add licensed exchange tick/order-book feed <!-- id=80 priority=medium created=2026-11-27 -->
+- [x] Add HBA coal benchmark to Macro & markets <!-- id=81 priority=medium done=2026-11-27 created=2026-11-27 -->
+- [x] Fix harmonic 429, nav order, and empty workspace watchlist <!-- id=82 priority=high done=2026-11-27 created=2026-11-27 -->

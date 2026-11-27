@@ -4,6 +4,35 @@ import crypto from "crypto";
 let redisClient: Redis | null = null;
 const memoryCache = new Map<string, string>();
 
+/**
+ * Wait briefly for the shared connection to become usable. Chart streaming
+ * calls this on the request path, so it must never hang when Redis is down.
+ */
+export async function getRedisReady(timeoutMs = 750): Promise<Redis | null> {
+  const client = getRedisClient();
+  if (!client) return null;
+  if (client.status === "ready") return client;
+  if (client.status === "end") return null;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: Redis | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      client.off("ready", onReady);
+      client.off("end", onEnd);
+      resolve(value);
+    };
+    const onReady = () => finish(client);
+    const onEnd = () => finish(null);
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    client.once("ready", onReady);
+    client.once("end", onEnd);
+    if (client.status === "ready") onReady();
+  });
+}
+
 export function getRedisClient(): Redis | null {
   if (redisClient) return redisClient;
 
